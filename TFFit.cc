@@ -57,8 +57,8 @@ int main (int argc, char **argv)
             m_br->SetAddress(&tfNTuple);
 
             //Set the number of selected events (for loop on events):
-            //int nEvent = inputTFTree->GetEntries(); 
-            int nEvent = 100000;
+            int nEvent = inputTFTree->GetEntries(); 
+            //int nEvent = 100000;
             std::cout << " *** Looking at dataset " << iDataSet+1 << "/" << inputTFRoot.size() << " with " << nEvent << " selected events! \n " << std::endl;
 
             //Initialize the TFCreation class (create all histograms):
@@ -124,18 +124,18 @@ int main (int argc, char **argv)
         int ConsHisto = 1;
         const int NrParamsDblGaus = 6;
         std::cout << " --> Will look at " << NrFitHistos << " different histograms to fit! " << std::endl;
-        string HistoInfo[12][1+NrParamsDblGaus] = { "BJet_DiffPhiVsGenPt",    "0.0002", "0.022", "8000",  "0.0002",   "0.06", "3000",
-                                                    "BJet_DiffPtVsGenPt",         "10",   "-12","20000",      "13",    "10", "-5000",
-				                    "BJet_DiffThetaVsGenPt",       "0",  "0.04", "2000",       "0",  "0.013", "6000",
-				                    "El_DiffPhiVsGenPt",           "0", "0.006",  "600",       "0", "0.0012", "1500",
-				                    "El_DiffPtVsGenPt",            "0",    "-2",  "600",       "0",    "0.9", "1500",
-				                    "El_DiffThetaVsGenPt",         "0", "0.007",  "700",       "0", "0.0013", "2500",
-				                    "Light_DiffPhiVsGenPt",        "0", "0.022", "8000",  "0.0004",  "0.002", "3000",
-				                    "Light_DiffPtVsGenPt",         "0",     "8", "4000",       "0",     "12", "4000",
-				                    "Light_DiffThetaVsGenPt",      "0", "-0.05", "2000",       "0", "-0.014", "6000",
-				                    "Mu_DiffPhiVsGenInvPt",        "0", "0.008",  "700",       "0", "0.0015",  "600",
-				                    "Mu_DiffInvPtVsGenInvPt",      "0","0.0003", "2000",       "0", "0.0006",  "500",
-				                    "Mu_DiffThetaVsGenInvPt",      "0", "0.002",  "500",       "0", "0.0004",  "500"};
+        string HistoInfo[12][1+NrParamsDblGaus] = { "BJet_DiffPhiVsGenE",   "0.0002",  "0.022",  "8000", "0.0002",   "0.06",  "3000",
+                                                    "BJet_DiffEVsGenE",         "10",    "-12", "20000",     "13",     "10", "-5000",
+				                    "BJet_DiffThetaVsGenE",      "0",   "0.04",  "2000",      "0",  "0.013",  "6000",
+				                    "El_DiffPhiVsGenE",          "0",  "0.006",   "600",      "0", "0.0012",  "1500",
+				                    "El_DiffEVsGenE",            "0",     "-2",   "600",      "0",    "0.9",  "1500",
+				                    "El_DiffThetaVsGenE",        "0",  "0.007",   "700",      "0", "0.0013",  "2500",
+				                    "Light_DiffPhiVsGenE",       "0",  "0.022",  "8000", "0.0004",  "0.002",  "3000",
+				                    "Light_DiffEVsGenE",         "0",      "8",  "4000",      "0",     "12",  "4000",
+				                    "Light_DiffThetaVsGenE",     "0",  "-0.05",  "2000",      "0", "-0.014",  "6000",
+				                    "Mu_DiffPhiVsGenInvE",       "0",  "0.008",   "700",      "0", "0.0015",   "600",
+				                    "Mu_DiffInvEVsGenInvE",      "0", "0.0003",  "2000",      "0", "0.0006",   "500",
+				                    "Mu_DiffThetaVsGenInvE",     "0",  "0.002",   "500",      "0", "0.0004",   "500"};
 
         //Set the booleans!
         bool useROOTClass = false;
@@ -256,10 +256,10 @@ int main (int argc, char **argv)
             else if(HistoInfo[iHisto][0].find("Mu_") == 0)  {PartName = "muon";     BlockName = "TF_muon_";     particles = "mu";        widthType = "thin";}
             else if(HistoInfo[iHisto][0].find("El_") == 0)  {PartName = "electron"; BlockName = "TF_electron_"; particles = "el";        widthType = "thin";}
             // -- 2) which kinematic variable
-            if(HistoInfo[iHisto][0].find("DiffPt") <= HistoInfo[iHisto][0].size())         {CaptionName = PartName+" transverse momentum";            KinVarName += "PT";   VarName = "PT";}
+            if(HistoInfo[iHisto][0].find("DiffE") <= HistoInfo[iHisto][0].size())         {CaptionName = PartName+" energy";            KinVarName += "E";   VarName = "E";}
             else if(HistoInfo[iHisto][0].find("DiffTheta") <= HistoInfo[iHisto][0].size()) {CaptionName = PartName+" polar angle \\theta";            KinVarName += "THETA";VarName = "THETA";}
             else if(HistoInfo[iHisto][0].find("DiffPhi") <= HistoInfo[iHisto][0].size())   {CaptionName = PartName+" azimuthal angle \\phi";          KinVarName += "PHI";  VarName = "PHI";}
-            else if(HistoInfo[iHisto][0].find("DiffInvPt") <= HistoInfo[iHisto][0].size()) {CaptionName = PartName+" inverse of transverse momentum"; KinVarName += "INVPT";VarName = "INVPT";}
+            else if(HistoInfo[iHisto][0].find("DiffInvE") <= HistoInfo[iHisto][0].size()) {CaptionName = PartName+" inverse of energy"; KinVarName += "INVE";VarName = "INVE";}
             BlockName = BlockName + KinVarName;
     
             //Write the TF's in a table and in a MadWeight card!:
@@ -295,13 +295,12 @@ int main (int argc, char **argv)
                 //Output for all variables!
                 myTransferCard[ii]<<"BLOCK "<<BlockName << endl;
                 
-                //if(VarName != "PHI") myTF[ii] << "\n  <\\variable>"<<endl;
                 myTF[ii]<<"\n  <variable name='"<<VarName<<"'>"<<endl;
                 myTF[ii]<<"    <tf>";
             }
     
             tfCreation.WriteTF(myTFTable, myTransferCard[0], myTransferCard[1], myTF[0], myTF[1], nEtaBins);  
-            if(HistoInfo[iHisto][0].find("DiffTheta") <= HistoInfo[iHisto][0].size() ){ myTF[0] << "\n</block>"; myTF[1] << "\n</block>";}
+            if(HistoInfo[iHisto][0].find("DiffTheta") <= HistoInfo[iHisto][0].size() ){ myTF[0] << "\n</block> \n</file>"; myTF[1] << "\n</block> \n</file>";}
     
             myTFTable<<"\\hline" << endl;
             myTFTable<<"\\end{tabular}"<<endl;
