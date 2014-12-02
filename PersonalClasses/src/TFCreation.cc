@@ -42,8 +42,8 @@ void TFCreation::InitializeVariables(int nEtaBins){
     histo2D["El_RecoEVsGenE"]           = new TH2F("El_RecoEVsGenE",          "Energy of electron (reco vs gen)",                                   100,     0,  200, 100,      0,   200);
     histo2D["El_DiffEVsGenE"]           = new TH2F("El_DiffEVsGenE",          "E difference (gen-reco) versus E_{gen} for electron",                 10,    30,  105, 100,     -6,     6);
     histo2D["Mu_RecoInvEVsGenInvE"]     = new TH2F("Mu_RecoInvEVsGenInvE",    "Inverse of energy of muon (reco vs gen)",                            100,     0, 0.05, 100,      0,  0.05);
-    histo2D["Mu_DiffInvEVsGenInvE"]     = new TH2F("Mu_DiffInvEVsGenInvE",    "#frac{1}{E} difference (gen-reco) versus #frac{1}{E_{gen}} for muon", 10, 0.005,0.035,  80,-0.0015, 0.001);
-    histo2D["Mu_DiffInvEVsGenInvE_All"] = new TH2F("Mu_DiffInvEVsGenInvE_All","#frac{1}{E} difference (gen-reco) versus #frac{1}{E_{gen}} for muon", 20, 0.005, 0.05, 180,   -0.1,   0.1);
+    histo2D["Mu_DiffInvEVsGenInvE"]     = new TH2F("Mu_DiffInvEVsGenInvE",    "#frac{1}{E} difference (gen-reco) versus #frac{1}{E_{gen}} for muon", 10, 0.004, 0.03,  80,-0.0012, 0.001);
+    histo2D["Mu_DiffInvEVsGenInvE_All"] = new TH2F("Mu_DiffInvEVsGenInvE_All","#frac{1}{E} difference (gen-reco) versus #frac{1}{E_{gen}} for muon", 20, 0.004, 0.05, 180,   -0.1,   0.1);
     histo2D["Mu_RecoEVsGenE"]           = new TH2F("Mu_RecoEVsGenE",          "Energy of muon (reco vs gen)",                                       150,     0,  200, 150,      0,   200);
     histo2D["Mu_DiffEVsGenE"]           = new TH2F("Mu_DiffEVsGenE",          "E difference (gen-reco) versus E_{gen} for muon",                     10,    26,  150, 100,    -10,    10);
 	
@@ -58,13 +58,13 @@ void TFCreation::InitializeVariables(int nEtaBins){
     histo2D["Light_RecoThetaVsGenE"]     = new TH2F("Light_RecoThetaVsGenE",    "Polar angle #theta_{rec} versus energy E_{gen} for light quarks",                120,    0,   300,  60,     0, 3.15);
     histo2D["Light_DiffThetaVsGenE"]     = new TH2F("Light_DiffThetaVsGenE",    "#theta difference (gen-reco) versus E_{gen} for light quarks",                    10,   30,   150, 150, -0.12, 0.12);
     histo2D["BJet_RecoThetaVsGenE"]      = new TH2F("BJet_RecoThetaVsGenE",     "Polar angle #theta_{rec} versus energy E_{gen} for b-jets",                      120,    0,   300,  60,     0, 3.15);
-    histo2D["BJet_DiffThetaVsGenE"]      = new TH2F("BJet_DiffThetaVsGenE",     "#theta difference (gen-reco) versus E_{gen} for b-jets",                          10,   30,   160, 150,  -0.1,  0.1);
+    histo2D["BJet_DiffThetaVsGenE"]      = new TH2F("BJet_DiffThetaVsGenE",     "#theta difference (gen-reco) versus E_{gen} for b-jets",                          10,   30,   160, 150, -0.12, 0.12);
     histo2D["El_RecoThetaVsGenE"]        = new TH2F("El_RecoThetaVsGenE",       "Polar angle #theta_{rec} versus energy E_{gen} for electron",                    100,    0,   200,  60,     0, 3.15);
     histo2D["El_DiffThetaVsGenE"]        = new TH2F("El_DiffThetaVsGenE",       "#theta difference (gen-reco) versus E_{gen} for electron",                        10,   30,   130, 100, -0.02, 0.02);
     histo2D["Mu_RecoThetaVsGenInvE"]     = new TH2F("Mu_RecoThetaVsGenInvE",    "Polar angle #theta_{rec} versus #frac{1}{E_{gen}} for muon",                     100,    0,  0.05,  60,     0, 3.15);
     histo2D["Mu_RecoThetaVsGenE"]        = new TH2F("Mu_RecoThetaVsGenE",       "Polar angle #theta_{rec} versus energy E_{gen} for muon",                        150,    0,   200,  60,     0, 3.15);
-    histo2D["Mu_DiffThetaVsGenInvE"]     = new TH2F("Mu_DiffThetaVsGenInvE",    "#theta difference (gen-reco) versus #frac{1}{E_{gen}} for muon",                  10,0.005, 0.035, 150,-0.015,0.015);//0.004
-    histo2D["Mu_DiffThetaVsGenInvE_All"] = new TH2F("Mu_DiffThetaVsGenInvE_All","#theta difference (gen-reco) versus #frac{1}{E_{gen}} for muon",                  10,0.005, 0.035, 500,  -0.2,  0.2);
+    histo2D["Mu_DiffThetaVsGenInvE"]     = new TH2F("Mu_DiffThetaVsGenInvE",    "#theta difference (gen-reco) versus #frac{1}{E_{gen}} for muon",                  10,0.004,  0.03, 150, -0.01, 0.01);//0.004
+    histo2D["Mu_DiffThetaVsGenInvE_All"] = new TH2F("Mu_DiffThetaVsGenInvE_All","#theta difference (gen-reco) versus #frac{1}{E_{gen}} for muon",                  10,0.003, 0.035, 500,  -0.2,  0.2);
     histo2D["Mu_DiffThetaVsGenE"]        = new TH2F("Mu_DiffThetaVsGenE",       "#theta difference (gen-reco) versus E_{gen} for muon",                            10,   30,   150, 100,  -0.1,  0.1);
 	
     histo2D["Light_RecoPhiVsGenPhi"]     = new TH2F("Light_RecoPhiVsGenPhi",    "Azimuthal angle distribution of light quarks (reco vs gen)",                       60,  -3.2,   3.2,  60,  -3.2,  3.2);
@@ -90,7 +90,7 @@ void TFCreation::InitializeVariables(int nEtaBins){
     histo2D["El_DiffPhiVsGenE_All"]      = new TH2F("El_DiffPhiVsGenE_All",     "#phi difference (gen-reco) versus E_{gen} for electron",                           17,     0,   250, 120,  -6.2,  6.2);
     histo2D["Mu_RecoPhiVsGenInvE"]       = new TH2F("Mu_RecoPhiVsGenInvE",      "Azimuthal angle #phi_{rec} versus #frac{1}{E_{gen}} for muon",                    100,     0,  0.05,  60,  -3.2,  3.2);
     histo2D["Mu_RecoPhiVsGenE"]          = new TH2F("Mu_RecoPhiVsGenE",         "Azimuthal angle #phi_{rec} versus energy E_{gen} for muon",                       150,     0,   200,  60,  -3.2,  3.2);
-    histo2D["Mu_DiffPhiVsGenInvE"]       = new TH2F("Mu_DiffPhiVsGenInvE",      "#phi difference (gen-reco) versus #frac{1}{E_{gen}} for muon",                     10, 0.005, 0.035, 120,-0.006,0.006);
+    histo2D["Mu_DiffPhiVsGenInvE"]       = new TH2F("Mu_DiffPhiVsGenInvE",      "#phi difference (gen-reco) versus #frac{1}{E_{gen}} for muon",                     10, 0.004,  0.03, 120,-0.005,0.005);
     histo2D["Mu_DiffPhiVsGenInvE_All"]   = new TH2F("Mu_DiffPhiVsGenInvE_All",  "#phi difference (gen-reco) versus #frac{1}{E_{gen}} for muon",                     10,     0,  0.05, 120,  -6.2,  6.2);
     histo2D["Mu_DiffPhiVsGenE"]          = new TH2F("Mu_DiffPhiVsGenE",         "#phi difference (gen-reco) versus E_{gen} for muon",                               10,    26,   150, 100,  -0.2,  0.2);
     histo2D["Mu_DiffPhiVsGenE_All"]      = new TH2F("Mu_DiffPhiVsGenE_All",     "#phi difference (gen-reco) versus E_{gen} for muon",                               14,     0,   200, 100,  -6.2,  6.2);
@@ -343,6 +343,7 @@ void TFCreation::FitSliceClassCode(TH2F* histoFit, int npar, const char* parname
 	hlist[npar] = new TH1D( (string(histoFit->GetName())+"_chi2").c_str(), (string(histoFit->GetName())+": #chi^{2} distribution for "+string(doubleGaussianFit->GetExpFormula())).c_str(), histoFit->GetXaxis()->GetNbins(), histoFit->GetXaxis()->GetXmin(), histoFit->GetXaxis()->GetXmax() );
 
 	//Loop on all bins in X, generate a projection along Y and fit each bin separately!
+        std::cout << " ----  Looking at histogram : " << histoFit->GetName() << "   ---- " << std::endl;
 	int cut = 0; // require a minimum number of bins in the slice to be filled --> Should this ever be larger than 0 ??
 	int nbins = histoFit->GetXaxis()->GetNbins();
 	for(int bin=1;bin <= nbins+1;bin ++) {
@@ -379,7 +380,17 @@ void TFCreation::FitSliceClassCode(TH2F* histoFit, int npar, const char* parname
 		//Fill the hlist histogram for each parameter with the obtained Fit parameter and its uncertainty
 	        //--> Each bin in this histogram represents a bin range in x-axis of considered 2D histogram!
 	        for(int ipar=0; ipar<npar; ipar++ ){
-                    if( (histoName.find("Light_DiffEVsGenE") > histoName.size() && histoName.find("Mu_DiffInvEVsGenInvE_Eta_1.45") > histoName.size() ) ||  ( (histoName == "Light_DiffEVsGenE" || histoName.find("Light_DiffEVsGenE_Eta_0") <= histoName.size()) && bin != 2) || (histoName == "Mu_DiffInvEVsGenInvE_Eta_1.45_2.5" && bin !=11 && bin != 10) || (histoName.find("Light_DiffEVsGenE_Eta_1.45") <= histoName.size() && bin !=7) ){  //Skip 2nd bin for LightE!!
+                    if( (histoName.find("Light_DiffEVsGenE_") > histoName.size() && histoName.find("Mu_DiffInvEVsGenInvE_Eta_1.45") > histoName.size() && histoName != "El_DiffThetaVsGenE" && histoName != "BJet_DiffEVsGenE"  && histoName != "El_DiffEVsGenE" && histoName != "Light_DiffThetaVsGenE" && histoName != "BJet_DiffPhiVsGenE" && histoName != "El_DiffPhiVsGenE") ||
+                        ( (histoName == "Light_DiffEVsGenE_" || histoName.find("Light_DiffEVsGenE_Eta_0") <= histoName.size()) && bin != 2) ||   //TEMPORARY (_ should be removed afterwards!)
+                        (histoName == "Mu_DiffInvEVsGenInvE_Eta_1.45_2.5" && bin != 11 && bin != 10) || 
+                        (histoName.find("Light_DiffEVsGenE_Eta_1.45") <= histoName.size() && bin != 7) || 
+                        (histoName == "El_DiffThetaVsGenE" && bin != 11) ||
+                        (histoName == "BJet_DiffEVsGenE" && bin != 11) ||
+                        (histoName == "El_DiffEVsGenE" && bin != 11) ||
+                        (histoName == "Light_DiffThetaVsGenE" && bin != 11) ||
+                        (histoName == "BJet_DiffPhiVsGenE" && (bin != 1 || bin != 11) ) ||
+                        (histoName == "El_DiffPhiVsGenE" && bin != 1) ){  //Skip specific bins!
+
                         hlist[ipar]->Fill(histoFit->GetXaxis()->GetBinCenter(bin+1/2),doubleGaussianFit->GetParameter(ipar));
                         hlist[ipar]->SetBinError( (int) (bin+1/2) ,doubleGaussianFit->GetParError(ipar)); //WHY +1/2 .... (Is bin size always equal to 1 .. )?
                     }
@@ -570,8 +581,8 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
 
     if(histoName.find("BJet_DiffPhiVsGenE") <= histoName.size() ){
         if(histoName.find("Eta") > histoName.size() || histoName.find("Eta_0") <= histoName.size() ){            //Same fit ranges for first three eta-bins and full distribution!
-            double FullFitRangeNeg[11] = {-0.12, -0.12, -0.12, -0.1, -0.1, -0.08, -0.08, -0.08, -0.05, -0.05, -0.05}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
-            double FullFitRangePos[11] = { 0.12,  0.12,  0.12,  0.1,  0.1,  0.08,  0.08,  0.08,  0.05,  0.05,  0.05}; FitRangeBinPos = FullFitRangePos[iBin-1];
+            double FullFitRangeNeg[11] = {-0.1, -0.15, -0.15, -0.12, -0.12, -0.1, -0.1, -0.09, -0.08, -0.08, -0.07}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.1,  0.15,  0.15,  0.12,  0.12,  0.1,  0.1,  0.09,  0.08,  0.08,  0.07}; FitRangeBinPos = FullFitRangePos[iBin-1];
         }
         else if(histoName.find("Eta_1.45") <= histoName.size()){
             double FullFitRangeNeg[11] = {-0.15, -0.15, -0.12, -0.12, -0.1, -0.1, -0.08, -0.08, -0.06, -0.06, -0.06}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
@@ -581,8 +592,8 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
 
     if(histoName.find("BJet_DiffEVsGenE") <= histoName.size() ){
         if(histoName.find("Eta") > histoName.size() ){
-            double FullFitRangeNeg[11] = {-20, -20, -24, -24, -26, -28, -30, -35, -35, -35, -35}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
-            double FullFitRangePos[11] = {  8,  18,  25,  30,  35,  35,  35,  40,  40,  40,  50}; FitRangeBinPos = FullFitRangePos[iBin-1];
+            double FullFitRangeNeg[11] = {-18, -20, -20, -22, -24, -26, -30, -32, -35, -35, -30}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = {  8,  18,  25,  30,  35,  35,  35,  40,  45,  45,  40}; FitRangeBinPos = FullFitRangePos[iBin-1];
         }
         else if(histoName.find("Eta_0") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-15, -18, -20, -22, -22, -25, -25, -28, -28, -28, -30}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];    //Difference for first bin!
@@ -594,10 +605,20 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
         }
     } //End of BJet_DiffE histo
 
-    if(histoName.find("BJet_DiffThetaVsGenE") <= histoName.size() ){ FitRangeBinNeg = -0.1; FitRangeBinPos =  0.1; } //End of BJet_DiffTheta histo
+    if(histoName.find("BJet_DiffThetaVsGenE") <= histoName.size() ){
+        if(histoName.find("Eta") > histoName.size() ){
+            double FullFitRangeNeg[11] = {-0.12, -0.12, -0.1, -0.1, -0.08, -0.08, -0.07, -0.06, -0.05, -0.05, -0.04}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.12,  0.12,  0.1,  0.1,  0.08,  0.08,  0.07,  0.06,  0.05,  0.05,  0.04}; FitRangeBinPos = FullFitRangePos[iBin-1];
+        }
+        else{ FitRangeBinNeg = -0.12; FitRangeBinPos =  0.12; }
+    } //End of BJet_DiffTheta histo
 
     if(histoName.find("El_DiffPhiVsGenE") <= histoName.size() ){
-        if(histoName.find("Eta") > histoName.size() || histoName.find("Eta_0_") <= histoName.size() || histoName.find("Eta_0.375") <= histoName.size() ){ FitRangeBinNeg = -0.012; FitRangeBinPos =  0.012; }
+        if(histoName.find("Eta_0_") <= histoName.size() || histoName.find("Eta_0.375") <= histoName.size() ){ FitRangeBinNeg = -0.012; FitRangeBinPos =  0.012; }
+        else if(histoName.find("Eta") > histoName.size() ){
+            double FullFitRangeNeg[11] = {-0.006, -0.008, -0.01, -0.012, -0.012, -0.012, -0.012, -0.012, -0.012, -0.012, -0.012}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.006,  0.008,  0.01,  0.012,  0.012,  0.012,  0.012,  0.012,  0.012,  0.012,  0.012}; FitRangeBinPos = FullFitRangePos[iBin-1];
+        }
         else if(histoName.find("Eta_0.75") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-0.012, -0.012, -0.012, -0.012, -0.012, -0.012, -0.012, -0.012, -0.01, -0.01, -0.01}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
             double FullFitRangePos[11] = { 0.012,  0.012,  0.012,  0.012,  0.012,  0.012,  0.012,  0.012,  0.01,  0.01,  0.01}; FitRangeBinPos = FullFitRangePos[iBin-1];
@@ -614,7 +635,11 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
     } //End of El_DiffE histo
 
     if(histoName.find("El_DiffThetaVsGenE") <= histoName.size() ){
-        if(histoName.find("Eta_1") > histoName.size() ){ FitRangeBinNeg = -0.018; FitRangeBinPos = 0.018; }
+        if(histoName.find("Eta_1") > histoName.size() && histoName.find("Eta") < histoName.size() ){ FitRangeBinNeg = -0.018; FitRangeBinPos = 0.018; }
+        else if(histoName.find("Eta") > histoName.size() ){ 
+            double FullFitRangeNeg[11] = {-0.01, -0.01, -0.015, -0.015, -0.014, -0.012, -0.012, -0.011, -0.01, -0.01, -0.008}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.01,  0.01,  0.015,  0.015,  0.014,  0.012,  0.012,  0.011,  0.01,  0.01,  0.008}; FitRangeBinPos = FullFitRangePos[iBin-1];
+        }
         else if(histoName.find("Eta_1.45") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-0.012, -0.012, -0.012, -0.01, -0.01, -0.007, -0.007, -0.007, -0.005, -0.005, -0.005}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
             double FullFitRangePos[11] = { 0.012,  0.012,  0.012,  0.01,  0.01,  0.007,  0.007,  0.007,  0.005,  0.005,  0.005}; FitRangeBinPos = FullFitRangePos[iBin-1];
@@ -623,8 +648,8 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
 
     if(histoName.find("Light_DiffPhiVsGenE") <= histoName.size() ){
         if(histoName.find("Eta") > histoName.size() || histoName.find("Eta_0_") <= histoName.size() || histoName.find("Eta_0.375") <= histoName.size() ){ 
-            double FullFitRangeNeg[11] = {-0.14, -0.14, -0.1, -0.1, -0.1, -0.1, -0.08, -0.08, -0.08, -0.08, -0.08}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
-            double FullFitRangePos[11] = { 0.14,  0.14,  0.1,  0.1,  0.1,  0.1,  0.08,  0.08,  0.08,  0.08,  0.08};  FitRangeBinPos = FullFitRangePos[iBin-1];
+            double FullFitRangeNeg[11] = { -0.12,  -0.12, -0.14, -0.13, -0.12, -0.12, -0.11, -0.11, -0.1, -0.1, -0.09}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = {  0.12,   0.12,  0.14,  0.13,  0.12,  0.12,  0.11,  0.11,  0.1,  0.1,  0.09};  FitRangeBinPos = FullFitRangePos[iBin-1];
         }
         else if(histoName.find("Eta_75") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-0.12, -0.12, -0.1, -0.1, -0.1, -0.1, -0.08, -0.08, -0.08, -0.08, -0.08}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
@@ -638,8 +663,8 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
 
     if(histoName.find("Light_DiffEVsGenE") <= histoName.size() ){
         if(histoName.find("Eta") > histoName.size() ){
-            double FullFitRangeNeg[11] = {-15, -18, -20, -20, -22, -22, -25, -28, -28, -28, -28}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
-            double FullFitRangePos[11] = {  7,  12,  18,  22,  25,  25,  28,  35,  35,  35,  35}; FitRangeBinPos = FullFitRangePos[iBin-1];
+            double FullFitRangeNeg[11] = {-21, -23, -24, -24, -25, -25, -26, -28, -28, -28, -28}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = {  6,  12,  18,  22,  25,  25,  28,  35,  35,  35,  35}; FitRangeBinPos = FullFitRangePos[iBin-1];
         }
         else if(histoName.find("Eta_0_") <= histoName.size() || histoName.find("Eta_0.375") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-15, -20, -20, -20, -22, -22, -22, -25, -25, -30, -30}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
@@ -655,16 +680,22 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
         }
     } //End of Light_DiffE
 
-    if(histoName.find("Light_DiffThetaVsGenE") <= histoName.size() ){ FitRangeBinNeg = -0.12; FitRangeBinPos = 0.12; } //End of Light_DiffTheta
+    if(histoName.find("Light_DiffThetaVsGenE") <= histoName.size() ){
+        if(histoName.find("Eta") <= histoName.size() ){ FitRangeBinNeg = -0.12; FitRangeBinPos = 0.12;}
+        else if(histoName == "Light_DiffThetaVsGenE"){
+            double FullFitRangeNeg[11] = {-0.08, -0.09, -0.08, -0.08, -0.07, -0.07, -0.06, -0.05, -0.05, -0.05, -0.04}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.08,  0.09,  0.08,  0.08,  0.07,  0.07,  0.06,  0.05,  0.05,  0.05,  0.04}; FitRangeBinPos = FullFitRangePos[iBin-1];
+        }
+    } //End of Light_DiffTheta
 
     if(histoName.find("Mu_DiffPhiVsGenInvE") <= histoName.size() ){
         if(histoName.find("Eta") > histoName.size() ){
-            double FullFitRangeNeg[11] = {-0.0015, -0.003, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
-            double FullFitRangePos[11] = { 0.0015,  0.003,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004}; FitRangeBinPos = FullFitRangePos[iBin-1];
+            double FullFitRangeNeg[11] = {-0.0025, -0.003, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.0025,  0.003,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004}; FitRangeBinPos = FullFitRangePos[iBin-1];
         }
         else if(histoName.find("Eta_0") <= histoName.size() ){
-            double FullFitRangeNeg[11] = {-0.003, -0.003, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
-            double FullFitRangePos[11] = { 0.003,  0.003,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004}; FitRangeBinPos = FullFitRangePos[iBin-1];
+            double FullFitRangeNeg[11] = {-0.003, -0.0035, -0.0045, -0.0045, -0.0045, -0.004, -0.004, -0.004, -0.004, -0.004, -0.004}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.003,  0.0035,  0.0045,  0.0045,  0.0045,  0.004,  0.004,  0.004,  0.004,  0.004,  0.004}; FitRangeBinPos = FullFitRangePos[iBin-1];
         }
         else if(histoName.find("Eta_0.375") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-0.002, -0.0025, -0.003, -0.005, -0.005, -0.005, -0.005, -0.005, -0.005, -0.005, -0.005}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
@@ -681,7 +712,11 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
     } //End of Mu_DiffPhi
 
     if(histoName.find("Mu_DiffInvEVsGenInvE") <= histoName.size() ){
-        if(histoName.find("Eta") > histoName.size() || histoName.find("Eta_0_") <= histoName.size() || histoName.find("Eta_0.75") <= histoName.size() ){ FitRangeBinNeg = -0.0015; FitRangeBinPos = 0.001; }
+        if( histoName.find("Eta_0_") <= histoName.size() || histoName.find("Eta_0.75") <= histoName.size() ){ FitRangeBinNeg = -0.0015; FitRangeBinPos = 0.001; }
+        /*else if(histoName == "Mu_DiffInvEVsGenInvE" ){
+            double FullFitRangeNeg[11] = {-0.001, -0.0012, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.005,  0.008,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001 }; FitRangeBinPos = FullFitRangePos[iBin-1];            
+        }*/
         else if(histoName.find("Eta_0.375") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-0.001, -0.0012, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015, -0.0015}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
             double FullFitRangePos[11] = { 0.005,  0.008,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001,   0.001 }; FitRangeBinPos = FullFitRangePos[iBin-1];
@@ -694,8 +729,8 @@ std::vector<double> TFCreation::SetFitRange(std::string histoName, int iBin){
 
     if(histoName.find("Mu_DiffThetaVsGenInvE") <= histoName.size() ){
         if(histoName.find("Eta") > histoName.size() ){
-            double FullFitRangeNeg[11] = {-0.002, -0.0025, -0.0025, -0.003, -0.003, -0.003, -0.0035, -0.0035, -0.0035, -0.0035, -0.0035}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
-            double FullFitRangePos[11] = { 0.002,  0.0025,  0.0025,  0.003,  0.003,  0.003,  0.0035,  0.0035,  0.0035,  0.0035,  0.0035}; FitRangeBinPos = FullFitRangePos[iBin-1];
+            double FullFitRangeNeg[11] = {-0.004, -0.0045, -0.0045, -0.006, -0.006, -0.006, -0.008, -0.008, -0.008, -0.005, -0.005}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];
+            double FullFitRangePos[11] = { 0.004,  0.0045,  0.0045,  0.006,  0.006,  0.006,  0.008,  0.008,  0.008,  0.005,  0.005}; FitRangeBinPos = FullFitRangePos[iBin-1];
         }
         else if(histoName.find("Eta_0_") <= histoName.size() || histoName.find("Eta_0.375") <= histoName.size() || histoName.find("1.45") <= histoName.size() ){
             double FullFitRangeNeg[11] = {-0.008, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01}; FitRangeBinNeg = FullFitRangeNeg[iBin-1];

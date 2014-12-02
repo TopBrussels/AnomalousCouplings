@@ -15,9 +15,9 @@
   int NrBins = 11;  //Also update on loop over bins!
   string HistoBin[NrBins] = {"1","2","3","4","5","6","7","8","9","10","11"};
   const int NrParams = 6;                                                   //Looking at doubleGaussian with 6 parameters!
-  const int NrDblGaus = 15;                                                 //Number of different Pt-bins have been considered for creating separate double Gaussian distributions!
-  string GenPt[NrDblGaus] = {"10","15","20","30","40","55","70","85","100","115","130","145","160","180","200"};   
-  string GenInvPt[NrDblGaus] = {"0.1","0.0667", "0.05", "0.033", "0.025", "0.01818", "0.014", "0.0118", "0.01", "0.00869", "0.00769", "0.00689", "0.00625", "0.00556", "0.005"};
+  const int NrDblGaus = 15;                                                 //Number of different E-bins have been considered for creating separate double Gaussian distributions!
+  string GenE[NrDblGaus] = {"10","15","20","30","40","55","70","85","100","115","130","145","160","180","200"};   
+  string GenInvE[NrDblGaus] = {"0.1","0.0667", "0.05", "0.033", "0.025", "0.01818", "0.014", "0.0118", "0.01", "0.00869", "0.00769", "0.00689", "0.00625", "0.00556", "0.005"};
   string Param[NrParams] = {"a1","a2","a3","a4","a5","a6"};                 //Names of the fit parameters  --> Check whether this is also correct for the ROOT class!
   bool GetMkdirOutput = false;                                              //Output for directories which need to be created wanted ??
   const int NrFitHistos = 12;                                               //Number of histograms which need to be considered!
@@ -45,26 +45,25 @@
   }
 
   //***********************//
-  int usedEta = 2;
+  int usedEta = 0;
   //***********************//
   Directory = Directory+EtaBin[usedEta];
 
-  std::string Titles[12] ={"Light_DiffPtVsGenPt"+EtaBin[usedEta],      // Number 0
-			   "Light_DiffThetaVsGenPt"+EtaBin[usedEta],   // Number 4
-			   "Light_DiffPhiVsGenPt"+EtaBin[usedEta],     // Number 8
-			   "BJet_DiffPtVsGenPt"+EtaBin[usedEta],       // Number 1
-			   "BJet_DiffThetaVsGenPt"+EtaBin[usedEta],    // Number 5
-			   "BJet_DiffPhiVsGenPt"+EtaBin[usedEta],      // Number 9
-			   "El_DiffPtVsGenPt"+EtaBin[usedEta],         // Number 2
-			   "El_DiffThetaVsGenPt"+EtaBin[usedEta],      // Number 6
-			   "El_DiffPhiVsGenPt"+EtaBin[usedEta],        // Number 10
-			   "Mu_DiffInvPtVsGenInvPt"+EtaBin[usedEta],   // Number 3
-			   "Mu_DiffThetaVsGenInvPt"+EtaBin[usedEta],   // Number 7
-			   "Mu_DiffPhiVsGenInvPt"+EtaBin[usedEta]};    // Number 11
-  string HistoAxisName[5] ={"Difference (gen-reco) of transverse E","Difference (gen-reco) of inverse transverse E ",
-			    "Difference (gen-reco) of transverse p","Difference (gen-reco) of #phi","Difference (gen-reco) of #theta"};
-  string ChiXAxisName[3] ={"Transverse energy of generator parton (GeV)","Inverse transverse energy of generator parton (1/GeV)","Transverse momentum of generator parton (GeV)"};
-  string HistoTitle[4] = {"light jets","b-jets","muon","electron"};
+  std::string Titles[12] ={"Light_DiffEVsGenE"+EtaBin[usedEta],      // Number 0
+			   "Light_DiffThetaVsGenE"+EtaBin[usedEta],   // Number 4
+			   "Light_DiffPhiVsGenE"+EtaBin[usedEta],     // Number 8
+			   "BJet_DiffEVsGenE"+EtaBin[usedEta],       // Number 1
+			   "BJet_DiffThetaVsGenE"+EtaBin[usedEta],    // Number 5
+			   "BJet_DiffPhiVsGenE"+EtaBin[usedEta],      // Number 9
+			   "El_DiffEVsGenE"+EtaBin[usedEta],         // Number 2
+			   "El_DiffThetaVsGenE"+EtaBin[usedEta],      // Number 6
+			   "El_DiffPhiVsGenE"+EtaBin[usedEta],        // Number 10
+			   "Mu_DiffInvEVsGenInvE"+EtaBin[usedEta],   // Number 3
+			   "Mu_DiffThetaVsGenInvE"+EtaBin[usedEta],   // Number 7
+			   "Mu_DiffPhiVsGenInvE"+EtaBin[usedEta]};    // Number 11
+  string HistoAxisName[5] ={"Difference (gen-reco) of E","Difference (gen-reco) of inverse E ", "Difference (gen-reco) of transverse p","Difference (gen-reco) of #phi","Difference (gen-reco) of #theta"};
+  string ChiXAxisName[3] = {"Energy of generator parton (GeV)","Inverse energy of generator parton (1/GeV)","Transverse momentum of generator parton (GeV)"};
+  string HistoTitle[4] =   {"light jets","b-jets","muon","electron"};
 
   if(GetMkdirOutput == true){
     //--------------------------------------------//
@@ -72,8 +71,7 @@
     //--------------------------------------------//
     std::cout << endl << " *** Directories which should be created ! *** " << endl << endl;
     std::cout << " mkdir " << Directory << " ";
-    for(int ii = 0; ii < NrFitHistos; ii++)
-      std::cout << Directory << "/" << Titles[ii] << " ";
+    for(int ii = 0; ii < NrFitHistos; ii++) std::cout << Directory << "/" << Titles[ii] << " ";
     std::cout << " " << endl;
     //--------------------------------------------//
     std::cout << endl << " --> If histograms need to be created, change value of boolean 'GetMkdirOutput' to false !! " << endl;
@@ -95,8 +93,8 @@
       TH1D* ProjHisto;
       
       //Set the correct X-axis name for the chi2 distribution
-      if(Title.find("GenEt") <= Title.size())         chiXAxisName = ChiXAxisName[0];   
-      else if(Title.find("GenInvPt") <= Title.size()) chiXAxisName = ChiXAxisName[1];
+      if(Title.find("GenE") <= Title.size())          chiXAxisName = ChiXAxisName[0];   
+      else if(Title.find("GenInvE") <= Title.size())  chiXAxisName = ChiXAxisName[1];
       else if(Title.find("GenPt") <= Title.size())    chiXAxisName = ChiXAxisName[2];
 	  
       //Set the title for the correct particle
@@ -106,9 +104,9 @@
       else if(Title.find("El_") == 0)    histoTitle = HistoTitle[3];
       
       //Set the correct axis variable
-      if(Title.find("DiffEt") <= Title.size())         histoAxisName = HistoAxisName[0];
-      else if(Title.find("DiffInvPt") <= Title.size()) histoAxisName = HistoAxisName[1];
-      else if(Title.find("DiffPt") <= Title.size())    histoAxisName = HistoAxisName[2];
+      if(Title.find("DiffE") <= Title.size())         histoAxisName = HistoAxisName[0];
+      else if(Title.find("DiffInvE") <= Title.size())  histoAxisName = HistoAxisName[1];
+      else if(Title.find("DiffPt") <= Title.size())     histoAxisName = HistoAxisName[2];
       else if(Title.find("DiffPhi") <= Title.size())   histoAxisName = HistoAxisName[3];
       else if(Title.find("DiffTheta") <= Title.size()) histoAxisName = HistoAxisName[4];      
       std::cout << " --- Found strings : (chiXAxis, histoTitle & histoAxisName) = " << chiXAxisName << ", " << histoTitle << " & " << histoAxisName << std::endl;
@@ -141,7 +139,7 @@
       TCanvas* projCanvas = new TCanvas("projCanvas","Fit results of projectionY for each bin");
       projCanvas->Divide(3,4);
     
-      if(Title == "Mu_DiffInvPtVsGenInvPt") NrBins = 10;
+      if(Title == "Mu_DiffInvEVsGenInvE") NrBins = 10;
       else NrBins = 11;
       for(int iBin = 0; iBin <= NrBins; iBin++){
 	//Set name for .root file and for saving the histograms!
@@ -245,13 +243,13 @@
       TH1D* dblGausHisto;
       for(int iGaus = 0; iGaus < NrDblGaus; iGaus++){
 
-        if(Title.find("GenInvPt") <= Title.size()){
-            dblGausHisto = (TH1D*) histoFile->Get( (Title+"/"+Title+"_DblGausPlot_GenPt"+GenInvPt[iGaus]).c_str());
-            dblGausHisto->SetTitle( ("Double Gaussian distribution ("+histoTitle+") for InvGenPt "+GenInvPt[iGaus]).c_str());
+        if(Title.find("GenInvE") <= Title.size()){
+            dblGausHisto = (TH1D*) histoFile->Get( (Title+"/"+Title+"_DblGausPlot_GenE"+GenInvE[iGaus]).c_str());
+            dblGausHisto->SetTitle( ("Double Gaussian distribution ("+histoTitle+") for InvGenE "+GenInvE[iGaus]).c_str());
         }
         else{
-            dblGausHisto = (TH1D*) histoFile->Get( (Title+"/"+Title+"_DblGausPlot_GenPt"+GenPt[iGaus]).c_str());
-            dblGausHisto->SetTitle( ("Double Gaussian distribution ("+histoTitle+") for GenPt "+GenPt[iGaus]).c_str());
+            dblGausHisto = (TH1D*) histoFile->Get( (Title+"/"+Title+"_DblGausPlot_GenE"+GenE[iGaus]).c_str());
+            dblGausHisto->SetTitle( ("Double Gaussian distribution ("+histoTitle+") for GenE "+GenE[iGaus]).c_str());
         }
         dblGausHisto->GetXaxis()->SetTitle( histoAxisName.c_str() );
         dblGausHisto->GetXaxis()->SetTitleOffset(0.85);
