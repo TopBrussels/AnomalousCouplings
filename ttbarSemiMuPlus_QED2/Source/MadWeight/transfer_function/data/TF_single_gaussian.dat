@@ -77,7 +77,7 @@
 #        particles.dat
 <width_type> large </width_type>
 # width_type should be thin or large (thin is for energy acuurate up to 5-10%)
-<variable name='PT'>
+<variable name='E'>
 <tf>
         prov1=(#1+#2*dsqrt(p(0))+#3*p(0))
         prov2=(#4+#5*dsqrt(p(0))+#6*p(0))
@@ -102,7 +102,7 @@
 #        particles.dat
 <width_type> thin </width_type>
 # width_type should be thin or large (thin is for energy acuurate up to 5-10%)
-<variable name='PT'>
+<variable name='E'>
 <tf>
         prov1=(#7+#8*dsqrt(p(0))+#9*p(0))
         prov2=(#10+#11*dsqrt(p(0))+#12*p(0))
