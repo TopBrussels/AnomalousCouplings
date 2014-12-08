@@ -220,7 +220,7 @@ class TF_input(XML_input):
         text='$B$ TF_HEADER $E$'
         text=mod_file.mod_text(text,template.dico)
         for block in self.block.values():
-            for variable in ['PT','THETA','PHI']:     #CHANGED: Originally only 'E' was allowed and not 'PT'
+            for variable in ['E','THETA','PHI']:
                 tf_var='tf_'+variable+'_'+block.name
                 new_text='$B$ GENERIC_TF $E$'
                 width_var='width_'+variable+'_'+block.name  
@@ -288,7 +288,7 @@ class TF_block(dict):
         self.name=name
         #init all to delta
         dict.__init__(self)
-        self.update({'PT':TF_on_var(),'THETA':TF_on_var(),'PHI':TF_on_var()})     #CHANGED 8/12/2014
+        self.update({'E':TF_on_var(),'THETA':TF_on_var(),'PHI':TF_on_var()})
         self.order=0
         self.infotext=''
         self.name=name
@@ -423,7 +423,7 @@ class TF_in_SubProcesses:
         text='$B$ TF_HEADER $E$\n'
         text+=self.text_get_central_point()+'\n'
         text+=self.text_transfer_fct()+'\n'
-        text+=self.text_tf_PT_for_part()+'\n'            #CHANGED 8/12/2014
+        text+=self.text_tf_E_for_part()+'\n'
         
         template = mod_file.Mod_file(rule_file='./Source/MadWeight/transfer_function/input/mod_generic')
         text=mod_file.mod_text(text,template.dico)
@@ -447,7 +447,7 @@ class TF_in_SubProcesses:
         #add the definition for external function
         for block in self.blockname_list:
             if isinstance(block, basestring):
-                name_list='width_PT_'+block+', width_THETA_'+block+', width_PHI_'+block   #CHANGED 8/12/2014 (should INVPT also be added?)
+                name_list='width_E_'+block+', width_THETA_'+block+', width_PHI_'+block
             else:
                 continue
             
@@ -469,7 +469,7 @@ class TF_in_SubProcesses:
                 text+=' c_point(perm, %s,3,1)=rho(pexp_init(0,2+perm_id(%s)))\n' %(i+1,i-1)
             
             #define width
-            variable=['THETA','PHI','PT']      #CHANGED 8/12/2014
+            variable=['THETA','PHI','E']
             for j in range(1,4):
                 if blockname == -1: #particle is invisible 
                     text+=' c_point(perm,%s,%s,2)=-1d0\n' % (i+1,j)    
@@ -513,21 +513,21 @@ class TF_in_SubProcesses:
                 continue
             
             text+=' n_lhco=tag_lhco(%s)\n' % (i+1)
-            for var in ['PT','THETA','PHI']:
+            for var in ['E','THETA','PHI']:
                 text+=' call tf_%s_%s(pexp(0,%s),p(0,%s),n_lhco,weight)\n' %(var,blockname,i+1,i+1)
             text+='\n'#space between particles definition
         
         if met:
             text+=' k=met_lhco\n'
             text+=' call four_momentum_set2(eta_init(k),phi_init(k),pt_init(k),j_mass(k),p_met_exp)\n'
-            text+=' call tf_PT_%s(p_met_exp,p_met_rec,met_lhco,weight)\n' %(met)                            #CHANGED 8/12/2014
+            text+=' call tf_E_%s(p_met_exp,p_met_rec,met_lhco,weight)\n' %(met)
 
         text+="\n call check_nan(weight)\n return \n end\n"
         return text
         
-    #2 #############################################################################         #CHANGED 8/12/2014
-    def text_tf_PT_for_part(self):
-        """ return the different tf_PT_for_XX function in a  unformated text              
+    #2 #############################################################################     
+    def text_tf_E_for_part(self):
+        """ return the different tf_E_for_XX function in a  unformated text 
             (need to pass in mod_file for comment, and to f77_format    
         """    
 
@@ -536,42 +536,42 @@ class TF_in_SubProcesses:
         text='$B$ START_TF_E_FOR_PART $E$\n'
         
         for i in range(0,len(self.blockname_list)):
-            text2+='\n'+self.text_tf_PT_for_one_part(i)+'\n'         #CHANGED 8/12/2014
+            text2+='\n'+self.text_tf_E_for_one_part(i)+'\n'
             blockname=self.blockname_list[i]
             
             if not isinstance(blockname, basestring):
-                text+=' if(MG_num.eq.%s) then\n tf_PT_for_part=1d0\n return\n endif\n' % (i+1)             #CHANGED 8/12/2014
+                text+=' if(MG_num.eq.%s) then\n tf_E_for_part=1d0\n return\n endif\n' % (i+1)
             else:
                 text+=' if(MG_num.eq.%s) then\n' %(i+1)
-                text+=' tf_PT_for_part=1d0\n'                #CHANGED 8/12/2014
+                text+=' tf_E_for_part=1d0\n'
                 text+=' n_lhco=tag_lhco(%s)\n'% (i+1)
-                text+=' call tf_PT_%s(pexp(0,%s),momenta(0,%s),n_lhco,tf_PT_for_part)\n' % (blockname,i+1,i+1)          #CHANGED 8/12/2014
+                text+=' call tf_E_%s(pexp(0,%s),momenta(0,%s),n_lhco,tf_E_for_part)\n' % (blockname,i+1,i+1)
                 text+='\n return\n endif\n'        
         
         text+="\n return \n end\n"
         return text+text2
     
     #2 #############################################################################     
-    def text_tf_PT_for_one_part(self,i):             #CHANGED 8/12/2014
-        """ return the different tf_PT_for_XX function in a  unformated text 
+    def text_tf_E_for_one_part(self,i):
+        """ return the different tf_E_for_XX function in a  unformated text 
             (need to pass in mod_file for comment, and to f77_format    
         """  
         
-        text='$B$ S-COMMENT_C $B$      Subroutine: tf_PT_for_XX()\n'          #CHANGED 8/12/2014
+        text='$B$ S-COMMENT_C $B$      Subroutine: tf_E_for_XX()\n'
         text+='\n     purpose: returns the value of the transfer function (in energy)\n'
         text+='$E$ S-COMMENT_C $E$\n'
-        text+=' double precision function tf_PT_for_%s()\n\n' % (i+1)      #CHANGED 8/12/2014
+        text+=' double precision function tf_E_for_%s()\n\n' % (i+1)    
        
         #Comment-subroutine-definition-init weight
         text+='$B$ DEF_TF_E_FOR_ONE_PART $E$\n'
         
         blockname=self.blockname_list[i]            
         if not isinstance(blockname, basestring):        
-            text+=' tf_PT_for_%s=1d0\n' %(i+1)               #CHANGED 8/12/2014
+            text+=' tf_E_for_%s=1d0\n' %(i+1) 
         else:
-            text+=' tf_PT_for_%s=1d0\n' %(i+1)               #CHANGED 8/12/2014
+            text+=' tf_E_for_%s=1d0\n' %(i+1)
             text+=' n_lhco=tag_lhco(%s)\n'% (i+1)
-            text+=' call tf_PT_%s(pexp(0,%s),momenta(0,%s),n_lhco,tf_PT_for_%s)\n' % (blockname,i+1,i+1,i+1)       #CHANGED 8/12/2014
+            text+=' call tf_E_%s(pexp(0,%s),momenta(0,%s),n_lhco,tf_E_for_%s)\n' % (blockname,i+1,i+1,i+1)       
         
         text+="\n return \n end\n"
         return text    
