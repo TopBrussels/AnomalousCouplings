@@ -10,9 +10,9 @@ C+-----------------------------------------------------------------------+
 
 
 C+-----------------------------------------------------------------------+
-C|    Transfer function for tf_PT_lepton
+C|    Transfer function for tf_E_lepton
 C+-----------------------------------------------------------------------+
-      subroutine tf_PT_lepton(pexp,p,n_lhco,weight)
+      subroutine tf_E_lepton(pexp,p,n_lhco,weight)
       implicit none
 
       double precision tf
@@ -28,10 +28,10 @@ C+-----------------------------------------------------------------------+
 
 
 
-        prov1=(tf_lepton_PT_7(curr_tf)+tf_lepton_PT_8(curr_tf)*dsqrt(p(0))+
-     &tf_lepton_PT_9(curr_tf)*p(0))
-        prov2=(tf_lepton_PT_10(curr_tf)+tf_lepton_PT_11(curr_tf)*dsqrt(p(0))+
-     &tf_lepton_PT_12(curr_tf)*p(0))
+        prov1=(tf_lepton_E_7(curr_tf)+tf_lepton_E_8(curr_tf)*dsqrt(p(0))+
+     &tf_lepton_E_9(curr_tf)*p(0))
+        prov2=(tf_lepton_E_10(curr_tf)+tf_lepton_E_11(curr_tf)*dsqrt(p(0))+
+     &tf_lepton_E_12(curr_tf)*p(0))
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))                !first gaussian
         tf=tf*((1d0/dsqrt(2d0*pi))/(prov2))            !normalisation
@@ -44,9 +44,9 @@ C+-----------------------------------------------------------------------+
       end
 
 C+-----------------------------------------------------------------------+
-C|    Definition of the WIDTH associated to tf_PT_lepton
+C|    Definition of the WIDTH associated to tf_E_lepton
 C+-----------------------------------------------------------------------+
-      DOUBLE PRECISION FUNCTION width_PT_lepton(pexp,n_lhco)
+      DOUBLE PRECISION FUNCTION width_E_lepton(pexp,n_lhco)
       implicit none
 
        	  double precision width
@@ -63,13 +63,13 @@ C+-----------------------------------------------------------------------+
 
 
 
-        width=(tf_lepton_PT_10(curr_tf)+tf_lepton_PT_11(curr_tf)*dsqrt(pexp(0))+
-     &tf_lepton_PT_12(curr_tf)*pexp(0))
+        width=(tf_lepton_E_10(curr_tf)+tf_lepton_E_11(curr_tf)*dsqrt(pexp(0))+
+     &tf_lepton_E_12(curr_tf)*pexp(0))
 
 
 
 
-      width_PT_lepton= width
+      width_E_lepton= width
 
       return
       end
@@ -187,9 +187,9 @@ C+-----------------------------------------------------------------------+
 
 
 C+-----------------------------------------------------------------------+
-C|    Transfer function for tf_PT_jet
+C|    Transfer function for tf_E_jet
 C+-----------------------------------------------------------------------+
-      subroutine tf_PT_jet(pexp,p,n_lhco,weight)
+      subroutine tf_E_jet(pexp,p,n_lhco,weight)
       implicit none
 
       double precision tf
@@ -205,10 +205,10 @@ C+-----------------------------------------------------------------------+
 
 
 
-        prov1=(tf_jet_PT_1(curr_tf)+tf_jet_PT_2(curr_tf)*dsqrt(p(0))+
-     &tf_jet_PT_3(curr_tf)*p(0))
-        prov2=(tf_jet_PT_4(curr_tf)+tf_jet_PT_5(curr_tf)*dsqrt(p(0))+
-     &tf_jet_PT_6(curr_tf)*p(0))
+        prov1=(tf_jet_E_1(curr_tf)+tf_jet_E_2(curr_tf)*dsqrt(p(0))+
+     &tf_jet_E_3(curr_tf)*p(0))
+        prov2=(tf_jet_E_4(curr_tf)+tf_jet_E_5(curr_tf)*dsqrt(p(0))+
+     &tf_jet_E_6(curr_tf)*p(0))
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))                !first gaussian
         tf=tf*((1d0/dsqrt(2d0*pi))/(prov2))            !normalisation 	
@@ -221,9 +221,9 @@ C+-----------------------------------------------------------------------+
       end
 
 C+-----------------------------------------------------------------------+
-C|    Definition of the WIDTH associated to tf_PT_jet
+C|    Definition of the WIDTH associated to tf_E_jet
 C+-----------------------------------------------------------------------+
-      DOUBLE PRECISION FUNCTION width_PT_jet(pexp,n_lhco)
+      DOUBLE PRECISION FUNCTION width_E_jet(pexp,n_lhco)
       implicit none
 
        	  double precision width
@@ -240,13 +240,13 @@ C+-----------------------------------------------------------------------+
 
 
 
-        width=(tf_jet_PT_4(curr_tf)+tf_jet_PT_5(curr_tf)*dsqrt(pexp(0))+
-     &tf_jet_PT_6(curr_tf)*pexp(0))
+        width=(tf_jet_E_4(curr_tf)+tf_jet_E_5(curr_tf)*dsqrt(pexp(0))+
+     &tf_jet_E_6(curr_tf)*pexp(0))
 
 
 
 
-      width_PT_jet= width
+      width_E_jet= width
 
       return
       end
