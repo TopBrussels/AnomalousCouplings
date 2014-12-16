@@ -1,0 +1,37 @@
+<subprocess id='P1_gg_ttx_t_bwp_wp_mupvm_tx_bxwm_wm_qq'>
+<card id='5'>
+<event id='1' value='3.65157276764e-23' error='1.35514456445e-25'>
+    <tfset id='1' value='3.6516735455e-23' error='1.40742056013e-25'></tfset>
+</event>
+<event id='2' value='7.33098456312e-26' error='2.41462860004e-28'>
+    <tfset id='1' value='7.33220996853e-26' error='2.60550295691e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='1' value='2.28223297978e-24' error='8.46965352784e-27'>
+    <tfset id='1' value='2.28229596594e-24' error='8.79637850084e-27'></tfset>
+</event>
+<event id='2' value='4.58186535195e-27' error='1.50914287502e-29'>
+    <tfset id='1' value='4.58263123033e-27' error='1.62843934807e-29'></tfset>
+</event>
+</card><card id='3'>
+<event id='1' value='0.0' error='0.0'>
+    <tfset id='1' value='0.0' error='0.0'></tfset>
+</event>
+<event id='2' value='0.0' error='0.0'>
+    <tfset id='1' value='0.0' error='0.0'></tfset>
+</event>
+</card><card id='2'>
+<event id='1' value='2.28223297978e-24' error='8.46965352784e-27'>
+    <tfset id='1' value='2.28229596594e-24' error='8.79637850084e-27'></tfset>
+</event>
+<event id='2' value='4.58186535195e-27' error='1.50914287502e-29'>
+    <tfset id='1' value='4.58263123033e-27' error='1.62843934807e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='1' value='3.65157276764e-23' error='1.35514456445e-25'>
+    <tfset id='1' value='3.6516735455e-23' error='1.40742056013e-25'></tfset>
+</event>
+<event id='2' value='7.33098456312e-26' error='2.41462860004e-28'>
+    <tfset id='1' value='7.33220996853e-26' error='2.60550295691e-28'></tfset>
+</event>
+</card></subprocess>

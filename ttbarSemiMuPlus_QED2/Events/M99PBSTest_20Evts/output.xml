@@ -1,0 +1,806 @@
+<madweight>
+<banner>
+<proc_card_mg5>
+#************************************************************
+#*                     MadGraph5_aMC@NLO                    *
+#*                                                          *
+#*                *                       *                 *
+#*                  *        * *        *                   *
+#*                    * * * * 5 * * * *                     *
+#*                  *        * *        *                   *
+#*                *                       *                 *
+#*                                                          *
+#*                                                          *
+#*         VERSION 2.1.0.beta            2014-02-18         *
+#*                                                          *
+#*    The MadGraph5_aMC@NLO Development Team - Find us at   *
+#*    https://server06.fynu.ucl.ac.be/projects/madgraph     *
+#*                                                          *
+#************************************************************
+#*                                                          *
+#*               Command File for MadGraph5_aMC@NLO         *
+#*                                                          *
+#*     run as ./bin/mg5_aMC  filename                       *
+#*                                                          *
+#************************************************************
+
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set gauge unitary
+set complex_mass_scheme False
+import model sm
+define p = g u c d s u~ c~ d~ s~
+define j = g u c d s u~ c~ d~ s~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+import model MassiveLeptons
+generate p p > t t~ , ( t > b w+ , w+ > mu+ vm ) , ( t~ > b~ w- , w- > j j ) @1 QED = 2
+output madweight ttbarSemiMuPlus_QED2
+</proc_card_mg5>
+<MadWeight_card>
+##########################################################################
+##                                                                      ##
+##                             MadWeigth                                ##
+##                             =============                            ##
+##                                                                      ##
+##                              Run control                             ##
+##                              -----------                             ##
+##                                                                      ##
+##                                                                      ##
+##    Author: Mattelaer Olivier (UCL-CP3)                               ##
+##            Artoisenet Pierre (UCL-CP3)                               ##
+##                                                                      ##
+##    Version:     5.0.0                                                ##
+##    Last change: 01/10/14                                             ##
+##                                                                      ##
+##########################################################################
+##                                                                      ##
+##  This Card defines all specific parameters of Madweight              ## 
+##                                                                      ##
+##########################################################################
+#*************************************************************************
+##                      select run options                              ##  
+#*************************************************************************
+Block MW_Run 
+#   TAG                 VALUE                    UTILITY
+     name                 M99PBSTest_20Evts    # name for the run  
+     nb_exp_events        20     # number of experimental events to consider
+     MW_int_points        2000    # number of points (by permutation) in MadWeight integration for survey 
+     MW_int_refine        10000   # number of points (by permutation) in MadWeight integration for refine 
+     precision            0.005   # stops computation if precision is reached.
+     nb_event_by_node     5       # one job submission compute the weight for N events
+     log_level            weight  # from low level of log to extensive log: 
+                                  # weight, permutation, channel, full
+     use_cut              F       # use the cut defined in run_card.dat
+     bw_cut               F       # use the BW cut 
+     nwa                  0.1     # width below narrow width approximation is used.
+     isr                  0       # isr=0 : ignore ISR effect (except if all FS particles are visible)
+                                  # isr=1 : correct kinematic based on reconstructed Pt(isr)
+     inputfile          './Events/input.lhco' # path to the input file (in lhco format)
+                                  
+                                  
+#*************************************************************************
+##                  define the different param_card's                   ##  
+#*************************************************************************
+Block MW_parameter         
+#   TAG      VALUE                     UTILITY
+    mode         1         #    type of input 
+                           #    0 : inputs are read from the cards: param_card_1.dat, param_card_2.dat,...
+                           #    1 : redefines some values from param_card.dat according to the form below
+                           #    2 : same but the value for different parameters are modified simultaneously
+#                             
+#                             # first parameter #
+     11       anom          # Block of the parameter to change  
+     12       3             # id of the parameter to change 
+     13       -1.0           # here you can enter the different values:
+     13       -0.5           #         add a new line with tag 13 to introduce a new value        
+     13       0.0           #         add a new line with tag 13 to introduce a new value        
+     13       0.5           #         add a new line with tag 13 to introduce a new value        
+     13       1.0           #         add a new line with tag 13 to introduce a new value        
+
+#
+#                            #  second parameter #
+#                            !DELETE ALL THE FOLLOWING TAG IF YOU WANT TO RUN WITH ONLY ONE PARAM!
+#     21       MGCKM          # Block of the parameter to change  
+#     22       1              # id of the paramter to change 
+#     22       2              # id2 of the paramter to change
+#     23       1.5E-02        # here you can enter the different values:
+#     23       1.8E-02        #        add a new line with tag 23 to introduce a new value
+#
+#  use same syntax for parameters 3,4,...
+#*************************************************************************
+##                                Permutations                          ##  
+#*************************************************************************
+Block MW_perm
+#   TAG           VALUE                    UTILITY
+     permutation  T         # make permutation
+     bjet_is_jet  T         # consider permutation between b-jets and light jets
+     montecarlo   T         # Monte-Carlo over permutation (Huge speed up if many permutation)
+     preselect    'default' # How to pre-select the correct permutation set. 
+                            # put 'None' if no pre-selection to perform.
+                            # You can set the path to a fortran file defining the require function
+                            # See file SubProcesses/permutation_weight_default.dat for
+                            # instructions.
+     min_perm_cut 5e-4      # Cut for discarding permutation on the preselected method
+#*************************************************************************
+##                       Phase-Space Integration mapping                ##
+#*************************************************************************
+Block MW_gen
+    force_nwa     2         # Only consider the change of variable alligning particles 
+                            # with width smaller than this value. This speed up the code
+                            # but can lead to zero weight for background event where the
+                            # kinematic doesn't agree with the associated mass.
+                            # if "mw_run nwa" parameter is bigger than this value, that
+                            # value is used for this parameter automatically.
+</MadWeight_card>
+<transfer_card>
+#+-----------------------------------------------------------------------+
+#|                         TRANSFER_CARD.DAT                             |
+#|                                                                       |
+#|     Author: Pierre Artoisenet (UCL-CP3)                               |
+#|             Olivier Mattelaer (UCL-CP3)                               |
+#+-----------------------------------------------------------------------+
+#|     This file is generated automaticly by MADWEIGHT                   |
+#|     card generation version: 2.0.0                                    |
+#+-----------------------------------------------------------------------+
+#|                                                                       |
+#|    To change the transfer function run ./bin/change_tf.py             |
+#|    Current parametrization :single_gaussian                           |
+#|                                                                       |
+#+-----------------------------------------------------------------------+
+
+#+-----------------------------------------------------------------------+
+#|    Parameter for particles: mu,e                                      |
+#|    Information: single gaussian with parameter depending of the energy 
+#|                                                                       |
+#+-----------------------------------------------------------------------+
+
+BLOCK TF_lepton_E
+	7	 0d0 	 #
+	8	 0d0 	 #
+	9	 0d0 	 #
+	10	 0d0 	 #
+	11	 0d0 	 #
+	12	 0.02d0  #
+#+-----------------------------------------------------------------------+
+#|    Parameter for particles: u,d,s,c,b,g                               |
+#|    Information: single gaussian with parameter depending of the energy 
+#|                                                                       |
+#+-----------------------------------------------------------------------+
+
+
+BLOCK TF_jet_E
+	1	 0d0 	 #
+	2	 0d0 	 #
+	3	 0d0 	 #
+	4	 0d0 	 #
+	5	 0d0 	 #
+	6	 0.05d0 	 #
+</transfer_card>
+<param_card>
+######################################################################
+## PARAM_CARD AUTOMATICALY GENERATED BY MG5 FOLLOWING UFO MODEL   ####
+######################################################################
+##                                                                  ##
+##  Width set on Auto will be computed following the information    ##
+##        present in the decay.py files of the model.               ##
+##        See  arXiv:1402.1178 for more details.                    ##
+##                                                                  ##
+######################################################################
+
+###################################
+## INFORMATION FOR ANOM
+###################################
+Block anom 
+    1 1.0 # RVL 
+    2 0.0 # IVL 
+    3 0.0 # RVR 
+    4 0.0 # IVR 
+    5 0.0 # RgL 
+    6 0.0 # IgL 
+    7 0.0 # RgR 
+    8 0.0 # IgR 
+
+###################################
+## INFORMATION FOR CKMBLOCK
+###################################
+Block ckmblock 
+    1 2.277360e-01 # cabi 
+
+###################################
+## INFORMATION FOR MASS
+###################################
+Block mass 
+    5 4.800000e+00 # MB 
+    6 1.725000e+02 # MT 
+   11 5.110000e-04 # Me 
+   13 1.056600e-01 # MM 
+   15 1.777000e+00 # MTA 
+   23 9.111880e+01 # MZ 
+   25 1.200000e+02 # MH 
+## Dependent parameters, given by model restrictions.
+## Those values should be edited following the 
+## analytical expression. MG5 ignores those values 
+## but they are important for interfacing the output of MG5
+## to external program such as Pythia.
+  1 0.000000 # d : 0.0 
+  2 0.000000 # u : 0.0 
+  3 0.000000 # s : 0.0 
+  4 0.000000 # c : 0.0 
+  12 0.000000 # ve : 0.0 
+  14 0.000000 # vm : 0.0 
+  16 0.000000 # vt : 0.0 
+  21 0.000000 # g : 0.0 
+  22 0.000000 # a : 0.0 
+  24 80.333525 # w+ : cmath.sqrt(MZ__exp__2/2. + cmath.sqrt(MZ__exp__4/4. - (aEW*cmath.pi*MZ__exp__2)/(Gf*sqrt__2))) 
+
+###################################
+## INFORMATION FOR SMINPUTS
+###################################
+Block sminputs 
+    1 1.325070e+02 # aEWM1 
+    2 1.166390e-05 # Gf 
+    3 1.180000e-01 # aS 
+
+###################################
+## INFORMATION FOR YUKAWA
+###################################
+Block yukawa 
+    5 4.800000e+00 # ymb 
+    6 1.725000e+02 # ymt 
+   11 5.110000e-04 # yme 
+   13 1.056600e-01 # ymm 
+   15 1.777000e+00 # ymtau 
+
+###################################
+## INFORMATION FOR DECAY
+###################################
+DECAY   6 1.508336e+00 # WT 
+DECAY  23 2.441400e+00 # WZ 
+DECAY  24 2.047600e+00 # WW 
+DECAY  25 5.753088e-03 # WH 
+## Dependent parameters, given by model restrictions.
+## Those values should be edited following the 
+## analytical expression. MG5 ignores those values 
+## but they are important for interfacing the output of MG5
+## to external program such as Pythia.
+DECAY  1 0.000000 # d : 0.0 
+DECAY  2 0.000000 # u : 0.0 
+DECAY  3 0.000000 # s : 0.0 
+DECAY  4 0.000000 # c : 0.0 
+DECAY  5 0.000000 # b : 0.0 
+DECAY  11 0.000000 # e- : 0.0 
+DECAY  12 0.000000 # ve : 0.0 
+DECAY  13 0.000000 # mu- : 0.0 
+DECAY  14 0.000000 # vm : 0.0 
+DECAY  15 0.000000 # ta- : 0.0 
+DECAY  16 0.000000 # vt : 0.0 
+DECAY  21 0.000000 # g : 0.0 
+DECAY  22 0.000000 # a : 0.0 
+</param_card>
+<run_card>
+#*********************************************************************
+#                       MadGraph/MadEvent                            *
+#                  http://madgraph.hep.uiuc.edu                      *
+#                                                                    *
+#                        run_card.dat                                *
+#                                                                    *
+#  This file is used to set the parameters of the run.               *
+#                                                                    *
+#  Some notation/conventions:                                        *
+#                                                                    *
+#   Lines starting with a '# ' are info or comments                  *
+#                                                                    *
+#   mind the format:   value    = variable     ! comment             *
+#*********************************************************************
+#
+#*******************                                                 
+# Running parameters
+#*******************                                                 
+#                                                                    
+#*********************************************************************
+# Tag name for the run (one word)                                    *
+#*********************************************************************
+  ''     = run_tag ! name of the run. overwritten by the MW card 
+#*********************************************************************
+# Run to generate the grid pack                                      *
+#*********************************************************************
+  .false.     = gridpack  !True = setting up the grid pack
+#*********************************************************************
+# Number of events and rnd seed                                      *
+#*********************************************************************
+      0       = iseed   ! rnd seed 
+#*********************************************************************
+# Collider type and energy                                           *
+#*********************************************************************
+        1     = lpp1  ! beam 1 type (0=NO PDF)
+        1     = lpp2  ! beam 2 type (0=NO PDF)
+     4000     = ebeam1  ! beam 1 energy in GeV
+     4000     = ebeam2  ! beam 2 energy in GeV
+#*********************************************************************
+# Beam polarization from -100 (left-handed) to 100 (right-handed)    *
+#*********************************************************************
+        0     = polbeam1 ! beam polarization for beam 1
+        0     = polbeam2 ! beam polarization for beam 2
+#*********************************************************************
+# PDF CHOICE: this automatically fixes also alpha_s and its evol.    *
+#*********************************************************************
+ 'cteq6l1'    = pdlabel     ! PDF set                                     
+#*********************************************************************
+# Renormalization and factorization scales                           *
+#*********************************************************************
+ T        = fixed_ren_scale  ! if .true. use fixed ren scale (false is beta)
+ T        = fixed_fac_scale  ! if .true. use fixed fac scale (false is beta)
+ 91.1880  = scale            ! fixed ren scale
+ 91.1880  = dsqrt_q2fact1    ! fixed fact scale for pdf1
+ 91.1880  = dsqrt_q2fact2    ! fixed fact scale for pdf2
+ 1        = scalefact        ! scale factor for event-by-event scales
+#*********************************************************************
+# Matching - Warning! ickkw > 1 is still beta
+#*********************************************************************
+ 0        = ickkw            ! 0 no matching, 1 MLM, 2 CKKW matching
+ 1        = highestmult      ! for ickkw=2, highest mult group
+ 1        = ktscheme         ! for ickkw=1, 1 Durham kT, 2 Pythia pTE
+ 1        = alpsfact         ! scale factor for QCD emission vx
+ F        = chcluster        ! cluster only according to channel diag
+ F        = pdfwgt           ! for ickkw=1, perform pdf reweighting
+#*********************************************************************
+#                                                                    
+#**********************************
+# BW cutoff (M+/-bwcutoff*Gamma)
+#**********************************
+  40  = bwcutoff    ! desactivate by default in the MadWeight_card
+#*******************                                                 
+# Standard Cuts    ! desactivate by default in the MadWeight_card
+#*******************                                                 
+#                                                                    
+#*********************************************************************
+# Minimum and maximum pt's                                           *
+#*********************************************************************
+  0  = ptj       ! minimum pt for the jets 
+  0  = ptb       ! minimum pt for the b 
+  0  = pta       ! minimum pt for the photons 
+  0  = ptl       ! minimum pt for the charged leptons 
+  0  = misset    ! minimum missing Et (sum of neutrino's momenta)
+  0  = ptheavy   ! minimum pt for one heavy final state
+ 1.0 = ptonium   ! minimum pt for the quarkonium states
+ 1d5 = ptjmax    ! maximum pt for the jets
+ 1d5 = ptbmax    ! maximum pt for the b
+ 1d5 = ptamax    ! maximum pt for the photons
+ 1d5 = ptlmax    ! maximum pt for the charged leptons
+ 1d5 = missetmax ! maximum missing Et (sum of neutrino's momenta)
+#*********************************************************************
+# Minimum and maximum E's (in the lab frame)                         *
+#*********************************************************************
+  0  = ej     ! minimum E for the jets 
+  0  = eb     ! minimum E for the b 
+  0  = ea     ! minimum E for the photons 
+  0  = el     ! minimum E for the charged leptons 
+ 1d5  = ejmax ! maximum E for the jets
+ 1d5  = ebmax ! maximum E for the b
+ 1d5  = eamax ! maximum E for the photons
+ 1d5  = elmax ! maximum E for the charged leptons
+#*********************************************************************
+# Maximum and minimum rapidity                                       *
+#*********************************************************************
+ 1d2  = etaj    ! max rap for the jets 
+ 1d2  = etab    ! max rap for the b 
+ 1d2  = etaa    ! max rap for the photons 
+ 1d2  = etal    ! max rap for the charged leptons 
+ 1d2  = etaonium ! max rap for the quarkonium states
+ 0d0  = etajmin ! min rap for the jets
+ 0d0  = etabmin ! min rap for the b
+ 0d0  = etaamin ! min rap for the photons
+ 0d0  = etalmin ! main rap for the charged leptons
+#*********************************************************************
+# Minimum and maximum DeltaR distance                                *
+#*********************************************************************
+ 0.  = drjj    ! min distance between jets 
+ 0   = drbb    ! min distance between b's 
+ 0.  = drll    ! min distance between leptons 
+ 0.  = draa    ! min distance between gammas 
+ 0   = drbj    ! min distance between b and jet 
+ 0.  = draj    ! min distance between gamma and jet 
+ 0.  = drjl    ! min distance between jet and lepton 
+ 0   = drab    ! min distance between gamma and b 
+ 0   = drbl    ! min distance between b and lepton 
+ 0.  = dral    ! min distance between gamma and lepton 
+ 1d2 = drjjmax ! max distance between jets
+ 1d2 = drbbmax ! max distance between b's
+ 1d2 = drllmax ! max distance between leptons
+ 1d2 = draamax ! max distance between gammas
+ 1d2 = drbjmax ! max distance between b and jet
+ 1d2 = drajmax ! max distance between gamma and jet
+ 1d2 = drjlmax ! max distance between jet and lepton
+ 1d2 = drabmax ! max distance between gamma and b
+ 1d2 = drblmax ! max distance between b and lepton
+ 1d2 = dralmax ! maxdistance between gamma and lepton
+#*********************************************************************
+# Minimum and maximum invariant mass for pairs                       *
+#*********************************************************************
+ 0   = mmjj    ! min invariant mass of a jet pair 
+ 0   = mmbb    ! min invariant mass of a b pair 
+ 0   = mmaa    ! min invariant mass of gamma gamma pair
+ 0   = mmll    ! min invariant mass of l+l- (same flavour) lepton pair
+ 1d5 = mmjjmax ! max invariant mass of a jet pair
+ 1d5 = mmbbmax ! max invariant mass of a b pair
+ 1d5 = mmaamax ! max invariant mass of gamma gamma pair
+ 1d5 = mmllmax ! max invariant mass of l+l- (same flavour) lepton pair
+#*********************************************************************
+# Minimum and maximum invariant mass for all letpons                 *
+#*********************************************************************
+ 0   = mmnl    ! min invariant mass for all letpons (l+- and vl) 
+ 1d5 = mmnlmax ! max invariant mass for all letpons (l+- and vl) 
+#*********************************************************************
+# Inclusive cuts                                                     *
+#*********************************************************************
+ 0  = xptj ! minimum pt for at least one jet  
+ 0  = xptb ! minimum pt for at least one b 
+ 0  = xpta ! minimum pt for at least one photon 
+ 0  = xptl ! minimum pt for at least one charged lepton 
+#*********************************************************************
+# Control the pt's of the jets sorted by pt                          *
+#*********************************************************************
+ 0   = ptj1min ! minimum pt for the leading jet in pt
+ 0   = ptj2min ! minimum pt for the second jet in pt
+ 0   = ptj3min ! minimum pt for the third jet in pt
+ 0   = ptj4min ! minimum pt for the fourth jet in pt
+ 1d5 = ptj1max ! maximum pt for the leading jet in pt 
+ 1d5 = ptj2max ! maximum pt for the second jet in pt
+ 1d5 = ptj3max ! maximum pt for the third jet in pt
+ 1d5 = ptj4max ! maximum pt for the fourth jet in pt
+ 0   = cutuse  ! reject event if fails any (0) / all (1) jet pt cuts
+#*********************************************************************
+# Control the Ht(k)=Sum of k leading jets                            *
+#*********************************************************************
+ 0   = htjmin ! minimum jet HT=Sum(jet pt)
+ 1d5 = htjmax ! maximum jet HT=Sum(jet pt)
+ 0   = ht2min ! minimum Ht for the two leading jets
+ 0   = ht3min ! minimum Ht for the three leading jets
+ 0   = ht4min ! minimum Ht for the four leading jets
+ 1d5 = ht2max ! maximum Ht for the two leading jets
+ 1d5 = ht3max ! maximum Ht for the three leading jets
+ 1d5 = ht4max ! maximum Ht for the four leading jets
+#*********************************************************************
+# WBF cuts                                                           *
+#*********************************************************************
+ 0   = xetamin ! minimum rapidity for two jets in the WBF case  
+ 0   = deltaeta ! minimum rapidity for two jets in the WBF case 
+#*********************************************************************
+# maximal pdg code for quark to be considered as a jet               *
+# otherwise b cuts are applied                                       *
+#*********************************************************************
+ 4 = maxjetflavor
+#*********************************************************************
+# Jet measure cuts                                                   *
+#*********************************************************************
+ 0   = xqcut   ! minimum kt jet measure between partons
+#*********************************************************************
+</run_card>
+</banner>
+<subprocess id='P1_gg_ttx_t_bwp_wp_mupvm_tx_bxwm_wm_qq'>
+<card id='4'>
+<event id='6' value='1.25049687196e-28' error='6.92560536803e-31'>
+    <tfset id='1' value='1.25047339032e-28' error='6.21621745573e-31'></tfset>
+</event>
+<event id='7' value='3.47060428971e-23' error='2.60489042858e-25'>
+    <tfset id='1' value='3.47014235899e-23' error='2.61864452107e-25'></tfset>
+</event>
+<event id='8' value='1.18571126455e-25' error='5.66634149655e-28'>
+    <tfset id='1' value='1.18600428098e-25' error='5.87681987888e-28'></tfset>
+</event>
+<event id='9' value='3.1373682983e-25' error='7.37001594347e-27'>
+    <tfset id='1' value='3.13888187339e-25' error='6.0458984467e-27'></tfset>
+</event>
+<event id='10' value='4.93785052686e-25' error='2.25370982866e-27'>
+    <tfset id='1' value='4.93811694331e-25' error='2.25158504729e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='11' value='4.79599816161e-24' error='1.61549150716e-26'>
+    <tfset id='1' value='4.79572239692e-24' error='1.73942630237e-26'></tfset>
+</event>
+<event id='12' value='8.24007102701e-24' error='5.9728095425e-26'>
+    <tfset id='1' value='8.24197942315e-24' error='5.93244709641e-26'></tfset>
+</event>
+<event id='13' value='4.36835228172e-25' error='1.96763005161e-27'>
+    <tfset id='1' value='4.3681400116e-25' error='2.07350462859e-27'></tfset>
+</event>
+<event id='14' value='2.7835119024e-27' error='1.75161721228e-28'>
+    <tfset id='1' value='2.78414813456e-27' error='1.02277358604e-28'></tfset>
+</event>
+<event id='15' value='2.21198238588e-24' error='7.1977388112e-27'>
+    <tfset id='1' value='2.21196400014e-24' error='7.57796046935e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='16' value='1.63264179967e-25' error='2.1578973961e-27'>
+    <tfset id='1' value='1.63317242998e-25' error='2.15291600022e-27'></tfset>
+</event>
+<event id='17' value='1.47185310926e-22' error='5.10675567921e-25'>
+    <tfset id='1' value='1.47205124803e-22' error='5.3256433911e-25'></tfset>
+</event>
+<event id='18' value='8.0787922596e-22' error='2.71612857378e-24'>
+    <tfset id='1' value='8.07929762394e-22' error='2.83468486839e-24'></tfset>
+</event>
+<event id='19' value='1.92901718066e-22' error='6.6191230999e-25'>
+    <tfset id='1' value='1.92900154135e-22' error='7.08107478118e-25'></tfset>
+</event>
+<event id='20' value='1.17017835159e-26' error='9.20196263247e-29'>
+    <tfset id='1' value='1.17055426373e-26' error='9.14588453968e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='6' value='2.81196008713e-28' error='9.33733123989e-30'>
+    <tfset id='1' value='2.81338523666e-28' error='1.48253461876e-30'></tfset>
+</event>
+<event id='7' value='7.50107377721e-23' error='5.21610116127e-25'>
+    <tfset id='1' value='7.50164533017e-23' error='5.18048331115e-25'></tfset>
+</event>
+<event id='8' value='2.60048151722e-25' error='1.17453239042e-27'>
+    <tfset id='1' value='2.60073075128e-25' error='1.22116814472e-27'></tfset>
+</event>
+<event id='9' value='8.44961395273e-25' error='2.19252194112e-26'>
+    <tfset id='1' value='8.45109480867e-25' error='1.76024392527e-26'></tfset>
+</event>
+<event id='10' value='1.20040277665e-24' error='5.47704899417e-27'>
+    <tfset id='1' value='1.20048039691e-24' error='5.65046581843e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='11' value='7.15196617619e-24' error='2.36030351662e-26'>
+    <tfset id='1' value='7.15110638872e-24' error='2.53997082553e-26'></tfset>
+</event>
+<event id='12' value='1.86996778403e-23' error='1.31474113415e-25'>
+    <tfset id='1' value='1.87021537027e-23' error='1.30357834188e-25'></tfset>
+</event>
+<event id='13' value='8.93511049729e-25' error='3.45068501694e-27'>
+    <tfset id='1' value='8.93729675438e-25' error='3.6051122219e-27'></tfset>
+</event>
+<event id='14' value='4.75783435333e-27' error='2.29301686066e-28'>
+    <tfset id='1' value='4.75590422208e-27' error='1.93030934805e-28'></tfset>
+</event>
+<event id='15' value='3.49074683058e-24' error='1.11580807974e-26'>
+    <tfset id='1' value='3.49049577443e-24' error='1.17081956497e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='11' value='1.57923010568e-23' error='5.1155021294e-26'>
+    <tfset id='1' value='1.57928380453e-23' error='5.50002715272e-26'></tfset>
+</event>
+<event id='12' value='6.60768696868e-23' error='4.89361201413e-25'>
+    <tfset id='1' value='6.60787780699e-23' error='4.86206339652e-25'></tfset>
+</event>
+<event id='13' value='2.98788598482e-24' error='1.11287410393e-26'>
+    <tfset id='1' value='2.98838083797e-24' error='1.15098550252e-26'></tfset>
+</event>
+<event id='14' value='1.26198998473e-26' error='4.12868679392e-28'>
+    <tfset id='1' value='1.26235816879e-26' error='3.94772808125e-28'></tfset>
+</event>
+<event id='15' value='8.56336717795e-24' error='2.73585932379e-26'>
+    <tfset id='1' value='8.56338836823e-24' error='2.89124153073e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='16' value='3.91165797424e-26' error='3.71946150473e-28'>
+    <tfset id='1' value='3.9124097668e-26' error='3.79209093897e-28'></tfset>
+</event>
+<event id='17' value='3.42553873491e-23' error='1.1883103319e-25'>
+    <tfset id='1' value='3.42615411542e-23' error='1.25423763731e-25'></tfset>
+</event>
+<event id='18' value='1.86162123113e-22' error='6.39799088968e-25'>
+    <tfset id='1' value='1.86179097045e-22' error='6.68108492642e-25'></tfset>
+</event>
+<event id='19' value='6.30267192671e-23' error='2.21461060039e-25'>
+    <tfset id='1' value='6.30285651016e-23' error='2.30802162341e-25'></tfset>
+</event>
+<event id='20' value='3.7133472874e-27' error='3.88372110952e-29'>
+    <tfset id='1' value='3.71365873966e-27' error='3.59197874712e-29'></tfset>
+</event>
+</card><card id='4'>
+<event id='1' value='2.75051510589e-23' error='9.46349641517e-26'>
+    <tfset id='1' value='2.75043041664e-23' error='9.97531323653e-26'></tfset>
+</event>
+<event id='2' value='1.25976090532e-25' error='5.5365248605e-28'>
+    <tfset id='1' value='1.26004446856e-25' error='5.73393641223e-28'></tfset>
+</event>
+<event id='3' value='1.66567323242e-24' error='5.32261454448e-27'>
+    <tfset id='1' value='1.66566032013e-24' error='5.69734367182e-27'></tfset>
+</event>
+<event id='4' value='2.96923695614e-23' error='2.00436768206e-25'>
+    <tfset id='1' value='2.96942768194e-23' error='1.95346974783e-25'></tfset>
+</event>
+<event id='5' value='4.68653230226e-24' error='8.17148047408e-26'>
+    <tfset id='1' value='4.68637904086e-24' error='8.06465187444e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='16' value='6.4665243069e-26' error='9.60681135193e-28'>
+    <tfset id='1' value='6.46923974677e-26' error='9.20343073011e-28'></tfset>
+</event>
+<event id='17' value='5.57106872854e-23' error='1.79936438605e-25'>
+    <tfset id='1' value='5.57104907796e-23' error='1.90545096889e-25'></tfset>
+</event>
+<event id='18' value='3.0902359455e-22' error='1.08846072338e-24'>
+    <tfset id='1' value='3.09045898141e-22' error='1.1339217819e-24'></tfset>
+</event>
+<event id='19' value='8.97667910724e-23' error='3.05602445167e-25'>
+    <tfset id='1' value='8.97580558089e-23' error='3.26527288616e-25'></tfset>
+</event>
+<event id='20' value='5.39671917554e-27' error='3.43938472245e-29'>
+    <tfset id='1' value='5.39723362406e-27' error='3.49054084235e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='1' value='9.4347910526e-23' error='3.33803209889e-25'>
+    <tfset id='1' value='9.43299392243e-23' error='3.49714608428e-25'></tfset>
+</event>
+<event id='2' value='3.42642875025e-25' error='1.36481734062e-27'>
+    <tfset id='1' value='3.42724733761e-25' error='1.42406588973e-27'></tfset>
+</event>
+<event id='3' value='3.71288834975e-24' error='1.24369082877e-26'>
+    <tfset id='1' value='3.71266158131e-24' error='1.33316539183e-26'></tfset>
+</event>
+<event id='4' value='8.93641415432e-23' error='7.37770495693e-25'>
+    <tfset id='1' value='8.93851477673e-23' error='7.28853300826e-25'></tfset>
+</event>
+<event id='5' value='2.1750825381e-23' error='4.59418219393e-25'>
+    <tfset id='1' value='2.17716982926e-23' error='4.09759307941e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='1' value='3.28179516686e-23' error='1.14408036586e-25'>
+    <tfset id='1' value='3.28199151277e-23' error='1.19437856994e-25'></tfset>
+</event>
+<event id='2' value='1.37449239161e-25' error='6.61724675367e-28'>
+    <tfset id='1' value='1.37449202228e-25' error='6.67643710753e-28'></tfset>
+</event>
+<event id='3' value='1.83705521059e-24' error='6.05997393688e-27'>
+    <tfset id='1' value='1.8370372988e-24' error='6.49167188867e-27'></tfset>
+</event>
+<event id='4' value='3.47020923562e-23' error='2.53141597696e-25'>
+    <tfset id='1' value='3.47069929059e-23' error='2.51898751699e-25'></tfset>
+</event>
+<event id='5' value='5.43347535715e-24' error='8.68121840283e-26'>
+    <tfset id='1' value='5.4353472198e-24' error='8.50692172816e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='16' value='1.49651392476e-25' error='1.60484540724e-27'>
+    <tfset id='1' value='1.49665788245e-25' error='1.64531498302e-27'></tfset>
+</event>
+<event id='17' value='1.31906043503e-22' error='4.41496838746e-25'>
+    <tfset id='1' value='1.3190893606e-22' error='4.63275256503e-25'></tfset>
+</event>
+<event id='18' value='7.29852795284e-22' error='2.4738294251e-24'>
+    <tfset id='1' value='7.29893000081e-22' error='2.57570593892e-24'></tfset>
+</event>
+<event id='19' value='1.69690552905e-22' error='5.73368234119e-25'>
+    <tfset id='1' value='1.69676136109e-22' error='6.14851640126e-25'></tfset>
+</event>
+<event id='20' value='1.01173977691e-26' error='7.23941813259e-29'>
+    <tfset id='1' value='1.01194031953e-26' error='6.89100771205e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='6' value='3.1809987677e-28' error='1.36757754344e-30'>
+    <tfset id='1' value='3.18076101792e-28' error='1.42373152015e-30'></tfset>
+</event>
+<event id='7' value='8.43421202208e-23' error='6.5889276179e-25'>
+    <tfset id='1' value='8.43403246382e-23' error='6.6157251559e-25'></tfset>
+</event>
+<event id='8' value='2.88531269226e-25' error='1.06575096309e-27'>
+    <tfset id='1' value='2.88557692529e-25' error='1.1223157073e-27'></tfset>
+</event>
+<event id='9' value='9.58548294683e-25' error='2.53012244414e-26'>
+    <tfset id='1' value='9.58480831469e-25' error='2.19128659846e-26'></tfset>
+</event>
+<event id='10' value='1.35833455824e-24' error='6.1346506017e-27'>
+    <tfset id='1' value='1.35829773953e-24' error='6.36740780702e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='1' value='1.45155465833e-23' error='5.0239256931e-26'>
+    <tfset id='1' value='1.45163029312e-23' error='5.25404556001e-26'></tfset>
+</event>
+<event id='2' value='7.29000907633e-26' error='2.54093409149e-28'>
+    <tfset id='1' value='7.28911403385e-26' error='2.71719317933e-28'></tfset>
+</event>
+<event id='3' value='1.19301285323e-24' error='3.99858858609e-27'>
+    <tfset id='1' value='1.19305355245e-24' error='4.30681675676e-27'></tfset>
+</event>
+<event id='4' value='1.7899191294e-23' error='1.28106729679e-25'>
+    <tfset id='1' value='1.79051743895e-23' error='1.2695852737e-25'></tfset>
+</event>
+<event id='5' value='1.78381896824e-24' error='3.66060890475e-26'>
+    <tfset id='1' value='1.78383766862e-24' error='3.55921505388e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='16' value='5.91627018493e-26' error='5.92845826989e-28'>
+    <tfset id='1' value='5.91492169464e-26' error='6.01646684583e-28'></tfset>
+</event>
+<event id='17' value='5.1162406281e-23' error='1.65226375028e-25'>
+    <tfset id='1' value='5.11652503469e-23' error='1.71935489666e-25'></tfset>
+</event>
+<event id='18' value='2.80627194287e-22' error='9.64655906692e-25'>
+    <tfset id='1' value='2.80610021976e-22' error='1.00736945719e-24'></tfset>
+</event>
+<event id='19' value='8.20854847232e-23' error='2.7770487453e-25'>
+    <tfset id='1' value='8.2086790805e-23' error='2.96836690765e-25'></tfset>
+</event>
+<event id='20' value='4.76625000226e-27' error='3.97258078715e-29'>
+    <tfset id='1' value='4.76746070882e-27' error='3.83439229832e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='11' value='1.41043169048e-23' error='4.6806737011e-26'>
+    <tfset id='1' value='1.41028765092e-23' error='5.02184843147e-26'></tfset>
+</event>
+<event id='12' value='5.66889801074e-23' error='5.26301785457e-25'>
+    <tfset id='1' value='5.67180787852e-23' error='4.7901532683e-25'></tfset>
+</event>
+<event id='13' value='2.47753762499e-24' error='1.02784745006e-26'>
+    <tfset id='1' value='2.47795696706e-24' error='1.03917397279e-26'></tfset>
+</event>
+<event id='14' value='1.13950723586e-26' error='1.25287991256e-27'>
+    <tfset id='1' value='1.13986707942e-26' error='4.07481832891e-28'></tfset>
+</event>
+<event id='15' value='7.53372173677e-24' error='2.5227540797e-26'>
+    <tfset id='1' value='7.53356548494e-24' error='2.68189153291e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='6' value='1.36485065535e-28' error='7.50398352421e-31'>
+    <tfset id='1' value='1.36492538179e-28' error='7.80907320581e-31'></tfset>
+</event>
+<event id='7' value='3.75650072169e-23' error='2.99805018182e-25'>
+    <tfset id='1' value='3.75643723837e-23' error='2.99268407458e-25'></tfset>
+</event>
+<event id='8' value='1.29745873437e-25' error='5.90011839754e-28'>
+    <tfset id='1' value='1.29726625126e-25' error='6.18362866961e-28'></tfset>
+</event>
+<event id='9' value='3.49247670298e-25' error='1.02144814538e-26'>
+    <tfset id='1' value='3.49348572563e-25' error='8.26994650548e-27'></tfset>
+</event>
+<event id='10' value='5.40603988612e-25' error='2.33305854497e-27'>
+    <tfset id='1' value='5.40603147934e-25' error='2.41001575383e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='11' value='6.53633782667e-24' error='2.18884426662e-26'>
+    <tfset id='1' value='6.53360929063e-24' error='2.36289229765e-26'></tfset>
+</event>
+<event id='12' value='1.58635173401e-23' error='1.01437091395e-25'>
+    <tfset id='1' value='1.5866114392e-23' error='1.024217793e-25'></tfset>
+</event>
+<event id='13' value='7.55996736098e-25' error='2.73101172474e-27'>
+    <tfset id='1' value='7.56061036414e-25' error='2.8328827603e-27'></tfset>
+</event>
+<event id='14' value='4.02522794881e-27' error='1.23611817443e-28'>
+    <tfset id='1' value='4.02586501532e-27' error='1.08636473785e-28'></tfset>
+</event>
+<event id='15' value='3.16005193547e-24' error='1.06658904352e-26'>
+    <tfset id='1' value='3.1596878195e-24' error='1.11546436694e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='6' value='8.51064544119e-29' error='3.53637141844e-31'>
+    <tfset id='1' value='8.51321293463e-29' error='3.66824032112e-31'></tfset>
+</event>
+<event id='7' value='2.60004821203e-23' error='2.59941679284e-25'>
+    <tfset id='1' value='2.60087231562e-23' error='2.29092594625e-25'></tfset>
+</event>
+<event id='8' value='8.81995064993e-26' error='3.45371624213e-28'>
+    <tfset id='1' value='8.81991615516e-26' error='3.61120181021e-28'></tfset>
+</event>
+<event id='9' value='1.92682912664e-25' error='4.23595966003e-27'>
+    <tfset id='1' value='1.92126573742e-25' error='4.11397756276e-27'></tfset>
+</event>
+<event id='10' value='3.49273792561e-25' error='1.50360235287e-27'>
+    <tfset id='1' value='3.49255467981e-25' error='1.55672745465e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='1' value='1.1370304984e-22' error='3.92800282206e-25'>
+    <tfset id='1' value='1.13709209206e-22' error='4.12012825304e-25'></tfset>
+</event>
+<event id='2' value='3.8250750849e-25' error='1.34514443088e-27'>
+    <tfset id='1' value='3.82548609429e-25' error='1.43747946866e-27'></tfset>
+</event>
+<event id='3' value='4.22142182093e-24' error='1.43442960083e-26'>
+    <tfset id='1' value='4.22149928689e-24' error='1.52376491009e-26'></tfset>
+</event>
+<event id='4' value='1.03155986066e-22' error='1.8315258104e-24'>
+    <tfset id='1' value='1.0317336701e-22' error='8.39701827886e-25'></tfset>
+</event>
+<event id='5' value='2.67609447497e-23' error='6.80289838462e-25'>
+    <tfset id='1' value='2.67613656309e-23' error='5.66843697032e-25'></tfset>
+</event>
+</card></subprocess>
+
+</madweight>

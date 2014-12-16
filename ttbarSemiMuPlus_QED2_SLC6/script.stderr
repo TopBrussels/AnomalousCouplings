@@ -1,0 +1,3 @@
+ls: cannot access /pnfs/iihe/cms/store/user/aolbrech: Permission denied
+/var/torque/mom_priv/jobs/1169032.cream02.iihe.ac.be.SC: line 32: rootScript.C: Permission denied
+/var/torque/mom_priv/jobs/1169032.cream02.iihe.ac.be.SC: line 44: root: command not found

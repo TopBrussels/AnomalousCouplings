@@ -1,0 +1,739 @@
+#************************************************************
+#*                        MadWeight 5                       *
+#*                                                          *
+#*                *                       *                 *
+#*                  *        * *        *                   *
+#*                    * * * * 5 * * * *                     *
+#*                  *        * *        *                   *
+#*                *                       *                 *
+#*                                                          *
+#*                                                          *
+#*         VERSION 5.2.1.0.beta                             *
+#*                                                          *
+#*    The MadGraph Development Team - Please visit us at    *
+#*    https://server06.fynu.ucl.ac.be/projects/madgraph     *
+#*                                                          *
+#************************************************************
+#*                                                          *
+#*              Command File for MadWeight                  *
+#*                                                          *
+#*     run as ./bin/madweight.py FILENAME                   *
+#*                                                          *
+#************************************************************
+launch 
+Traceback (most recent call last):
+  File "/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/bin/internal/extended_cmd.py", line 872, in onecmd
+    return self.onecmd_orig(line, **opt)
+  File "/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/bin/internal/extended_cmd.py", line 865, in onecmd_orig
+    return func(arg, **opt)
+  File "/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/bin/internal/madweight_interface.py", line 745, in do_launch
+    self.exec_cmd('compile')
+  File "/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/bin/internal/extended_cmd.py", line 912, in exec_cmd
+    stop = Cmd.onecmd_orig(current_interface, line, **opt)
+  File "/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/bin/internal/extended_cmd.py", line 865, in onecmd_orig
+    return func(arg, **opt)
+  File "/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/bin/internal/madweight_interface.py", line 357, in do_compile
+    misc.compile(cwd=pdir)
+  File "/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/bin/internal/misc.py", line 269, in compile
+    raise MadGraph5Error, error_text
+MadGraph5Error: A compilation Error occurs when trying to compile /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/SubProcesses/P1_gg_ttx_t_bwp_wp_mupvm_tx_bxwm_wm_qq.
+The compilation fails with the following output message:
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o driver.o driver.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o d_choices.o d_choices.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o main_code.o main_code.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o gen_ps.o gen_ps.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o initialization.o initialization.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o call_TF.o call_TF.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o permutation.o permutation.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o multi_channel.o multi_channel.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w  -c -o permutation_weight.o permutation_weight.f
+    gfortran -O -w -fbounds-check -ffixed-line-length-132 -w -o comp_madweight driver.o  setscales.o   d_choices.o cuts.o auto_dsig1.o auto_dsig2.o auto_dsig3.o auto_dsig4.o auto_dsig5.o auto_dsig6.o auto_dsig7.o auto_dsig8.o auto_dsig.o matrix1.o matrix2.o matrix3.o matrix4.o matrix5.o matrix6.o matrix7.o matrix8.o main_code.o gen_ps.o initialization.o call_TF.o permutation.o multi_channel.o permutation_weight.o -L../../lib/ -ldhelas -lgeneric -lmodel  -lcernlib -lpdf -lblocks -ltools -lTF  
+    cuts.o: In function `iso_getdelphi_':
+    cuts.f:(.text+0x13c5): undefined reference to `_gfortran_transfer_character_write'
+    cuts.o: In function `cut_bw_':
+    cuts.f:(.text+0x15d6): undefined reference to `_gfortran_stop_numeric_f08'
+    cuts.o: In function `passcuts_':
+    cuts.f:(.text+0x169c): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x16b3): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x16ca): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x173b): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1760): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x181c): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1833): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x184a): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x18bb): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x192f): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x19c1): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1a35): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x1ac7): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1b3b): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x1bcd): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1c40): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x1cf5): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1d0c): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x1d23): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1da7): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1dc1): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x1dd8): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x1e08): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x1ef4): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x2046): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x2060): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x2077): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x2135): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x21e9): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x2203): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x221a): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x22d8): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x5399): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x53fa): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x5414): undefined reference to `_gfortran_transfer_integer_write'
+    cuts.f:(.text+0x542e): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x5829): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x5840): undefined reference to `_gfortran_transfer_real_write'
+    cuts.f:(.text+0x5857): undefined reference to `_gfortran_transfer_character_write'
+    cuts.f:(.text+0x588e): undefined reference to `_gfortran_transfer_real_write'
+    auto_dsig1.o: In function `dsig1_':
+    auto_dsig1.f:(.text+0x21b): undefined reference to `_gfortran_transfer_character_write'
+    auto_dsig2.o: In function `dsig2_':
+    auto_dsig2.f:(.text+0x21b): undefined reference to `_gfortran_transfer_character_write'
+    auto_dsig3.o: In function `dsig3_':
+    auto_dsig3.f:(.text+0x21b): undefined reference to `_gfortran_transfer_character_write'
+    auto_dsig4.o: In function `dsig4_':
+    auto_dsig4.f:(.text+0x21b): undefined reference to `_gfortran_transfer_character_write'
+    auto_dsig5.o: In function `dsig5_':
+    auto_dsig5.f:(.text+0x723): undefined reference to `_gfortran_transfer_character_write'
+    auto_dsig6.o:auto_dsig6.f:(.text+0x723): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libgeneric.a(alfas_functions.o): In function `alphas_':
+    alfas_functions.f:(.text+0x475): undefined reference to `_gfortran_transfer_real_write'
+    alfas_functions.f:(.text+0x4f8): undefined reference to `_gfortran_transfer_character_write'
+    alfas_functions.f:(.text+0x50f): undefined reference to `_gfortran_transfer_real_write'
+    alfas_functions.f:(.text+0x592): undefined reference to `_gfortran_transfer_character_write'
+    alfas_functions.f:(.text+0x5a9): undefined reference to `_gfortran_transfer_real_write'
+    alfas_functions.f:(.text+0x62c): undefined reference to `_gfortran_transfer_character_write'
+    alfas_functions.f:(.text+0x643): undefined reference to `_gfortran_transfer_real_write'
+    alfas_functions.f:(.text+0x6a1): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(kin_functions.o): In function `rap_':
+    kin_functions.f:(.text+0x31a): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(kin_functions.o): In function `dj_':
+    kin_functions.f:(.text+0x6cb): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x78e): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0x862): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libgeneric.a(kin_functions.o): In function `dj1_':
+    kin_functions.f:(.text+0xd49): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0xe0b): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0xee0): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libgeneric.a(kin_functions.o): In function `pyjb_':
+    kin_functions.f:(.text+0x12e0): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x12f2): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0x1306): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x131a): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0x132e): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x1342): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0x1356): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x136a): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libgeneric.a(kin_functions.o): In function `zclus_':
+    kin_functions.f:(.text+0x14e7): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x14fb): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0x150f): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x1523): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0x1537): undefined reference to `_gfortran_transfer_character_write'
+    kin_functions.f:(.text+0x154b): undefined reference to `_gfortran_transfer_real_write'
+    kin_functions.f:(.text+0x15ba): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(setrun.o): In function `get_pdfup_':
+    setrun.f:(.text+0x76): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x1bd): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x1d1): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x1e8): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(setrun.o):setrun.f:(.text+0x246): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libgeneric.a(setrun.o): In function `get_pdfup_':
+    setrun.f:(.text+0x2f4): undefined reference to `_gfortran_transfer_array_write'
+    setrun.f:(.text+0x352): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x369): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(setrun.o): In function `setrun_':
+    setrun.f:(.text+0x25be): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x2621): undefined reference to `_gfortran_transfer_real_write'
+    setrun.f:(.text+0x2684): undefined reference to `_gfortran_transfer_real_write'
+    setrun.f:(.text+0x27df): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x286d): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x2884): undefined reference to `_gfortran_transfer_real_write'
+    setrun.f:(.text+0x28ec): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x2903): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x291a): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x2931): undefined reference to `_gfortran_transfer_real_write'
+    setrun.f:(.text+0x29e8): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x2a46): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x2a5d): undefined reference to `_gfortran_transfer_real_write'
+    setrun.f:(.text+0x2abb): undefined reference to `_gfortran_transfer_character_write'
+    setrun.f:(.text+0x2ad2): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libgeneric.a(run_printout.o): In function `run_printout_':
+    run_printout.f:(.text+0x89): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0xe7): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x266): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x27d): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x294): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(run_printout.o):run_printout.f:(.text+0x2ab): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libgeneric.a(run_printout.o): In function `run_printout_':
+    run_printout.f:(.text+0x2c2): undefined reference to `_gfortran_transfer_real_write'
+    run_printout.f:(.text+0x2d9): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x337): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x34e): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x3c3): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x3da): undefined reference to `_gfortran_transfer_real_write'
+    run_printout.f:(.text+0x3f1): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x408): undefined reference to `_gfortran_transfer_integer_write'
+    run_printout.f:(.text+0x41f): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x4aa): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x4c1): undefined reference to `_gfortran_transfer_real_write'
+    run_printout.f:(.text+0x4d8): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x4ef): undefined reference to `_gfortran_transfer_integer_write'
+    run_printout.f:(.text+0x506): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x580): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x597): undefined reference to `_gfortran_transfer_real_write'
+    run_printout.f:(.text+0x5ae): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x5c5): undefined reference to `_gfortran_transfer_integer_write'
+    run_printout.f:(.text+0x5dc): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x643): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x65a): undefined reference to `_gfortran_transfer_real_write'
+    run_printout.f:(.text+0x6ba): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x725): undefined reference to `_gfortran_transfer_character_write'
+    run_printout.f:(.text+0x763): undefined reference to `_gfortran_transfer_real_write'
+    run_printout.f:(.text+0x7a1): undefined reference to `_gfortran_transfer_real_write'
+    run_printout.f:(.text+0x801): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(rw_routines.o): In function `load_para_':
+    rw_routines.f:(.text+0x262): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(rw_routines.o): In function `get_real_':
+    rw_routines.f:(.text+0x188f): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x18a2): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x18b9): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(rw_routines.o):rw_routines.f:(.text+0x1917): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libgeneric.a(rw_routines.o): In function `get_real_':
+    rw_routines.f:(.text+0x192e): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libgeneric.a(rw_routines.o): In function `get_integer_':
+    rw_routines.f:(.text+0x1aef): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1b02): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1b19): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1b77): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1b8e): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libgeneric.a(rw_routines.o): In function `get_int8_':
+    rw_routines.f:(.text+0x1d4b): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1d5e): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1d75): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1dd3): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x1dea): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libgeneric.a(rw_routines.o): In function `get_string_':
+    rw_routines.f:(.text+0x200a): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x201d): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x2034): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x2092): undefined reference to `_gfortran_transfer_character_write'
+    rw_routines.f:(.text+0x20ab): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libgeneric.a(rw_routines.o):rw_routines.f:(.text+0x2268): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libgeneric.a(rw_routines.o): In function `get_logical_':
+    rw_routines.f:(.text+0x2307): undefined reference to `_gfortran_transfer_logical_write'
+    ../../lib//libgeneric.a(open_file.o): In function `open_file_':
+    open_file.f:(.text+0x446): undefined reference to `_gfortran_transfer_character_write'
+    open_file.f:(.text+0x459): undefined reference to `_gfortran_transfer_character_write'
+    open_file.f:(.text+0x470): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libmodel.a(printout.o): In function `printout_':
+    printout.f:(.text+0x3d): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x96): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libmodel.a(printout.o):printout.f:(.text+0xf4): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libmodel.a(printout.o): In function `printout_':
+    printout.f:(.text+0x5ba): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x618): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x62f): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x68d): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x6a4): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x702): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x719): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x777): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x78e): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x7ec): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x803): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x861): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x878): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x8d6): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x8ed): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x94b): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x962): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x9c0): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x9d7): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xa35): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xa4c): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xaaa): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xac1): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xb1f): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xb36): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xb94): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xbab): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xc09): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xc20): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xc7e): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xc95): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xcf3): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xd0a): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xd68): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xd7f): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xddd): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xdf4): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xe52): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xe69): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xec7): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xede): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xf3c): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xf53): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0xfb1): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0xfc8): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1026): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x103d): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x109b): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x10b2): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1110): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1127): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1185): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x119c): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x11fa): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1211): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x126f): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x12cd): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x132b): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1389): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x13a0): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x13fe): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1415): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1473): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x148a): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x14e8): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x14ff): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x155d): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1574): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x15d2): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x15e9): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1647): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x165e): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x16bc): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x16d3): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1731): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1748): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x17a6): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x17bd): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x181b): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1832): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1890): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x18a7): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1905): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x191c): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x197a): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1991): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x19ef): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1a06): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1a64): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1a7b): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1ad9): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1af0): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1b4e): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1b65): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1bc3): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1bda): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1c38): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1c4f): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1cad): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1cc4): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x1d22): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1d39): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1d97): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1dae): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1e0c): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1e23): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1e81): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1e98): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1ef6): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1f0d): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1f6b): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1f82): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x1fe0): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x1ff7): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x2055): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x206c): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x20ca): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x20e1): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x213f): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2156): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x21b4): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x21cb): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2229): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2240): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x229e): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x22b5): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2313): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x232a): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2388): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x239f): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x23fd): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2414): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2472): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2489): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x24e7): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x24fe): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x255c): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2573): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x25d1): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x25e8): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2646): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x265d): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x26bb): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x26d2): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2730): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2747): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x27a5): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x27bc): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x281a): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2831): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x288f): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x28a6): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2904): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x291b): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2979): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2990): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x29ee): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2a05): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2a63): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2ac1): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2b1f): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2b7d): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2b94): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2bf2): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2c09): undefined reference to `_gfortran_transfer_real_write'
+    printout.f:(.text+0x2c67): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2cc5): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2d23): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2d98): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2daf): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x2e24): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2e3b): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x2eb0): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2ec7): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x2f3c): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2f53): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x2fc8): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x2fdf): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x3054): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x306b): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x30e0): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x30f7): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x316c): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x3183): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x31f8): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x320f): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x3284): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x329b): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x3310): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x3327): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x339c): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x33b3): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x3428): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x343f): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x34b4): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x34cb): undefined reference to `_gfortran_transfer_complex_write'
+    printout.f:(.text+0x3540): undefined reference to `_gfortran_transfer_character_write'
+    printout.f:(.text+0x3557): undefined reference to `_gfortran_transfer_complex_write'
+    ../../lib//libmodel.a(lha_read.o): In function `lha_open_file_':
+    lha_read.f:(.text+0x6f4): undefined reference to `_gfortran_transfer_character_write'
+    lha_read.f:(.text+0x707): undefined reference to `_gfortran_transfer_character_write'
+    lha_read.f:(.text+0x71e): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libmodel.a(lha_read.o): In function `lha_loadcard_':
+    lha_read.f:(.text+0xc3f): undefined reference to `_gfortran_transfer_character_write'
+    lha_read.f:(.text+0xc52): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libmodel.a(lha_read.o):lha_read.f:(.text+0xcb0): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libmodel.a(lha_read.o): In function `lha_get_real_':
+    lha_read.f:(.text+0x156b): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libpdf.a(pdfwrap.o): In function `pdfwrap_':
+    pdfwrap.f:(.text+0x556): undefined reference to `_gfortran_transfer_character_write'
+    pdfwrap.f:(.text+0x5af): undefined reference to `_gfortran_transfer_character_write'
+    pdfwrap.f:(.text+0xdb8): undefined reference to `_gfortran_transfer_character_write'
+    pdfwrap.f:(.text+0xdcf): undefined reference to `_gfortran_transfer_character_write'
+    pdfwrap.f:(.text+0xe2d): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libpdf.a(pdfwrap.o):pdfwrap.f:(.text+0xe44): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libpdf.a(pdfwrap.o): In function `pdfwrap_':
+    pdfwrap.f:(.text+0x134c): undefined reference to `_gfortran_stop_numeric_f08'
+    ../../lib//libpdf.a(pdg2pdf.o): In function `pdg2pdf_':
+    pdg2pdf.f:(.text+0xa8): undefined reference to `_gfortran_transfer_character_write'
+    pdg2pdf.f:(.text+0xba): undefined reference to `_gfortran_transfer_real_write'
+    pdg2pdf.f:(.text+0x17d): undefined reference to `_gfortran_transfer_character_write'
+    pdg2pdf.f:(.text+0x192): undefined reference to `_gfortran_transfer_real_write'
+    pdg2pdf.f:(.text+0x1a9): undefined reference to `_gfortran_stop_numeric_f08'
+    pdg2pdf.f:(.text+0x26e): undefined reference to `_gfortran_transfer_character_write'
+    pdg2pdf.f:(.text+0x283): undefined reference to `_gfortran_transfer_integer_write'
+    pdg2pdf.f:(.text+0x2e1): undefined reference to `_gfortran_transfer_character_write'
+    pdg2pdf.f:(.text+0x3a7): undefined reference to `_gfortran_transfer_character_write'
+    pdg2pdf.f:(.text+0x3bc): undefined reference to `_gfortran_transfer_integer_write'
+    pdg2pdf.f:(.text+0x3d3): undefined reference to `_gfortran_stop_numeric_f08'
+    ../../lib//libpdf.a(Ctq4Fn.o): In function `ctq4fn_':
+    Ctq4Fn.f:(.text+0xd2): undefined reference to `_gfortran_transfer_character_write'
+    Ctq4Fn.f:(.text+0xe2): undefined reference to `_gfortran_transfer_integer_write'
+    Ctq4Fn.f:(.text+0x27f): undefined reference to `_gfortran_transfer_character_write'
+    Ctq4Fn.f:(.text+0x294): undefined reference to `_gfortran_transfer_real_write'
+    Ctq4Fn.f:(.text+0x315): undefined reference to `_gfortran_transfer_character_write'
+    Ctq4Fn.f:(.text+0x32a): undefined reference to `_gfortran_transfer_real_write'
+    Ctq4Fn.f:(.text+0x3b1): undefined reference to `_gfortran_transfer_character_write'
+    Ctq4Fn.f:(.text+0x3c6): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libpdf.a(Ctq5Par.o): In function `ctq5pd_':
+    Ctq5Par.f:(.text+0x905): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Par.f:(.text+0x915): undefined reference to `_gfortran_transfer_integer_write'
+    Ctq5Par.f:(.text+0x927): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Par.f:(.text+0x997): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libpdf.a(Ctq5Pdf.o): In function `ctq5pdf_':
+    Ctq5Pdf.f:(.text+0xcba): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0xcca): undefined reference to `_gfortran_transfer_real_write'
+    Ctq5Pdf.f:(.text+0xd47): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0xd5c): undefined reference to `_gfortran_transfer_real_write'
+    Ctq5Pdf.f:(.text+0xdff): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0xe14): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libpdf.a(Ctq5Pdf.o): In function `partonx_orig_':
+    Ctq5Pdf.f:(.text+0xfa0): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0xfb2): undefined reference to `_gfortran_transfer_real_write'
+    Ctq5Pdf.f:(.text+0xfc6): undefined reference to `_gfortran_transfer_real_write'
+    Ctq5Pdf.f:(.text+0x10ee): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0x1103): undefined reference to `_gfortran_transfer_real_write'
+    Ctq5Pdf.f:(.text+0x111a): undefined reference to `_gfortran_transfer_real_write'
+    Ctq5Pdf.f:(.text+0x11bb): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0x11d0): undefined reference to `_gfortran_transfer_real_write'
+    Ctq5Pdf.f:(.text+0x11e7): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libpdf.a(Ctq5Pdf.o): In function `setctq5_':
+    Ctq5Pdf.f:(.text+0x143b): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0x144d): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0x1523): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0x153a): undefined reference to `_gfortran_transfer_character_write'
+    Ctq5Pdf.f:(.text+0x1598): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libpdf.a(Ctq5Pdf.o):Ctq5Pdf.f:(.text+0x1683): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libpdf.a(Ctq5Pdf.o): In function `setctq5_':
+    Ctq5Pdf.f:(.text+0x1698): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libpdf.a(Partonx5.o): In function `partonx_':
+    Partonx5.f:(.text+0x130): undefined reference to `_gfortran_transfer_character_write'
+    Partonx5.f:(.text+0x142): undefined reference to `_gfortran_transfer_real_write'
+    Partonx5.f:(.text+0x156): undefined reference to `_gfortran_transfer_real_write'
+    Partonx5.f:(.text+0x27d): undefined reference to `_gfortran_transfer_character_write'
+    Partonx5.f:(.text+0x292): undefined reference to `_gfortran_transfer_real_write'
+    Partonx5.f:(.text+0x2a9): undefined reference to `_gfortran_transfer_real_write'
+    Partonx5.f:(.text+0x34a): undefined reference to `_gfortran_transfer_character_write'
+    Partonx5.f:(.text+0x35f): undefined reference to `_gfortran_transfer_real_write'
+    Partonx5.f:(.text+0x376): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libpdf.a(Ctq6Pdf.o): In function `partonx6_':
+    Ctq6Pdf.f:(.text+0xe5d): undefined reference to `_gfortran_transfer_character_write'
+    Ctq6Pdf.f:(.text+0xe77): undefined reference to `_gfortran_transfer_real_write'
+    Ctq6Pdf.f:(.text+0xf32): undefined reference to `_gfortran_transfer_character_write'
+    Ctq6Pdf.f:(.text+0xf4c): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libpdf.a(Ctq6Pdf.o): In function `ctq6pdf_':
+    Ctq6Pdf.f:(.text+0x1c28): undefined reference to `_gfortran_transfer_character_write'
+    Ctq6Pdf.f:(.text+0x1c38): undefined reference to `_gfortran_transfer_real_write'
+    Ctq6Pdf.f:(.text+0x1cb5): undefined reference to `_gfortran_transfer_character_write'
+    Ctq6Pdf.f:(.text+0x1cca): undefined reference to `_gfortran_transfer_real_write'
+    Ctq6Pdf.f:(.text+0x1d6d): undefined reference to `_gfortran_transfer_character_write'
+    Ctq6Pdf.f:(.text+0x1d82): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libpdf.a(Ctq6Pdf.o): In function `setctq6_':
+    Ctq6Pdf.f:(.text+0x1fc2): undefined reference to `_gfortran_transfer_integer_write'
+    Ctq6Pdf.f:(.text+0x20ce): undefined reference to `_gfortran_transfer_character_write'
+    Ctq6Pdf.f:(.text+0x20e3): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libpdf.a(opendata.o): In function `opendata_':
+    opendata.f:(.text+0x696): undefined reference to `_gfortran_transfer_character_write'
+    opendata.f:(.text+0x6ab): undefined reference to `_gfortran_transfer_character_write'
+    opendata.f:(.text+0x6c2): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libpdf.a(mrst2001.o): In function `mrst2001_':
+    mrst2001.f:(.text+0x4040): undefined reference to `_gfortran_transfer_real_write'
+    mrst2001.f:(.text+0x40cc): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libpdf.a(mrst2002.o): In function `mrst2002_':
+    mrst2002.f:(.text+0x108b): undefined reference to `_gfortran_transfer_real_write'
+    mrst2002.f:(.text+0x1117): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(vegas.o): In function `master.0.vegas_':
+    vegas.f:(.text+0x756): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x76d): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x784): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x79b): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x7b2): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x7c9): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x7e3): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x1129): undefined reference to `_gfortran_transfer_character_write'
+    vegas.f:(.text+0x1140): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x1157): undefined reference to `_gfortran_transfer_character_write'
+    vegas.f:(.text+0x116e): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1185): undefined reference to `_gfortran_transfer_character_write'
+    vegas.f:(.text+0x119c): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x124b): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x1316): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1333): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1350): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1b29): undefined reference to `_gfortran_transfer_integer_write'
+    vegas.f:(.text+0x1b40): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1b57): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1b6e): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1b85): undefined reference to `_gfortran_transfer_real_write'
+    vegas.f:(.text+0x1b9c): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(mint-integrator.o): In function `regrid_':
+    mint-integrator.f:(.text+0x45e): undefined reference to `_gfortran_transfer_character_write'
+    mint-integrator.f:(.text+0x478): undefined reference to `_gfortran_transfer_integer_write'
+    mint-integrator.f:(.text+0x48d): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libtools.a(mint-integrator.o): In function `mint_':
+    mint-integrator.f:(.text+0x872): undefined reference to `_gfortran_transfer_character_write'
+    mint-integrator.f:(.text+0x889): undefined reference to `_gfortran_transfer_integer_write'
+    mint-integrator.f:(.text+0x1606): undefined reference to `_gfortran_transfer_real_write'
+    mint-integrator.f:(.text+0x1620): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(mint-integrator.o): In function `gen_':
+    mint-integrator.f:(.text+0x22f6): undefined reference to `_gfortran_transfer_character_write'
+    mint-integrator.f:(.text+0x2371): undefined reference to `_gfortran_transfer_character_write'
+    mint-integrator.f:(.text+0x23f2): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libtools.a(xran1.o): In function `xran1_':
+    xran1.f:(.text+0x302): undefined reference to `_gfortran_transfer_character_write'
+    xran1.f:(.text+0x316): undefined reference to `_gfortran_transfer_integer_write'
+    xran1.f:(.text+0x34e): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(toms659.o): In function `gosobl_':
+    toms659.f:(.text+0x7f4): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libtools.a(topgraph.o): In function `histo_final_':
+    topgraph.f:(.text+0x6a9): undefined reference to `_gfortran_transfer_integer_write'
+    topgraph.f:(.text+0x73f): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libtools.a(topgraph.o): In function `histo_combine_iteration_':
+    topgraph.f:(.text+0xc76): undefined reference to `_gfortran_transfer_character_write'
+    topgraph.f:(.text+0xc88): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libtools.a(dbook.o): In function `master.1.multitop_':
+    dbook.f:(.text+0x6fe): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x718): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x732): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x74c): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x763): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(dbook.o):dbook.f:(.text+0x77a): more undefined references to `_gfortran_transfer_real_write' follow
+    ../../lib//libtools.a(dbook.o): In function `master.1.multitop_':
+    dbook.f:(.text+0x908): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x9a0): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x9b7): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xa6e): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xafe): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xb15): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xbcc): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0xd10): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xd27): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xdde): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xf1c): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0xf33): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(dbook.o):dbook.f:(.text+0xfea): more undefined references to `_gfortran_transfer_real_write' follow
+    ../../lib//libtools.a(dbook.o): In function `master.1.multitop_':
+    dbook.f:(.text+0x1222): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x125d): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x129a): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x12b1): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x12cb): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x1382): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x1439): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x1453): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x146d): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x1586): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x163d): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x16f6): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x1a2e): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x1aea): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x1ba6): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x1c24): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x1d45): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libtools.a(dbook.o): In function `mwarn_':
+    dbook.f:(.text+0x1ffd): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2056): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2068): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libtools.a(dbook.o):dbook.f:(.text+0x207f): more undefined references to `_gfortran_transfer_character_write' follow
+    ../../lib//libtools.a(dbook.o): In function `mbook_':
+    dbook.f:(.text+0x2308): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x231d): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x2334): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x234b): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x2362): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x24aa): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x24bf): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x24d4): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x258f): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x25a6): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2604): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x261b): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x295f): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2a18): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x2a2f): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2a44): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x2a59): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x2ab7): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2acc): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x2ae3): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2bf9): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2c10): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2c27): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2c3c): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x2c53): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x2d0a): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(dbook.o): In function `minteg_':
+    dbook.f:(.text+0x3f6e): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libtools.a(dbook.o): In function `mopera_':
+    dbook.f:(.text+0x4191): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x41a5): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x41b9): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x58de): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libtools.a(dbook.o): In function `mnorm_':
+    dbook.f:(.text+0x6c0e): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x6c1e): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x6c2e): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x6c40): undefined reference to `_gfortran_transfer_character_write'
+    ../../lib//libtools.a(dbook.o): In function `mprint_':
+    dbook.f:(.text+0x6eae): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x718c): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x7248): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x7368): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x741f): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x74d6): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x75eb): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x76a4): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x775b): undefined reference to `_gfortran_transfer_integer_write'
+    ../../lib//libtools.a(dbook.o): In function `mtop_':
+    dbook.f:(.text+0x79df): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x79ef): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x79ff): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x7a0f): undefined reference to `_gfortran_transfer_character_write'
+    dbook.f:(.text+0x7ac1): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x7b73): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x7e75): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x7e8c): undefined reference to `_gfortran_transfer_real_write'
+    dbook.f:(.text+0x7f45): undefined reference to `_gfortran_transfer_real_write'
+    ../../lib//libtools.a(dbook.o):dbook.f:(.text+0x8064): more undefined references to `_gfortran_transfer_real_write' follow
+    ../../lib//libtools.a(dbook.o): In function `mtop_':
+    dbook.f:(.text+0x857f): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x8638): undefined reference to `_gfortran_transfer_integer_write'
+    dbook.f:(.text+0x86ef): undefined reference to `_gfortran_transfer_integer_write'
+    collect2: ld returned 1 exit status
+    make: *** [comp_madweight] Error 1
+    
+Please try to fix this compilations issue and retry.
+Help might be found at https://answers.launchpad.net/madgraph5.
+If you think that this is a bug, you can report this at https://bugs.launchpad.net/madgraph5
+Value of current Options:
+              web_browser 	:	None
+              text_editor 	:	None
+        cluster_temp_path 	:	/grid_mnt/storage__localgrid/aolbrech/temp
+             syscalc_path 	:	None
+            cluster_queue 	:	localgrid
+         madanalysis_path 	:	None
+                 mg5_path 	:	/grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo
+           cluster_memory 	:	None
+    cluster_status_update 	:	(600, 30)
+             cluster_time 	:	None
+               hepmc_path 	:	None
+             pythia8_path 	:	None
+                hwpp_path 	:	None
+   automatic_html_opening 	:	True
+       cluster_retry_wait 	:	300
+             stdout_level 	:	None
+          pythia-pgs_path 	:	None
+                  td_path 	:	None
+             delphes_path 	:	None
+              thepeg_path 	:	None
+             cluster_type 	:	pbs
+      exrootanalysis_path 	:	None
+         fortran_compiler 	:	None
+              auto_update 	:	7
+         cluster_nb_retry 	:	1
+               eps_viewer 	:	None
+                  timeout 	:	60
+                  nb_core 	:	8
+                 run_mode 	:	1
