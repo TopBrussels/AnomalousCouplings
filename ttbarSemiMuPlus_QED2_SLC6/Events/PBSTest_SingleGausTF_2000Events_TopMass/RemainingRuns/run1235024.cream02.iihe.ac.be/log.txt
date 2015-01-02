@@ -1,0 +1,284 @@
+ Warning: file grid_card.dat not found
+ Warning: parameter auto_ptj_mjj not found
+          setting it to default value  T
+ Warning: parameter cut_decays not found
+          setting it to default value  T
+ Warning: parameter  xmtcentral  not found
+          setting it to default value    0.0000000000000000     
+ Warning: parameter  d  not found
+          setting it to default value    1.0000000000000000     
+ Warning: parameter  ptllmin  not found
+          setting it to default value    0.0000000000000000     
+ Warning: parameter  ptllmax  not found
+          setting it to default value    100000.00000000000     
+ Warning: parameter ihtmin not found
+          setting it to default value    0.0000000000000000     
+ Warning: parameter ihtmax not found
+          setting it to default value    100000.00000000000     
+ Warning: parameter  gridrun  not found
+          setting it to default value  F
+ Warning: parameter  fixed_couplings  not found
+          setting it to default value  T
+ Warning: parameter  lhaid   not found
+          setting it to default value        10042
+ A PDF is used, so alpha_s(MZ) is going to be modified
+ Old value of alpha_s from param_card:   0.11799999999999999     
+ New value of alpha_s from PDF cteq6l1:  0.13000000000000000     
+                
+ * * *  topology identification  * * *
+  
+ Final state content:
+ --------------------
+           1  missing particles
+           4  light jets
+           0  electrons
+           0  positronss
+           0  muons
+           1  anti muons
+           0  taus
+           0  anti taus
+           0 photon
+ inv_matching_type_part           3           6           7           8           4           5
+ *****************************************************
+ *               MadGraph/MadEvent                   *
+ *        --------------------------------           *
+ *          http://madgraph.hep.uiuc.edu             *
+ *          http://madgraph.phys.ucl.ac.be           *
+ *          http://madgraph.roma2.infn.it            *
+ *        --------------------------------           *
+ *                                                   *
+ *          PARAMETER AND COUPLING VALUES            *
+ *                                                   *
+ *****************************************************
+
+  External Params
+  ---------------------------------
+  
+ RVL =    1.0000000000000000     
+ IVL =    0.0000000000000000     
+ RVR =    0.0000000000000000     
+ IVR =    0.0000000000000000     
+ RgL =    0.0000000000000000     
+ IgL =    0.0000000000000000     
+ RgR =    0.0000000000000000     
+ IgR =    0.0000000000000000     
+ cabi =   0.22773599999999999     
+ aEWM1 =    132.50700000000001     
+ Gf =   1.16639000000000003E-005
+ aS =   0.13000000000000003     
+ ymb =    4.7999999999999998     
+ ymt =    172.50000000000000     
+ yme =   5.10999999999999953E-004
+ ymm =   0.10566000000000000     
+ ymtau =    1.7769999999999999     
+ MZ =    91.118799999999993     
+ Me =   5.10999999999999953E-004
+ MM =   0.10566000000000000     
+ MTA =    1.7769999999999999     
+ MT =    193.00000000000000     
+ MB =    4.7999999999999998     
+ MH =    120.00000000000000     
+ WZ =    2.4413999999999998     
+ WW =    2.0476000000000001     
+ WT =    1.5083359999999999     
+ WH =   5.75308799999999995E-003
+  Internal Params
+  ---------------------------------
+  
+ cos__cabi =   0.97418004031982097     
+ CKM11 =  ( 0.97418004031982097     ,  0.0000000000000000     )
+ sin__cabi =   0.22577256042856930     
+ CKM12 =  ( 0.22577256042856930     ,  0.0000000000000000     )
+ CKM21 =  (-0.22577256042856930     ,  0.0000000000000000     )
+ CKM22 =  ( 0.97418004031982097     ,  0.0000000000000000     )
+ CouplingW =    1.0000000000000000     
+ EWCoupl =   7.81860799999999946E-003
+ g1 =    1.0000000000000000     
+ complexi =  (  0.0000000000000000     ,  1.0000000000000000     )
+ gL =  (  0.0000000000000000     ,  0.0000000000000000     )
+ gR =  (  0.0000000000000000     ,  0.0000000000000000     )
+ gw =    1.0000000000000000     
+ VL =  (  1.0000000000000000     ,  0.0000000000000000     )
+ VR =  (  0.0000000000000000     ,  0.0000000000000000     )
+ MZ__exp__2 =    8302.6357134399987     
+ MZ__exp__4 =    68933759.790089309     
+ sqrt__2 =    1.4142135623730951     
+ sqrt__EWCoupl =   8.84228929633044669E-002
+ ElecC =   0.31345099428203049     
+ MH__exp__2 =    14400.000000000000     
+ conjg__CKM11 =  ( 0.97418004031982097     , -0.0000000000000000     )
+ conjg__CKM12 =  ( 0.22577256042856930     , -0.0000000000000000     )
+ conjg__CKM21 =  (-0.22577256042856930     , -0.0000000000000000     )
+ conjg__CKM22 =  ( 0.97418004031982097     , -0.0000000000000000     )
+ conjg__gL =  (  0.0000000000000000     , -0.0000000000000000     )
+ conjg__gR =  (  0.0000000000000000     , -0.0000000000000000     )
+ conjg__VL =  (  1.0000000000000000     , -0.0000000000000000     )
+ conjg__VR =  (  0.0000000000000000     , -0.0000000000000000     )
+ aEW =   7.54677111397888348E-003
+ MW =    80.333525036383378     
+ sqrt__aEW =   8.68721538467815552E-002
+ ee =   0.30795376724436879     
+ MW__exp__2 =    6453.4752447712353     
+ sw2 =   0.22271969197388863     
+ cw =   0.88163501973668867     
+ sqrt__sw2 =   0.47193187217424576     
+ sw =   0.47193187217424576     
+ vev =    246.21845810181631     
+ vev__exp__2 =    60623.529110035874     
+ lam =   0.11876576810517753     
+ yb =   2.75699277451562468E-002
+ ye =   2.93504855786975897E-006
+ ym =   6.06883034490252027E-004
+ yt =   0.99079427834155265     
+ ytau =   1.02066170006547188E-002
+ muH =    84.852813742385706     
+ ee__exp__2 =   9.48355227599988748E-002
+ sw__exp__2 =   0.22271969197388863     
+ cw__exp__2 =   0.77728030802611148     
+  Internal Params evaluated point by point
+  ----------------------------------------
+  
+ sqrt__aS =   0.36055512754639896     
+ G__exp__2 =    1.6336281798666927     
+  Couplings of MassiveLeptons
+  ---------------------------------
+  
+         GC_6 =  -0.12781E+01   0.00000E+00
+         GC_7 =   0.00000E+00   0.12781E+01
+        GC_13 =   0.00000E+00   0.46141E+00
+        GC_22 =   0.00000E+00   0.00000E+00
+        GC_23 =   0.00000E+00   0.00000E+00
+        GC_31 =  -0.00000E+00  -0.46965E+00
+        GC_32 =  -0.00000E+00  -0.00000E+00
+        GC_38 =   0.00000E+00   0.44950E+00
+        GC_39 =   0.00000E+00   0.10417E+00
+        GC_40 =   0.00000E+00  -0.10417E+00
+        GC_41 =   0.00000E+00   0.44950E+00
+        GC_42 =  -0.00000E+00  -0.00000E+00
+        GC_43 =  -0.00000E+00  -0.00000E+00
+        GC_44 =   0.00000E+00   0.46965E+00
+        GC_45 =   0.00000E+00   0.00000E+00
+
+ Collider parameters:
+ --------------------
+
+ Running at P P   machine @    8000.0000000000000       GeV
+ PDF set = cteq6l1
+ alpha_s(Mz)= 0.1300 running at 1 loops.
+ alpha_s(Mz)= 0.1300 running at 1 loops.
+ Renormalization scale fixed @    91.188000000000002     
+ Factorization scales  fixed @    91.188000000000002        91.188000000000002     
+
+
+ ISR effects are ignored 
+ read experimental data:
+ -----------------------
+   65.733030925020444       -6.3116841778741026       -64.862231450966704        7.1305629952825491     
+   548.89441576533181       -65.677257519752459        21.538485511384469        544.50402307505954     
+   306.03127103137598        11.513689180106169       -29.729331012720518        304.36612933616561     
+   135.85433103487898        48.988991572696435        12.087123739760338        126.12743319882665     
+   19.408770414943469       -1.8032495292981892       -18.647212681124380        5.0713788440605505     
+ exp. uncertainty on theta   of particle           3 :    0.0000000000000000      [   1.4618127104790566      ]
+ exp. uncertainty on phi     of particle           3 :    0.0000000000000000      [   4.6153853075897935      ]
+ exp. uncertainty on |p|     of particle           3 :    3.2866515462510222      [   65.557542316576317      ]
+ exp. uncertainty on theta   of particle           4 :    0.0000000000000000      [   1.3064306330391202      ]
+ exp. uncertainty on phi     of particle           4 :    0.0000000000000000      [   4.6159853075897939      ]
+ exp. uncertainty on |p|     of particle           4 :   0.38817540829886937      [   19.408480956014692      ]
+ exp. uncertainty on theta   of particle           5 :   -1.0000000000000000      [   0.0000000000000000      ]
+ exp. uncertainty on phi     of particle           5 :   -1.0000000000000000      [   0.0000000000000000      ]
+ exp. uncertainty on |p|     of particle           5 :   -1.0000000000000000      [   0.0000000000000000      ]
+ exp. uncertainty on theta   of particle           6 :    0.0000000000000000      [  0.12626371284745513      ]
+ exp. uncertainty on phi     of particle           6 :    0.0000000000000000      [   2.8247000004102070      ]
+ exp. uncertainty on |p|     of particle           6 :    27.444720788266594      [   548.87342772115039      ]
+ exp. uncertainty on theta   of particle           7 :    0.0000000000000000      [  0.10436498344580493      ]
+ exp. uncertainty on phi     of particle           7 :    0.0000000000000000      [   5.0818853080000004      ]
+ exp. uncertainty on |p|     of particle           7 :    15.301563551568799      [   306.03127102974213      ]
+ exp. uncertainty on theta   of particle           8 :    0.0000000000000000      [  0.38055508661733728      ]
+ exp. uncertainty on phi     of particle           8 :    0.0000000000000000      [  0.24190000000000000      ]
+ exp. uncertainty on |p|     of particle           8 :    6.7927165517439496      [   135.84604985399642      ]
+ ** Current channel of integration:            1 /           2  **
+ input parameters for vegas:  ndim=  7   ncall=  19683.
+                              it=    0    itmx=    2
+                              acc=0.500E-02
+                              mds=  1     nd= 100
+
+ vegas: iteration           1 value:  1.58153012521320472E-026 chi2: -1.16983196276947759E-011
+                                   1  1.58153012521320271E-026 +-  3.11502601863099549E-027
+ vegas: iteration           2 value:  1.48039412349902406E-026 chi2:  0.12620469152507857     
+                                   1  1.48049822531468304E-026 +-  8.65322385044748401E-028
+ input parameters for vegas:  ndim=  7   ncall=  19683.
+                              it=    0    itmx=    2
+                              acc=0.500E-02
+                              mds=  1     nd= 100
+
+ vegas: iteration           1 value:  3.50875708169941629E-026 chi2:   0.0000000000000000     
+                                   1  3.50875708169941629E-026 +-  1.98460465633653366E-026
+ vegas: iteration           2 value:  1.44117230984314363E-026 chi2:   1.9741227135787409     
+                                   1  1.44311652644437595E-026 +-  1.70803573298675760E-027
+ cross, sd  1.44117230984314363E-026  3.11345675845640931E-027
+ ** Current channel of integration:            2 /           2  **
+ input parameters for vegas:  ndim=  7   ncall=  19683.
+                              it=    0    itmx=    2
+                              acc=0.500E-02
+                              mds=  1     nd= 100
+
+ vegas: iteration           1 value:  1.72665284114803753E-026 chi2:   0.0000000000000000     
+                                   1  1.72665284114803725E-026 +-  2.06469685547893717E-027
+ vegas: iteration           2 value:  1.66296284826512846E-026 chi2:  0.11879003031350993     
+                                   1  1.66299297421100745E-026 +-  7.28122909823331417E-028
+ input parameters for vegas:  ndim=  7   ncall=  19683.
+                              it=    0    itmx=    2
+                              acc=0.500E-02
+                              mds=  1     nd= 100
+
+ vegas: iteration           1 value:  1.44206743056621142E-026 chi2:   0.0000000000000000     
+                                   1  1.44206743056621830E-026 +-  2.08243817226381433E-027
+ vegas: iteration           2 value:  1.79187425957087451E-026 chi2:   3.1086578266050409     
+                                   1  1.79153599675956988E-026 +-  1.60206290576871495E-027
+ cross, sd  1.79187425957087451E-026  1.56195317689780635E-027
+ exp. uncertainty on theta   of particle           3 :    0.0000000000000000      [   1.4618127104790566      ]
+ exp. uncertainty on phi     of particle           3 :    0.0000000000000000      [   4.6153853075897935      ]
+ exp. uncertainty on |p|     of particle           3 :    3.2866515462510222      [   65.557542316576317      ]
+ exp. uncertainty on theta   of particle           4 :    0.0000000000000000      [   1.3064306330391202      ]
+ exp. uncertainty on phi     of particle           4 :    0.0000000000000000      [   4.6159853075897939      ]
+ exp. uncertainty on |p|     of particle           4 :   0.38817540829886937      [   19.408480956014692      ]
+ exp. uncertainty on theta   of particle           5 :   -1.0000000000000000      [   0.0000000000000000      ]
+ exp. uncertainty on phi     of particle           5 :   -1.0000000000000000      [   0.0000000000000000      ]
+ exp. uncertainty on |p|     of particle           5 :   -1.0000000000000000      [   0.0000000000000000      ]
+ exp. uncertainty on theta   of particle           6 :    0.0000000000000000      [  0.12626371284745513      ]
+ exp. uncertainty on phi     of particle           6 :    0.0000000000000000      [   2.8247000004102070      ]
+ exp. uncertainty on |p|     of particle           6 :    27.444720788266594      [   548.87342772115039      ]
+ exp. uncertainty on theta   of particle           7 :    0.0000000000000000      [  0.10436498344580493      ]
+ exp. uncertainty on phi     of particle           7 :    0.0000000000000000      [   5.0818853080000004      ]
+ exp. uncertainty on |p|     of particle           7 :    15.301563551568799      [   306.03127102974213      ]
+ exp. uncertainty on theta   of particle           8 :    0.0000000000000000      [  0.38055508661733728      ]
+ exp. uncertainty on phi     of particle           8 :    0.0000000000000000      [  0.24190000000000000      ]
+ exp. uncertainty on |p|     of particle           8 :    6.7927165517439496      [   135.84604985399642      ]
+ ** Current channel of integration:            1 /           2  **
+ input parameters for vegas:  ndim=  7   ncall=  49152.
+                              it=    0    itmx=    2
+                              acc=0.500E-02
+                              mds=  1     nd= 100
+
+ vegas: iteration           1 value:  1.53427646532506991E-026 chi2:   0.0000000000000000     
+                                   1  1.53427646532508827E-026 +-  8.00030703709376967E-028
+ vegas: iteration           2 value:  1.49823831542779842E-026 chi2:  0.25928710918631814     
+                                   1  1.49859063671307547E-026 +-  3.46622833415803323E-028
+ cross, sd  1.49823831542779842E-026  3.41301097837965385E-028
+  1.61652328470700923E-029  1.49823831542779842E-026  3.41301097837965385E-028  1.05491816335473877E-003  5.00000000000000010E-003
+ input parameters for vegas:  ndim=  7   ncall=  49152.
+                              it=    2    itmx=   16
+                              acc=0.500E-02
+                              mds=  1     nd= 100
+
+ vegas: iteration           3 value:  1.52291194520130416E-026 chi2:  0.63615890342576098     
+                                   1  1.52307953728313675E-026 +-  2.47675680182233010E-028
+ vegas: iteration           4 value:  1.51808958328930759E-026 chi2:  0.45398218519599404     
+                                   1  1.51832181690134479E-026 +-  1.81884149408738586E-028
+ vegas: iteration           5 value:  1.50840953060754018E-026 chi2:  0.54542993088760283     
+                                   1  1.50880107347320633E-026 +-  1.43576561098487824E-028
+ vegas: iteration           6 value:  1.49363791103990495E-026 chi2:   1.0611625711492592     
+                                   1  1.49489362015078960E-026 +-  1.14808289705117798E-028
+ vegas: iteration           7 value:  1.49907781307751010E-026 chi2:   1.2088724210364206     
+                                   1  1.50048844345626444E-026 +-  1.07241655574990916E-028
+ vegas: iteration           8 value:  1.49603437555443548E-026 chi2:   1.1121702627367158     

@@ -1,0 +1,118 @@
+[?1034hNo module named madgraph.madweight.Cards
+************************************************************
+*                                                          *
+*           W E L C O M E  to  M A D G R A P H  5          *
+*                      M A D W E I G H T                   *
+*                                                          *
+*                 *                       *                *
+*                   *        * *        *                  *
+*                     * * * * 5 * * * *                    *
+*                   *        * *        *                  *
+*                 *                       *                *
+*                                                          *
+*         VERSION 5.2.1.0.beta                             *
+*                                                          *
+*    The MadGraph Development Team - Please visit us at    *
+*    https://server06.fynu.ucl.ac.be/projects/madgraph     *
+*                                                          *
+*               Type 'help' for in-line help.              *
+*                                                          *
+************************************************************
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/Cards/me5_configuration.txt  
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/input/mg5_configuration.txt  
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/Cards/me5_configuration.txt  
+No valid eps viewer found. Please set in ./input/mg5_configuration.txt
+No valid web browser found. Please set in ./input/mg5_configuration.txt
+submit_jobs
+INFO:  Idle: 496,  Running: 4,  Completed: 0 [  0.14s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  30.3s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  1m 0s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  1m 30s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  2m 0s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  2m 30s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  3m 0s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  3m 31s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  4m 1s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  4m 31s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  5m 1s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  5m 31s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  6m 1s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  6m 31s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  7m 2s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  7m 32s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  8m 2s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  8m 32s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  9m 2s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  9m 32s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  10m 3s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  10m 33s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  11m 3s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  11m 44s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  12m 14s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  12m 45s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  13m 26s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  13m 56s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  14m 26s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  14m 57s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  15m 27s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  15m 57s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  16m 27s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  16m 57s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  17m 27s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  17m 57s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  18m 28s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  18m 58s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  19m 28s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  19m 58s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  20m 28s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  20m 58s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  21m 28s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  21m 59s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  22m 29s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  22m 59s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  23m 29s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  23m 59s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  24m 29s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  24m 59s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  25m 30s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  26m 0s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  26m 30s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  27m 0s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  27m 30s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  28m 0s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  28m 30s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  29m 1s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  29m 31s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  30m 1s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  30m 31s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  31m 1s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  31m 31s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  32m 1s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  32m 32s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  33m 2s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  33m 32s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  34m 2s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  34m 32s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  35m 2s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  35m 32s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  36m 3s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  36m 33s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  37m 3s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  37m 33s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  38m 3s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  38m 33s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  39m 4s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  39m 34s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  40m 4s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  40m 34s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  41m 4s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  41m 34s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  42m 4s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  42m 35s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  43m 5s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  43m 35s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  44m 5s  ] 
+INFO:  Idle: 100,  Running: 400,  Completed: 0 [  44m 35s  ] 
+qstat: Invalid credential 
+INFO: All jobs finished 
+launch in debug mode

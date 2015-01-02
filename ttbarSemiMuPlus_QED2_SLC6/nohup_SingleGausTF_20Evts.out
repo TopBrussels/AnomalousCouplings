@@ -1,0 +1,101 @@
+[?1034hNo module named madgraph.madweight.Cards
+************************************************************
+*                                                          *
+*           W E L C O M E  to  M A D G R A P H  5          *
+*                      M A D W E I G H T                   *
+*                                                          *
+*                 *                       *                *
+*                   *        * *        *                  *
+*                     * * * * 5 * * * *                    *
+*                   *        * *        *                  *
+*                 *                       *                *
+*                                                          *
+*         VERSION 5.2.1.0.beta                             *
+*                                                          *
+*    The MadGraph Development Team - Please visit us at    *
+*    https://server06.fynu.ucl.ac.be/projects/madgraph     *
+*                                                          *
+*               Type 'help' for in-line help.              *
+*                                                          *
+************************************************************
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/Cards/me5_configuration.txt  
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/input/mg5_configuration.txt  
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/Cards/me5_configuration.txt  
+No valid eps viewer found. Please set in ./input/mg5_configuration.txt
+No valid web browser found. Please set in ./input/mg5_configuration.txt
+submit_jobs
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  0.22s  ] 
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  30.4s  ] 
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  1m 0s  ] 
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  1m 30s  ] 
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  2m 0s  ] 
+INFO: Start to wait 600s between checking status.
+Note that you can change this time in the configuration file.
+Press ctrl-C to force the update. 
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  12m 1s  ] 
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  22m 1s  ] 
+INFO:  Idle: 100,  Running: 0,  Completed: 0 [  32m 1s  ] 
+INFO:  Idle: 68,  Running: 32,  Completed: 0 [  42m 2s  ] 
+INFO:  Idle: 4,  Running: 78,  Completed: 18 [  52m 2s  ] 
+INFO:  Idle: 1,  Running: 78,  Completed: 21 [  52m 32s  ] 
+INFO:  Idle: 0,  Running: 77,  Completed: 23 [  53m 2s  ] 
+INFO:  Idle: 0,  Running: 76,  Completed: 24 [  53m 33s  ] 
+INFO:  Idle: 0,  Running: 72,  Completed: 28 [  54m 3s  ] 
+INFO:  Idle: 0,  Running: 70,  Completed: 30 [  54m 33s  ] 
+INFO:  Idle: 0,  Running: 67,  Completed: 33 [  55m 3s  ] 
+INFO:  Idle: 0,  Running: 66,  Completed: 34 [  55m 33s  ] 
+INFO:  Idle: 0,  Running: 63,  Completed: 37 [  56m 3s  ] 
+INFO:  Idle: 0,  Running: 61,  Completed: 39 [  56m 34s  ] 
+INFO:  Idle: 0,  Running: 58,  Completed: 42 [  57m 4s  ] 
+INFO:  Idle: 0,  Running: 57,  Completed: 43 [  57m 34s  ] 
+INFO:  Idle: 0,  Running: 54,  Completed: 46 [  58m 5s  ] 
+INFO:  Idle: 0,  Running: 53,  Completed: 47 [  58m 35s  ] 
+INFO:  Idle: 0,  Running: 52,  Completed: 48 [  59m 5s  ] 
+INFO:  Idle: 0,  Running: 48,  Completed: 52 [  59m 35s  ] 
+INFO:  Idle: 0,  Running: 44,  Completed: 56 [  1h 0m  ] 
+INFO:  Idle: 0,  Running: 43,  Completed: 57 [  1h 0m  ] 
+INFO:  Idle: 0,  Running: 40,  Completed: 60 [  1h 1m  ] 
+INFO:  Idle: 0,  Running: 38,  Completed: 62 [  1h 1m  ] 
+INFO:  Idle: 0,  Running: 35,  Completed: 65 [  1h 2m  ] 
+INFO:  Idle: 0,  Running: 34,  Completed: 66 [  1h 2m  ] 
+INFO:  Idle: 0,  Running: 29,  Completed: 71 [  1h 3m  ] 
+INFO:  Idle: 0,  Running: 26,  Completed: 74 [  1h 3m  ] 
+INFO:  Idle: 0,  Running: 25,  Completed: 75 [  1h 4m  ] 
+INFO:  Idle: 0,  Running: 23,  Completed: 77 [  1h 4m  ] 
+INFO:  Idle: 0,  Running: 22,  Completed: 78 [  1h 5m  ] 
+INFO:  Idle: 0,  Running: 22,  Completed: 78 [  1h 5m  ] 
+INFO:  Idle: 0,  Running: 22,  Completed: 78 [  1h 6m  ] 
+INFO:  Idle: 0,  Running: 19,  Completed: 81 [  1h 6m  ] 
+INFO:  Idle: 0,  Running: 17,  Completed: 83 [  1h 7m  ] 
+INFO:  Idle: 0,  Running: 15,  Completed: 85 [  1h 7m  ] 
+INFO:  Idle: 0,  Running: 12,  Completed: 88 [  1h 8m  ] 
+INFO:  Idle: 0,  Running: 10,  Completed: 90 [  1h 8m  ] 
+INFO:  Idle: 0,  Running: 8,  Completed: 92 [  1h 9m  ] 
+INFO:  Idle: 0,  Running: 8,  Completed: 92 [  1h 9m  ] 
+INFO:  Idle: 0,  Running: 8,  Completed: 92 [  1h 10m  ] 
+INFO:  Idle: 0,  Running: 8,  Completed: 92 [  1h 10m  ] 
+INFO:  Idle: 0,  Running: 8,  Completed: 92 [  1h 11m  ] 
+INFO:  Idle: 0,  Running: 7,  Completed: 93 [  1h 11m  ] 
+INFO:  Idle: 0,  Running: 7,  Completed: 93 [  1h 12m  ] 
+INFO:  Idle: 0,  Running: 6,  Completed: 94 [  1h 12m  ] 
+INFO:  Idle: 0,  Running: 6,  Completed: 94 [  1h 13m  ] 
+INFO:  Idle: 0,  Running: 6,  Completed: 94 [  1h 13m  ] 
+INFO:  Idle: 0,  Running: 6,  Completed: 94 [  1h 14m  ] 
+INFO:  Idle: 0,  Running: 5,  Completed: 95 [  1h 14m  ] 
+INFO:  Idle: 0,  Running: 5,  Completed: 95 [  1h 15m  ] 
+INFO:  Idle: 0,  Running: 5,  Completed: 95 [  1h 15m  ] 
+INFO:  Idle: 0,  Running: 5,  Completed: 95 [  1h 16m  ] 
+INFO:  Idle: 0,  Running: 5,  Completed: 95 [  1h 16m  ] 
+INFO:  Idle: 0,  Running: 5,  Completed: 95 [  1h 17m  ] 
+INFO:  Idle: 0,  Running: 4,  Completed: 96 [  1h 17m  ] 
+INFO:  Idle: 0,  Running: 4,  Completed: 96 [  1h 18m  ] 
+INFO:  Idle: 0,  Running: 2,  Completed: 98 [  1h 18m  ] 
+INFO:  Idle: 0,  Running: 2,  Completed: 98 [  1h 19m  ] 
+INFO:  Idle: 0,  Running: 2,  Completed: 98 [  1h 19m  ] 
+INFO:  Idle: 0,  Running: 2,  Completed: 98 [  1h 20m  ] 
+INFO:  Idle: 0,  Running: 2,  Completed: 98 [  1h 20m  ] 
+INFO:  Idle: 0,  Running: 1,  Completed: 99 [  1h 21m  ] 
+INFO:  Idle: 0,  Running: 1,  Completed: 99 [  1h 21m  ] 
+INFO:  Idle: 0,  Running: 1,  Completed: 99 [  1h 22m  ] 
+INFO: All jobs finished 
+launch in debug mode

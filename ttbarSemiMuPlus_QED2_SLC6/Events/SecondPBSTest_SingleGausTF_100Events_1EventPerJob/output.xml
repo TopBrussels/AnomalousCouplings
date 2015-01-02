@@ -1,0 +1,2486 @@
+<madweight>
+<banner>
+<proc_card_mg5>
+#************************************************************
+#*                     MadGraph5_aMC@NLO                    *
+#*                                                          *
+#*                *                       *                 *
+#*                  *        * *        *                   *
+#*                    * * * * 5 * * * *                     *
+#*                  *        * *        *                   *
+#*                *                       *                 *
+#*                                                          *
+#*                                                          *
+#*         VERSION 2.1.0.beta            2014-02-18         *
+#*                                                          *
+#*    The MadGraph5_aMC@NLO Development Team - Find us at   *
+#*    https://server06.fynu.ucl.ac.be/projects/madgraph     *
+#*                                                          *
+#************************************************************
+#*                                                          *
+#*               Command File for MadGraph5_aMC@NLO         *
+#*                                                          *
+#*     run as ./bin/mg5_aMC  filename                       *
+#*                                                          *
+#************************************************************
+
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set gauge unitary
+set complex_mass_scheme False
+import model sm
+define p = g u c d s u~ c~ d~ s~
+define j = g u c d s u~ c~ d~ s~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+import model MassiveLeptons
+generate p p > t t~ , ( t > b w+ , w+ > mu+ vm ) , ( t~ > b~ w- , w- > j j ) @1 QED = 2
+output madweight ttbarSemiMuPlus_QED2_SLC6
+</proc_card_mg5>
+<MadWeight_card>
+##########################################################################
+##                                                                      ##
+##                             MadWeigth                                ##
+##                             =============                            ##
+##                                                                      ##
+##                              Run control                             ##
+##                              -----------                             ##
+##                                                                      ##
+##                                                                      ##
+##    Author: Mattelaer Olivier (UCL-CP3)                               ##
+##            Artoisenet Pierre (UCL-CP3)                               ##
+##                                                                      ##
+##    Version:     5.0.0                                                ##
+##    Last change: 01/10/14                                             ##
+##                                                                      ##
+##########################################################################
+##                                                                      ##
+##  This Card defines all specific parameters of Madweight              ## 
+##                                                                      ##
+##########################################################################
+#*************************************************************************
+##                      select run options                              ##  
+#*************************************************************************
+Block MW_Run 
+#   TAG                 VALUE                    UTILITY
+     name                 SecondPBSTest_SingleGausTF_100Events_1EventPerJob    # name for the run  
+     nb_exp_events        100     # number of experimental events to consider
+     MW_int_points        2000    # number of points (by permutation) in MadWeight integration for survey 
+     MW_int_refine        10000   # number of points (by permutation) in MadWeight integration for refine 
+     precision            0.005   # stops computation if precision is reached.
+     nb_event_by_node     1       # one job submission compute the weight for N events
+     log_level            weight  # from low level of log to extensive log: 
+                                  # weight, permutation, channel, full
+     use_cut              F       # use the cut defined in run_card.dat
+     bw_cut               F       # use the BW cut 
+     nwa                  0.1     # width below narrow width approximation is used.
+     isr                  0       # isr=0 : ignore ISR effect (except if all FS particles are visible)
+                                  # isr=1 : correct kinematic based on reconstructed Pt(isr)
+     inputfile          './Events/input.lhco' # path to the input file (in lhco format)
+                                  
+                                  
+#*************************************************************************
+##                  define the different param_card's                   ##  
+#*************************************************************************
+Block MW_parameter         
+#   TAG      VALUE                     UTILITY
+    mode         1         #    type of input 
+                           #    0 : inputs are read from the cards: param_card_1.dat, param_card_2.dat,...
+                           #    1 : redefines some values from param_card.dat according to the form below
+                           #    2 : same but the value for different parameters are modified simultaneously
+#                             
+#                             # first parameter #
+     11       anom          # Block of the parameter to change  
+     12       3             # id of the parameter to change 
+     13       -1.0           # here you can enter the different values:
+     13       -0.5           #         add a new line with tag 13 to introduce a new value        
+     13       0.0           #         add a new line with tag 13 to introduce a new value        
+     13       0.5           #         add a new line with tag 13 to introduce a new value        
+     13       1.0           #         add a new line with tag 13 to introduce a new value        
+
+#
+#                            #  second parameter #
+#                            !DELETE ALL THE FOLLOWING TAG IF YOU WANT TO RUN WITH ONLY ONE PARAM!
+#     21       MGCKM          # Block of the parameter to change  
+#     22       1              # id of the paramter to change 
+#     22       2              # id2 of the paramter to change
+#     23       1.5E-02        # here you can enter the different values:
+#     23       1.8E-02        #        add a new line with tag 23 to introduce a new value
+#
+#  use same syntax for parameters 3,4,...
+#*************************************************************************
+##                                Permutations                          ##  
+#*************************************************************************
+Block MW_perm
+#   TAG           VALUE                    UTILITY
+     permutation  T         # make permutation
+     bjet_is_jet  T         # consider permutation between b-jets and light jets
+     montecarlo   T         # Monte-Carlo over permutation (Huge speed up if many permutation)
+     preselect    'default' # How to pre-select the correct permutation set. 
+                            # put 'None' if no pre-selection to perform.
+                            # You can set the path to a fortran file defining the require function
+                            # See file SubProcesses/permutation_weight_default.dat for
+                            # instructions.
+     min_perm_cut 5e-4      # Cut for discarding permutation on the preselected method
+#*************************************************************************
+##                       Phase-Space Integration mapping                ##
+#*************************************************************************
+Block MW_gen
+    force_nwa     2         # Only consider the change of variable alligning particles 
+                            # with width smaller than this value. This speed up the code
+                            # but can lead to zero weight for background event where the
+                            # kinematic doesn't agree with the associated mass.
+                            # if "mw_run nwa" parameter is bigger than this value, that
+                            # value is used for this parameter automatically.
+</MadWeight_card>
+<transfer_card>
+#+-----------------------------------------------------------------------+
+#|                         TRANSFER_CARD.DAT                             |
+#|                                                                       |
+#|     Author: Pierre Artoisenet (UCL-CP3)                               |
+#|             Olivier Mattelaer (UCL-CP3)                               |
+#+-----------------------------------------------------------------------+
+#|     This file is generated automaticly by MADWEIGHT                   |
+#|     card generation version: 2.0.0                                    |
+#+-----------------------------------------------------------------------+
+#|                                                                       |
+#|    To change the transfer function run ./bin/change_tf.py             |
+#|    Current parametrization :single_gaussian                           |
+#|                                                                       |
+#+-----------------------------------------------------------------------+
+
+#+-----------------------------------------------------------------------+
+#|    Parameter for particles: mu,e                                      |
+#|    Information: single gaussian with parameter depending of the energy 
+#|                                                                       |
+#+-----------------------------------------------------------------------+
+
+BLOCK TF_lepton_E
+	7	 0d0 	 #
+	8	 0d0 	 #
+	9	 0d0 	 #
+	10	 0d0 	 #
+	11	 0d0 	 #
+	12	 0.02d0  #
+#+-----------------------------------------------------------------------+
+#|    Parameter for particles: u,d,s,c,b,g                               |
+#|    Information: single gaussian with parameter depending of the energy 
+#|                                                                       |
+#+-----------------------------------------------------------------------+
+
+
+BLOCK TF_jet_E
+	1	 0d0 	 #
+	2	 0d0 	 #
+	3	 0d0 	 #
+	4	 0d0 	 #
+	5	 0d0 	 #
+	6	 0.05d0 	 #
+</transfer_card>
+<param_card>
+######################################################################
+## PARAM_CARD AUTOMATICALY GENERATED BY MG5 FOLLOWING UFO MODEL   ####
+######################################################################
+##                                                                  ##
+##  Width set on Auto will be computed following the information    ##
+##        present in the decay.py files of the model.               ##
+##        See  arXiv:1402.1178 for more details.                    ##
+##                                                                  ##
+######################################################################
+
+###################################
+## INFORMATION FOR ANOM
+###################################
+Block anom 
+    1 1.0 # RVL 
+    2 0.0 # IVL 
+    3 0.0 # RVR 
+    4 0.0 # IVR 
+    5 0.0 # RgL 
+    6 0.0 # IgL 
+    7 0.0 # RgR 
+    8 0.0 # IgR 
+
+###################################
+## INFORMATION FOR CKMBLOCK
+###################################
+Block ckmblock 
+    1 2.277360e-01 # cabi 
+
+###################################
+## INFORMATION FOR MASS
+###################################
+Block mass 
+    5 4.800000e+00 # MB 
+    6 1.725000e+02 # MT 
+   11 5.110000e-04 # Me 
+   13 1.056600e-01 # MM 
+   15 1.777000e+00 # MTA 
+   23 9.111880e+01 # MZ 
+   25 1.200000e+02 # MH 
+## Dependent parameters, given by model restrictions.
+## Those values should be edited following the 
+## analytical expression. MG5 ignores those values 
+## but they are important for interfacing the output of MG5
+## to external program such as Pythia.
+  1 0.000000 # d : 0.0 
+  2 0.000000 # u : 0.0 
+  3 0.000000 # s : 0.0 
+  4 0.000000 # c : 0.0 
+  12 0.000000 # ve : 0.0 
+  14 0.000000 # vm : 0.0 
+  16 0.000000 # vt : 0.0 
+  21 0.000000 # g : 0.0 
+  22 0.000000 # a : 0.0 
+  24 80.333525 # w+ : cmath.sqrt(MZ__exp__2/2. + cmath.sqrt(MZ__exp__4/4. - (aEW*cmath.pi*MZ__exp__2)/(Gf*sqrt__2))) 
+
+###################################
+## INFORMATION FOR SMINPUTS
+###################################
+Block sminputs 
+    1 1.325070e+02 # aEWM1 
+    2 1.166390e-05 # Gf 
+    3 1.180000e-01 # aS 
+
+###################################
+## INFORMATION FOR YUKAWA
+###################################
+Block yukawa 
+    5 4.800000e+00 # ymb 
+    6 1.725000e+02 # ymt 
+   11 5.110000e-04 # yme 
+   13 1.056600e-01 # ymm 
+   15 1.777000e+00 # ymtau 
+
+###################################
+## INFORMATION FOR DECAY
+###################################
+DECAY   6 1.508336e+00 # WT 
+DECAY  23 2.441400e+00 # WZ 
+DECAY  24 2.047600e+00 # WW 
+DECAY  25 5.753088e-03 # WH 
+## Dependent parameters, given by model restrictions.
+## Those values should be edited following the 
+## analytical expression. MG5 ignores those values 
+## but they are important for interfacing the output of MG5
+## to external program such as Pythia.
+DECAY  1 0.000000 # d : 0.0 
+DECAY  2 0.000000 # u : 0.0 
+DECAY  3 0.000000 # s : 0.0 
+DECAY  4 0.000000 # c : 0.0 
+DECAY  5 0.000000 # b : 0.0 
+DECAY  11 0.000000 # e- : 0.0 
+DECAY  12 0.000000 # ve : 0.0 
+DECAY  13 0.000000 # mu- : 0.0 
+DECAY  14 0.000000 # vm : 0.0 
+DECAY  15 0.000000 # ta- : 0.0 
+DECAY  16 0.000000 # vt : 0.0 
+DECAY  21 0.000000 # g : 0.0 
+DECAY  22 0.000000 # a : 0.0 
+</param_card>
+<run_card>
+#*********************************************************************
+#                       MadGraph/MadEvent                            *
+#                  http://madgraph.hep.uiuc.edu                      *
+#                                                                    *
+#                        run_card.dat                                *
+#                                                                    *
+#  This file is used to set the parameters of the run.               *
+#                                                                    *
+#  Some notation/conventions:                                        *
+#                                                                    *
+#   Lines starting with a '# ' are info or comments                  *
+#                                                                    *
+#   mind the format:   value    = variable     ! comment             *
+#*********************************************************************
+#
+#*******************                                                 
+# Running parameters
+#*******************                                                 
+#                                                                    
+#*********************************************************************
+# Tag name for the run (one word)                                    *
+#*********************************************************************
+  ''     = run_tag ! name of the run. overwritten by the MW card 
+#*********************************************************************
+# Run to generate the grid pack                                      *
+#*********************************************************************
+  .false.     = gridpack  !True = setting up the grid pack
+#*********************************************************************
+# Number of events and rnd seed                                      *
+#*********************************************************************
+      0       = iseed   ! rnd seed 
+#*********************************************************************
+# Collider type and energy                                           *
+#*********************************************************************
+        1     = lpp1  ! beam 1 type (0=NO PDF)
+        1     = lpp2  ! beam 2 type (0=NO PDF)
+     4000     = ebeam1  ! beam 1 energy in GeV
+     4000     = ebeam2  ! beam 2 energy in GeV
+#*********************************************************************
+# Beam polarization from -100 (left-handed) to 100 (right-handed)    *
+#*********************************************************************
+        0     = polbeam1 ! beam polarization for beam 1
+        0     = polbeam2 ! beam polarization for beam 2
+#*********************************************************************
+# PDF CHOICE: this automatically fixes also alpha_s and its evol.    *
+#*********************************************************************
+ 'cteq6l1'    = pdlabel     ! PDF set                                     
+#*********************************************************************
+# Renormalization and factorization scales                           *
+#*********************************************************************
+ T        = fixed_ren_scale  ! if .true. use fixed ren scale (false is beta)
+ T        = fixed_fac_scale  ! if .true. use fixed fac scale (false is beta)
+ 91.1880  = scale            ! fixed ren scale
+ 91.1880  = dsqrt_q2fact1    ! fixed fact scale for pdf1
+ 91.1880  = dsqrt_q2fact2    ! fixed fact scale for pdf2
+ 1        = scalefact        ! scale factor for event-by-event scales
+#*********************************************************************
+# Matching - Warning! ickkw > 1 is still beta
+#*********************************************************************
+ 0        = ickkw            ! 0 no matching, 1 MLM, 2 CKKW matching
+ 1        = highestmult      ! for ickkw=2, highest mult group
+ 1        = ktscheme         ! for ickkw=1, 1 Durham kT, 2 Pythia pTE
+ 1        = alpsfact         ! scale factor for QCD emission vx
+ F        = chcluster        ! cluster only according to channel diag
+ F        = pdfwgt           ! for ickkw=1, perform pdf reweighting
+#*********************************************************************
+#                                                                    
+#**********************************
+# BW cutoff (M+/-bwcutoff*Gamma)
+#**********************************
+  40  = bwcutoff    ! desactivate by default in the MadWeight_card
+#*******************                                                 
+# Standard Cuts    ! desactivate by default in the MadWeight_card
+#*******************                                                 
+#                                                                    
+#*********************************************************************
+# Minimum and maximum pt's                                           *
+#*********************************************************************
+  0  = ptj       ! minimum pt for the jets 
+  0  = ptb       ! minimum pt for the b 
+  0  = pta       ! minimum pt for the photons 
+  0  = ptl       ! minimum pt for the charged leptons 
+  0  = misset    ! minimum missing Et (sum of neutrino's momenta)
+  0  = ptheavy   ! minimum pt for one heavy final state
+ 1.0 = ptonium   ! minimum pt for the quarkonium states
+ 1d5 = ptjmax    ! maximum pt for the jets
+ 1d5 = ptbmax    ! maximum pt for the b
+ 1d5 = ptamax    ! maximum pt for the photons
+ 1d5 = ptlmax    ! maximum pt for the charged leptons
+ 1d5 = missetmax ! maximum missing Et (sum of neutrino's momenta)
+#*********************************************************************
+# Minimum and maximum E's (in the lab frame)                         *
+#*********************************************************************
+  0  = ej     ! minimum E for the jets 
+  0  = eb     ! minimum E for the b 
+  0  = ea     ! minimum E for the photons 
+  0  = el     ! minimum E for the charged leptons 
+ 1d5  = ejmax ! maximum E for the jets
+ 1d5  = ebmax ! maximum E for the b
+ 1d5  = eamax ! maximum E for the photons
+ 1d5  = elmax ! maximum E for the charged leptons
+#*********************************************************************
+# Maximum and minimum rapidity                                       *
+#*********************************************************************
+ 1d2  = etaj    ! max rap for the jets 
+ 1d2  = etab    ! max rap for the b 
+ 1d2  = etaa    ! max rap for the photons 
+ 1d2  = etal    ! max rap for the charged leptons 
+ 1d2  = etaonium ! max rap for the quarkonium states
+ 0d0  = etajmin ! min rap for the jets
+ 0d0  = etabmin ! min rap for the b
+ 0d0  = etaamin ! min rap for the photons
+ 0d0  = etalmin ! main rap for the charged leptons
+#*********************************************************************
+# Minimum and maximum DeltaR distance                                *
+#*********************************************************************
+ 0.  = drjj    ! min distance between jets 
+ 0   = drbb    ! min distance between b's 
+ 0.  = drll    ! min distance between leptons 
+ 0.  = draa    ! min distance between gammas 
+ 0   = drbj    ! min distance between b and jet 
+ 0.  = draj    ! min distance between gamma and jet 
+ 0.  = drjl    ! min distance between jet and lepton 
+ 0   = drab    ! min distance between gamma and b 
+ 0   = drbl    ! min distance between b and lepton 
+ 0.  = dral    ! min distance between gamma and lepton 
+ 1d2 = drjjmax ! max distance between jets
+ 1d2 = drbbmax ! max distance between b's
+ 1d2 = drllmax ! max distance between leptons
+ 1d2 = draamax ! max distance between gammas
+ 1d2 = drbjmax ! max distance between b and jet
+ 1d2 = drajmax ! max distance between gamma and jet
+ 1d2 = drjlmax ! max distance between jet and lepton
+ 1d2 = drabmax ! max distance between gamma and b
+ 1d2 = drblmax ! max distance between b and lepton
+ 1d2 = dralmax ! maxdistance between gamma and lepton
+#*********************************************************************
+# Minimum and maximum invariant mass for pairs                       *
+#*********************************************************************
+ 0   = mmjj    ! min invariant mass of a jet pair 
+ 0   = mmbb    ! min invariant mass of a b pair 
+ 0   = mmaa    ! min invariant mass of gamma gamma pair
+ 0   = mmll    ! min invariant mass of l+l- (same flavour) lepton pair
+ 1d5 = mmjjmax ! max invariant mass of a jet pair
+ 1d5 = mmbbmax ! max invariant mass of a b pair
+ 1d5 = mmaamax ! max invariant mass of gamma gamma pair
+ 1d5 = mmllmax ! max invariant mass of l+l- (same flavour) lepton pair
+#*********************************************************************
+# Minimum and maximum invariant mass for all letpons                 *
+#*********************************************************************
+ 0   = mmnl    ! min invariant mass for all letpons (l+- and vl) 
+ 1d5 = mmnlmax ! max invariant mass for all letpons (l+- and vl) 
+#*********************************************************************
+# Inclusive cuts                                                     *
+#*********************************************************************
+ 0  = xptj ! minimum pt for at least one jet  
+ 0  = xptb ! minimum pt for at least one b 
+ 0  = xpta ! minimum pt for at least one photon 
+ 0  = xptl ! minimum pt for at least one charged lepton 
+#*********************************************************************
+# Control the pt's of the jets sorted by pt                          *
+#*********************************************************************
+ 0   = ptj1min ! minimum pt for the leading jet in pt
+ 0   = ptj2min ! minimum pt for the second jet in pt
+ 0   = ptj3min ! minimum pt for the third jet in pt
+ 0   = ptj4min ! minimum pt for the fourth jet in pt
+ 1d5 = ptj1max ! maximum pt for the leading jet in pt 
+ 1d5 = ptj2max ! maximum pt for the second jet in pt
+ 1d5 = ptj3max ! maximum pt for the third jet in pt
+ 1d5 = ptj4max ! maximum pt for the fourth jet in pt
+ 0   = cutuse  ! reject event if fails any (0) / all (1) jet pt cuts
+#*********************************************************************
+# Control the Ht(k)=Sum of k leading jets                            *
+#*********************************************************************
+ 0   = htjmin ! minimum jet HT=Sum(jet pt)
+ 1d5 = htjmax ! maximum jet HT=Sum(jet pt)
+ 0   = ht2min ! minimum Ht for the two leading jets
+ 0   = ht3min ! minimum Ht for the three leading jets
+ 0   = ht4min ! minimum Ht for the four leading jets
+ 1d5 = ht2max ! maximum Ht for the two leading jets
+ 1d5 = ht3max ! maximum Ht for the three leading jets
+ 1d5 = ht4max ! maximum Ht for the four leading jets
+#*********************************************************************
+# WBF cuts                                                           *
+#*********************************************************************
+ 0   = xetamin ! minimum rapidity for two jets in the WBF case  
+ 0   = deltaeta ! minimum rapidity for two jets in the WBF case 
+#*********************************************************************
+# maximal pdg code for quark to be considered as a jet               *
+# otherwise b cuts are applied                                       *
+#*********************************************************************
+ 4 = maxjetflavor
+#*********************************************************************
+# Jet measure cuts                                                   *
+#*********************************************************************
+ 0   = xqcut   ! minimum kt jet measure between partons
+#*********************************************************************
+</run_card>
+</banner>
+<subprocess id='P1_gg_ttx_t_bwp_wp_mupvm_tx_bxwm_wm_qq'>
+<card id='2'>
+<event id='68' value='2.24322844278e-26' error='9.55307230747e-29'>
+    <tfset id='1' value='2.24336396483e-26' error='1.00092045831e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='3' value='1.66567323242e-24' error='5.32261454448e-27'>
+    <tfset id='1' value='1.66566032013e-24' error='5.69734367182e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='11' value='1.41043169048e-23' error='4.6806737011e-26'>
+    <tfset id='1' value='1.41028765092e-23' error='5.02184843147e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='57' value='6.71559551233e-27' error='1.49118643429e-28'>
+    <tfset id='1' value='6.72456304212e-27' error='1.33939722714e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='76' value='7.58714022423e-28' error='4.90875116329e-30'>
+    <tfset id='1' value='7.59034200005e-28' error='4.35291276552e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='9' value='1.92682912664e-25' error='4.23595966003e-27'>
+    <tfset id='1' value='1.92126573742e-25' error='4.11397756276e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='88' value='1.86647564896e-23' error='7.18516047615e-26'>
+    <tfset id='1' value='1.86664432503e-23' error='7.48030761103e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='18' value='7.29852795284e-22' error='2.4738294251e-24'>
+    <tfset id='1' value='7.29893000081e-22' error='2.57570593892e-24'></tfset>
+</event>
+</card><card id='1'>
+<event id='52' value='2.20618060425e-23' error='1.19621255173e-25'>
+    <tfset id='1' value='2.20666765894e-23' error='1.22805912822e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='73' value='1.00183369442e-25' error='3.20761290139e-28'>
+    <tfset id='1' value='1.00178356114e-25' error='3.34713043664e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='81' value='1.10528169261e-22' error='3.63843930406e-25'>
+    <tfset id='1' value='1.1054341524e-22' error='3.79165877227e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='80' value='7.77334628263e-25' error='2.59409127844e-27'>
+    <tfset id='1' value='7.77297649485e-25' error='2.82807400638e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='61' value='1.29189637828e-27' error='5.43688521234e-30'>
+    <tfset id='1' value='1.29190661547e-27' error='5.66751248281e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='6' value='1.25049687196e-28' error='6.92560536803e-31'>
+    <tfset id='1' value='1.25047339032e-28' error='6.21621745573e-31'></tfset>
+</event>
+</card><card id='5'>
+<event id='20' value='1.01173977691e-26' error='7.23941813259e-29'>
+    <tfset id='1' value='1.01194031953e-26' error='6.89100771205e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='13' value='8.93511049729e-25' error='3.45068501694e-27'>
+    <tfset id='1' value='8.93729675438e-25' error='3.6051122219e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='2' value='7.29000907633e-26' error='2.54093409149e-28'>
+    <tfset id='1' value='7.28911403385e-26' error='2.71719317933e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='78' value='2.67303968174e-28' error='2.85568358944e-30'>
+    <tfset id='1' value='2.67354181931e-28' error='2.72248388614e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='66' value='8.13886410455e-27' error='6.38788364238e-29'>
+    <tfset id='1' value='8.1402723197e-27' error='5.78046336214e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='24' value='1.61808228535e-29' error='7.35543850181e-32'>
+    <tfset id='1' value='1.61874018422e-29' error='7.82369109042e-32'></tfset>
+</event>
+</card><card id='2'>
+<event id='70' value='1.74728365156e-28' error='2.46067482668e-30'>
+    <tfset id='1' value='1.74614751323e-28' error='2.49040288985e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='63' value='6.14324197864e-23' error='2.06315235001e-25'>
+    <tfset id='1' value='6.14324875753e-23' error='2.17904576429e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='25' value='1.03698532296e-24' error='9.36637842186e-27'>
+    <tfset id='1' value='1.03611060158e-24' error='9.39407645587e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='16' value='6.4665243069e-26' error='9.60681135193e-28'>
+    <tfset id='1' value='6.46923974677e-26' error='9.20343073011e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='59' value='1.53751431203e-23' error='6.0896881201e-26'>
+    <tfset id='1' value='1.53759516926e-23' error='6.40386603473e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='71' value='7.20897524334e-24' error='2.45500212192e-26'>
+    <tfset id='1' value='7.20980076494e-24' error='2.5757336843e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='90' value='7.23913554245e-25' error='3.29043644065e-27'>
+    <tfset id='1' value='7.24064524358e-25' error='3.4862360196e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='7' value='2.60004821203e-23' error='2.59941679284e-25'>
+    <tfset id='1' value='2.60087231562e-23' error='2.29092594625e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='1' value='1.1370304984e-22' error='3.92800282206e-25'>
+    <tfset id='1' value='1.13709209206e-22' error='4.12012825304e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='58' value='8.4990433831e-29' error='3.16793113465e-31'>
+    <tfset id='1' value='8.49977335438e-29' error='3.24077967874e-31'></tfset>
+</event>
+</card><card id='5'>
+<event id='87' value='9.87439928947e-28' error='6.11998008997e-30'>
+    <tfset id='1' value='9.8744663305e-28' error='6.2123706539e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='33' value='2.54971420979e-23' error='8.90939168116e-26'>
+    <tfset id='1' value='2.54989753841e-23' error='9.38362257901e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='40' value='3.56999756534e-28' error='1.92664330333e-30'>
+    <tfset id='1' value='3.57041625151e-28' error='1.98302610332e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='12' value='6.60768696868e-23' error='4.89361201413e-25'>
+    <tfset id='1' value='6.60787780699e-23' error='4.86206339652e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='21' value='2.96443219311e-23' error='1.04457019722e-25'>
+    <tfset id='1' value='2.96470110973e-23' error='1.08031738399e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='46' value='1.08936318373e-25' error='5.34134281367e-28'>
+    <tfset id='1' value='1.08953724252e-25' error='5.60432901861e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='95' value='2.44529682089e-24' error='8.30965291421e-27'>
+    <tfset id='1' value='2.44559913742e-24' error='8.82064324901e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='28' value='2.36925376371e-24' error='7.43234163738e-27'>
+    <tfset id='1' value='2.36930778069e-24' error='7.75867293787e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='43' value='1.40567039267e-22' error='4.95661287031e-25'>
+    <tfset id='1' value='1.40576376916e-22' error='5.1448644615e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='50' value='4.12548470054e-23' error='1.38680618388e-25'>
+    <tfset id='1' value='4.12580001832e-23' error='1.49142555164e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='99' value='1.54800212996e-23' error='7.85036191275e-26'>
+    <tfset id='1' value='1.54837039126e-23' error='7.94989376425e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='94' value='1.28732828257e-22' error='1.04522846342e-24'>
+    <tfset id='1' value='1.28741536836e-22' error='1.03614384023e-24'></tfset>
+</event>
+</card><card id='1'>
+<event id='8' value='2.88531269226e-25' error='1.06575096309e-27'>
+    <tfset id='1' value='2.88557692529e-25' error='1.1223157073e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='51' value='5.69927354022e-23' error='1.93534144922e-25'>
+    <tfset id='1' value='5.69940140238e-23' error='2.05157374003e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='82' value='1.92378042577e-27' error='8.15147365547e-30'>
+    <tfset id='1' value='1.92368449026e-27' error='8.49792705187e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='36' value='7.29874659761e-25' error='2.5110541633e-27'>
+    <tfset id='1' value='7.29838627541e-25' error='2.62463281782e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='17' value='1.47185310926e-22' error='5.10675567921e-25'>
+    <tfset id='1' value='1.47205124803e-22' error='5.3256433911e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='30' value='1.84579951144e-27' error='1.65741106208e-29'>
+    <tfset id='1' value='1.84635562332e-27' error='1.66376654343e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='23' value='4.53479068517e-28' error='2.02374124408e-30'>
+    <tfset id='1' value='4.53571726834e-28' error='2.13625941313e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='48' value='1.98918052725e-28' error='1.14845928684e-30'>
+    <tfset id='1' value='1.98913119449e-28' error='1.19496296517e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='65' value='4.58204652401e-28' error='2.23859343831e-30'>
+    <tfset id='1' value='4.58268136046e-28' error='2.32014457702e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='97' value='2.8103062933e-23' error='9.53095481742e-26'>
+    <tfset id='1' value='2.81041362407e-23' error='9.97376252297e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='10' value='1.35833455824e-24' error='6.1346506017e-27'>
+    <tfset id='1' value='1.35829773953e-24' error='6.36740780702e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='56' value='4.37506023294e-26' error='7.85696273304e-28'>
+    <tfset id='1' value='4.37670310399e-26' error='7.3581914873e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='85' value='5.56011232946e-23' error='1.90720153276e-25'>
+    <tfset id='1' value='5.55982660025e-23' error='1.99964183903e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='31' value='1.41460370489e-27' error='7.70977544546e-30'>
+    <tfset id='1' value='1.41515255774e-27' error='7.83282968126e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='19' value='1.92901718066e-22' error='6.6191230999e-25'>
+    <tfset id='1' value='1.92900154135e-22' error='7.08107478118e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='60' value='1.30600682986e-23' error='5.03579188133e-26'>
+    <tfset id='1' value='1.30591073567e-23' error='5.21125600576e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='53' value='7.999144736e-24' error='2.68777679113e-26'>
+    <tfset id='1' value='7.99995246658e-24' error='2.81445681805e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='84' value='4.81047659859e-25' error='5.61110804692e-27'>
+    <tfset id='1' value='4.80931742449e-25' error='5.25056803703e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='89' value='2.7801969748e-28' error='1.20778462762e-30'>
+    <tfset id='1' value='2.78090355424e-28' error='1.23849596796e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='38' value='2.99493078004e-25' error='9.9719716686e-28'>
+    <tfset id='1' value='2.9946047336e-25' error='1.04232924849e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='26' value='7.49983851998e-29' error='4.27647123542e-31'>
+    <tfset id='1' value='7.50102555252e-29' error='4.30032570469e-31'></tfset>
+</event>
+</card><card id='3'>
+<event id='41' value='2.11604054255e-25' error='6.7964707274e-28'>
+    <tfset id='1' value='2.11606786079e-25' error='7.08178559793e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='64' value='2.89184662031e-23' error='9.25621993408e-26'>
+    <tfset id='1' value='2.89207280819e-23' error='9.79440451846e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='92' value='1.48106741557e-27' error='2.4089751308e-29'>
+    <tfset id='1' value='1.48185076458e-27' error='2.29888828689e-29'></tfset>
+</event>
+</card><card id='4'>
+<event id='27' value='1.78044302624e-31' error='8.31320448033e-34'>
+    <tfset id='1' value='1.78037621161e-31' error='8.44534744178e-34'></tfset>
+</event>
+</card><card id='5'>
+<event id='100' value='4.86789062433e-25' error='1.98427781107e-27'>
+    <tfset id='1' value='4.86984451713e-25' error='2.07491343951e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='9' value='3.49247670298e-25' error='1.02144814538e-26'>
+    <tfset id='1' value='3.49348572563e-25' error='8.26994650548e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='93' value='2.02737445815e-29' error='1.1878144405e-31'>
+    <tfset id='1' value='2.02829914202e-29' error='1.16968496586e-31'></tfset>
+</event>
+</card><card id='2'>
+<event id='44' value='1.0028715854e-23' error='3.5942522952e-26'>
+    <tfset id='1' value='1.00297559329e-23' error='3.85455630517e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='49' value='8.93883262282e-26' error='3.59283995386e-28'>
+    <tfset id='1' value='8.93879894117e-26' error='3.76714693587e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='81' value='3.84107409232e-23' error='1.28963337815e-25'>
+    <tfset id='1' value='3.84142426105e-23' error='1.33973603197e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='73' value='3.04873790889e-25' error='9.94496303456e-28'>
+    <tfset id='1' value='3.0487163092e-25' error='1.05463233001e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='52' value='6.16168540692e-24' error='3.10943753216e-26'>
+    <tfset id='1' value='6.16157230152e-24' error='3.20343806398e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='3' value='3.71288834975e-24' error='1.24369082877e-26'>
+    <tfset id='1' value='3.71266158131e-24' error='1.33316539183e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='35' value='7.11949646635e-28' error='3.16810759442e-30'>
+    <tfset id='1' value='7.12167265736e-28' error='3.15177817347e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='88' value='4.89760124141e-24' error='1.84652166482e-26'>
+    <tfset id='1' value='4.89716690353e-24' error='1.95631977902e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='76' value='6.64590874156e-27' error='4.80407008998e-29'>
+    <tfset id='1' value='6.64726261194e-27' error='4.79275238316e-29'></tfset>
+</event>
+</card><card id='3'>
+<event id='57' value='2.37619530189e-27' error='3.26645659018e-29'>
+    <tfset id='1' value='2.3761870461e-27' error='3.08622752577e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='34' value='1.94004240559e-23' error='6.5302490472e-26'>
+    <tfset id='1' value='1.94021940724e-23' error='6.9330765564e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='6' value='2.81196008713e-28' error='9.33733123989e-30'>
+    <tfset id='1' value='2.81338523666e-28' error='1.48253461876e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='39' value='5.42503674951e-30' error='4.70456935179e-32'>
+    <tfset id='1' value='5.42857979323e-30' error='2.52672461067e-32'></tfset>
+</event>
+</card><card id='4'>
+<event id='22' value='9.4648022226e-23' error='4.24369836284e-25'>
+    <tfset id='1' value='9.46338409904e-23' error='4.32131929782e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='96' value='6.02134095686e-25' error='4.78447205095e-27'>
+    <tfset id='1' value='6.02258410799e-25' error='4.8706999375e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='45' value='3.53101549204e-25' error='2.54859100082e-27'>
+    <tfset id='1' value='3.53128638917e-25' error='2.61264036455e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='83' value='5.05172940525e-25' error='1.85049322326e-27'>
+    <tfset id='1' value='5.05166272172e-25' error='2.01745811932e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='90' value='1.7269301362e-25' error='7.85937307947e-28'>
+    <tfset id='1' value='1.72664875563e-25' error='8.29662888192e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='59' value='4.14517496638e-24' error='1.40179618014e-26'>
+    <tfset id='1' value='4.14512459867e-24' error='1.53339513899e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='54' value='4.96000185145e-23' error='1.73245235598e-25'>
+    <tfset id='1' value='4.96153648713e-23' error='1.79721010386e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='37' value='1.71050722309e-26' error='9.55360720534e-29'>
+    <tfset id='1' value='1.71110790867e-26' error='9.49705448548e-29'></tfset>
+</event>
+</card><card id='3'>
+<event id='25' value='2.27663236102e-25' error='1.61379403889e-27'>
+    <tfset id='1' value='2.27697379e-25' error='1.62983212275e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='91' value='1.52305353211e-24' error='5.100012819e-27'>
+    <tfset id='1' value='1.52320364528e-24' error='5.38573221205e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='2' value='1.37449239161e-25' error='6.61724675367e-28'>
+    <tfset id='1' value='1.37449202228e-25' error='6.67643710753e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='42' value='5.57064594612e-24' error='3.24655366098e-26'>
+    <tfset id='1' value='5.57151310397e-24' error='3.28433010405e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='29' value='7.02086395934e-23' error='2.33170849063e-25'>
+    <tfset id='1' value='7.02068019173e-23' error='2.4384441522e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='24' value='6.73465779167e-30' error='3.16562527433e-32'>
+    <tfset id='1' value='6.73497719185e-30' error='3.37250794181e-32'></tfset>
+</event>
+</card><card id='2'>
+<event id='7' value='3.75650072169e-23' error='2.99805018182e-25'>
+    <tfset id='1' value='3.75643723837e-23' error='2.99268407458e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='98' value='2.90018728453e-24' error='1.0351607745e-26'>
+    <tfset id='1' value='2.90067520504e-24' error='1.05872110819e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='47' value='1.60578415817e-24' error='7.26571259576e-27'>
+    <tfset id='1' value='1.60578759113e-24' error='7.74782549981e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='86' value='7.87260122493e-23' error='2.41834396658e-25'>
+    <tfset id='1' value='7.87252448567e-23' error='2.61639359219e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='55' value='2.49758871154e-24' error='1.88093463704e-26'>
+    <tfset id='1' value='2.49788649682e-24' error='1.89445063976e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='32' value='4.86829268931e-23' error='1.6739331832e-25'>
+    <tfset id='1' value='4.86783202018e-23' error='1.791564346e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='17' value='3.42553873491e-23' error='1.1883103319e-25'>
+    <tfset id='1' value='3.42615411542e-23' error='1.25423763731e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='36' value='2.25577308786e-24' error='7.66854090465e-27'>
+    <tfset id='1' value='2.25554627036e-24' error='8.07456863714e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='74' value='3.63407044595e-27' error='1.59907710656e-29'>
+    <tfset id='1' value='3.63495649692e-27' error='1.64776850676e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='79' value='2.79475811228e-24' error='2.18215908122e-26'>
+    <tfset id='1' value='2.79619016387e-24' error='2.20907203548e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='99' value='2.8620306786e-23' error='1.28337983548e-25'>
+    <tfset id='1' value='2.86258788949e-23' error='1.31543220052e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='62' value='1.69704593079e-29' error='7.32505482509e-32'>
+    <tfset id='1' value='1.69821423802e-29' error='7.81305867275e-32'></tfset>
+</event>
+</card><card id='1'>
+<event id='50' value='2.50645763481e-22' error='7.89076416979e-25'>
+    <tfset id='1' value='2.5066111285e-22' error='8.44545658738e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='67' value='3.1215260549e-23' error='4.90571249839e-25'>
+    <tfset id='1' value='3.12175149118e-23' error='4.79436916269e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='12' value='8.24007102701e-24' error='5.9728095425e-26'>
+    <tfset id='1' value='8.24197942315e-24' error='5.93244709641e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='33' value='9.44400997127e-23' error='3.04622239365e-25'>
+    <tfset id='1' value='9.44526190938e-23' error='3.20479131609e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='75' value='1.50393631963e-25' error='6.4178933531e-28'>
+    <tfset id='1' value='1.5039148828e-25' error='6.68623676249e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='69' value='4.04296418844e-24' error='1.44843893202e-26'>
+    <tfset id='1' value='4.04297249565e-24' error='1.50304031698e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='92' value='9.84943252912e-27' error='1.46714061714e-28'>
+    <tfset id='1' value='9.85096253404e-27' error='1.39930841771e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='64' value='5.97478535837e-24' error='2.04023851636e-26'>
+    <tfset id='1' value='5.97497942801e-24' error='2.13123018325e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='41' value='7.16256594203e-25' error='2.21673887708e-27'>
+    <tfset id='1' value='7.16343509908e-25' error='2.31091536346e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='15' value='3.16005193547e-24' error='1.06658904352e-26'>
+    <tfset id='1' value='3.1596878195e-24' error='1.11546436694e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='72' value='1.84783317547e-22' error='6.3405644799e-25'>
+    <tfset id='1' value='1.84798846264e-22' error='6.56430641237e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='19' value='6.30267192671e-23' error='2.21461060039e-25'>
+    <tfset id='1' value='6.30285651016e-23' error='2.30802162341e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='14' value='4.02522794881e-27' error='1.23611817443e-28'>
+    <tfset id='1' value='4.02586501532e-27' error='1.08636473785e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='77' value='4.16466755914e-23' error='1.39763039014e-25'>
+    <tfset id='1' value='4.16461147272e-23' error='1.45837309101e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='97' value='8.79297655886e-23' error='2.88759899276e-25'>
+    <tfset id='1' value='8.7925203522e-23' error='3.01792637149e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='65' value='1.21270523958e-28' error='6.06194744576e-31'>
+    <tfset id='1' value='1.21271097907e-28' error='6.42244067641e-31'></tfset>
+</event>
+</card><card id='1'>
+<event id='48' value='4.44778381284e-28' error='2.82112650709e-30'>
+    <tfset id='1' value='4.44752847476e-28' error='2.86464233225e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='54' value='5.5272127868e-23' error='1.91307996601e-25'>
+    <tfset id='1' value='5.52774950233e-23' error='1.97655458005e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='59' value='1.31520558145e-23' error='4.37794856411e-26'>
+    <tfset id='1' value='1.31509983471e-23' error='4.74058504515e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='90' value='6.5557756038e-25' error='2.91092245318e-27'>
+    <tfset id='1' value='6.55568607382e-25' error='3.10465353308e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='83' value='5.67019918664e-25' error='1.93710600142e-27'>
+    <tfset id='1' value='5.67024544953e-25' error='2.13360127681e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='37' value='1.57370969363e-26' error='7.8879751537e-29'>
+    <tfset id='1' value='1.57392132312e-26' error='8.3305457716e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='25' value='8.98603405186e-25' error='9.69025362104e-27'>
+    <tfset id='1' value='8.9879509101e-25' error='9.63205948379e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='42' value='2.47620617802e-24' error='1.79390854653e-26'>
+    <tfset id='1' value='2.47648307044e-24' error='1.78829449765e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='91' value='5.40938715719e-25' error='1.77059073255e-27'>
+    <tfset id='1' value='5.40958410187e-25' error='1.85758208335e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='63' value='6.9955428667e-23' error='2.38635607148e-25'>
+    <tfset id='1' value='6.99512820353e-23' error='2.51367476987e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='24' value='1.51284095974e-29' error='7.51765209646e-32'>
+    <tfset id='1' value='1.51286223376e-29' error='7.75121812483e-32'></tfset>
+</event>
+</card><card id='2'>
+<event id='29' value='8.17600134452e-23' error='2.77594530706e-25'>
+    <tfset id='1' value='8.1754864072e-23' error='2.91025724355e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='47' value='5.82370762129e-25' error='2.62762922983e-27'>
+    <tfset id='1' value='5.82389681001e-25' error='2.77843510301e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='98' value='8.68297734e-25' error='3.16556710399e-27'>
+    <tfset id='1' value='8.68395238711e-25' error='3.23939188723e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='66' value='9.89032816185e-27' error='6.56684304306e-29'>
+    <tfset id='1' value='9.89039256976e-27' error='6.71001572025e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='9' value='9.58548294683e-25' error='2.53012244414e-26'>
+    <tfset id='1' value='9.58480831469e-25' error='2.19128659846e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='55' value='2.76066767769e-24' error='1.58202389782e-26'>
+    <tfset id='1' value='2.76047141047e-24' error='1.627745368e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='86' value='8.6056433331e-23' error='2.50526504996e-25'>
+    <tfset id='1' value='8.6043541442e-23' error='2.7047898776e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='32' value='4.39830570762e-23' error='1.47952740154e-25'>
+    <tfset id='1' value='4.39826925015e-23' error='1.5688892711e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='20' value='1.17017835159e-26' error='9.20196263247e-29'>
+    <tfset id='1' value='1.17055426373e-26' error='9.14588453968e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='27' value='1.97893073543e-31' error='3.38831610941e-33'>
+    <tfset id='1' value='1.9794302803e-31' error='6.04189835448e-34'></tfset>
+</event>
+</card><card id='3'>
+<event id='49' value='1.50558601679e-26' error='6.01034455264e-29'>
+    <tfset id='1' value='1.50557734171e-26' error='6.26904601462e-29'></tfset>
+</event>
+</card><card id='4'>
+<event id='44' value='9.16701439279e-24' error='3.21615075354e-26'>
+    <tfset id='1' value='9.165570558e-24' error='3.44485414474e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='93' value='1.88599193843e-29' error='1.36794774313e-31'>
+    <tfset id='1' value='1.88582543412e-29' error='1.41304432875e-31'></tfset>
+</event>
+</card><card id='3'>
+<event id='100' value='7.91134460003e-26' error='3.59026457378e-28'>
+    <tfset id='1' value='7.91176773712e-26' error='3.69277053181e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='7' value='8.43421202208e-23' error='6.5889276179e-25'>
+    <tfset id='1' value='8.43403246382e-23' error='6.6157251559e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='52' value='1.97878807638e-23' error='1.46563055806e-25'>
+    <tfset id='1' value='1.97870064378e-23' error='1.40100760303e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='81' value='9.3902967715e-23' error='2.88972964423e-25'>
+    <tfset id='1' value='9.39027947611e-23' error='3.00319384354e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='35' value='3.85551524429e-28' error='1.76400496623e-30'>
+    <tfset id='1' value='3.85569597917e-28' error='1.80180716829e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='18' value='8.0787922596e-22' error='2.71612857378e-24'>
+    <tfset id='1' value='8.07929762394e-22' error='2.83468486839e-24'></tfset>
+</event>
+</card><card id='1'>
+<event id='2' value='3.8250750849e-25' error='1.34514443088e-27'>
+    <tfset id='1' value='3.82548609429e-25' error='1.43747946866e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='57' value='5.79533050783e-27' error='1.35404082241e-28'>
+    <tfset id='1' value='5.7937991275e-27' error='1.09098297778e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='88' value='1.68010394263e-23' error='6.77910468911e-26'>
+    <tfset id='1' value='1.6805578921e-23' error='7.09701354764e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='39' value='8.87282162053e-30' error='2.46285193431e-29'>
+    <tfset id='1' value='8.93375390683e-30' error='1.24240764916e-31'></tfset>
+</event>
+</card><card id='3'>
+<event id='34' value='3.90756211383e-24' error='1.23527984798e-26'>
+    <tfset id='1' value='3.90783785083e-24' error='1.30354865434e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='11' value='1.57923010568e-23' error='5.1155021294e-26'>
+    <tfset id='1' value='1.57928380453e-23' error='5.50002715272e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='22' value='1.02744997402e-22' error='5.08484472669e-25'>
+    <tfset id='1' value='1.02739538626e-22' error='4.95912599173e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='45' value='2.92862635543e-25' error='2.7257464741e-27'>
+    <tfset id='1' value='2.92889615382e-25' error='2.76366991026e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='96' value='5.27266023674e-25' error='4.5517741143e-27'>
+    <tfset id='1' value='5.2733618311e-25' error='4.54842251551e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='64' value='2.52983737966e-23' error='8.29388976298e-26'>
+    <tfset id='1' value='2.52969064878e-23' error='8.70526619428e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='69' value='4.51252584932e-24' error='1.59043470675e-26'>
+    <tfset id='1' value='4.51308626515e-24' error='1.63889024014e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='26' value='9.0428965943e-29' error='5.42441799218e-31'>
+    <tfset id='1' value='9.04484593577e-29' error='5.48099852544e-31'></tfset>
+</event>
+</card><card id='2'>
+<event id='15' value='3.49074683058e-24' error='1.11580807974e-26'>
+    <tfset id='1' value='3.49049577443e-24' error='1.17081956497e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='60' value='1.49834908515e-23' error='5.71880634417e-26'>
+    <tfset id='1' value='1.4984809503e-23' error='5.87549437875e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='8' value='8.81995064993e-26' error='3.45371624213e-28'>
+    <tfset id='1' value='8.81991615516e-26' error='3.61120181021e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='89' value='2.99854372124e-28' error='1.17026436853e-30'>
+    <tfset id='1' value='2.99865258408e-28' error='1.23294913641e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='72' value='1.6937819637e-22' error='5.72506124503e-25'>
+    <tfset id='1' value='1.69389167566e-22' error='5.9198716865e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='14' value='4.75783435333e-27' error='2.29301686066e-28'>
+    <tfset id='1' value='4.75590422208e-27' error='1.93030934805e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='19' value='1.69690552905e-22' error='5.73368234119e-25'>
+    <tfset id='1' value='1.69676136109e-22' error='6.14851640126e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='77' value='3.80654419498e-23' error='1.28675892898e-25'>
+    <tfset id='1' value='3.80649261295e-23' error='1.31834288478e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='1' value='1.45155465833e-23' error='5.0239256931e-26'>
+    <tfset id='1' value='1.45163029312e-23' error='5.25404556001e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='65' value='4.18957935071e-28' error='2.07026961071e-30'>
+    <tfset id='1' value='4.18959707294e-28' error='2.18661960351e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='23' value='4.54330444109e-28' error='1.96250248451e-30'>
+    <tfset id='1' value='4.54481863568e-28' error='2.07750690165e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='17' value='1.31906043503e-22' error='4.41496838746e-25'>
+    <tfset id='1' value='1.3190893606e-22' error='4.63275256503e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='51' value='6.72221230664e-23' error='2.30987505092e-25'>
+    <tfset id='1' value='6.7219334889e-23' error='2.44944717896e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='79' value='2.43804059402e-24' error='2.02238733646e-26'>
+    <tfset id='1' value='2.43785834568e-24' error='2.05304163237e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='82' value='2.04097514848e-27' error='8.37541019798e-30'>
+    <tfset id='1' value='2.04156100868e-27' error='8.40554948498e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='74' value='1.35950648158e-27' error='5.69719514878e-30'>
+    <tfset id='1' value='1.35968812134e-27' error='5.88365847716e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='62' value='1.84875208016e-29' error='9.35722347259e-32'>
+    <tfset id='1' value='1.84880406741e-29' error='9.30672747879e-32'></tfset>
+</event>
+</card><card id='4'>
+<event id='5' value='4.68653230226e-24' error='8.17148047408e-26'>
+    <tfset id='1' value='4.68637904086e-24' error='8.06465187444e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='67' value='3.46115368463e-23' error='6.91107305734e-25'>
+    <tfset id='1' value='3.46245080464e-23' error='4.80395179108e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='4' value='2.96923695614e-23' error='2.00436768206e-25'>
+    <tfset id='1' value='2.96942768194e-23' error='1.95346974783e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='12' value='5.66889801074e-23' error='5.26301785457e-25'>
+    <tfset id='1' value='5.67180787852e-23' error='4.7901532683e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='58' value='9.94729631243e-29' error='3.40927809448e-31'>
+    <tfset id='1' value='9.94865718373e-29' error='3.47216919509e-31'></tfset>
+</event>
+</card><card id='1'>
+<event id='87' value='1.11797081204e-27' error='6.96199393906e-30'>
+    <tfset id='1' value='1.11803119562e-27' error='7.23274913995e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='10' value='3.49273792561e-25' error='1.50360235287e-27'>
+    <tfset id='1' value='3.49255467981e-25' error='1.55672745465e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='75' value='5.81800473181e-26' error='2.48673620428e-28'>
+    <tfset id='1' value='5.81670295637e-26' error='2.58600287537e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='13' value='7.55996736098e-25' error='2.73101172474e-27'>
+    <tfset id='1' value='7.56061036414e-25' error='2.8328827603e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='20' value='3.7133472874e-27' error='3.88372110952e-29'>
+    <tfset id='1' value='3.71365873966e-27' error='3.59197874712e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='78' value='3.06593635778e-28' error='4.61434239961e-30'>
+    <tfset id='1' value='3.06697648558e-28' error='2.85480360196e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='66' value='2.66968122569e-27' error='1.43726612504e-29'>
+    <tfset id='1' value='2.6702013193e-27' error='1.45641497143e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='98' value='3.33165809317e-24' error='1.19659017458e-26'>
+    <tfset id='1' value='3.33204228294e-24' error='1.23760253387e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='47' value='1.77347642172e-24' error='7.98113635187e-27'>
+    <tfset id='1' value='1.77338135384e-24' error='8.54650218353e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='63' value='1.71973582991e-23' error='5.88817438804e-26'>
+    <tfset id='1' value='1.71958907625e-23' error='6.2084947886e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='91' value='1.7025341769e-24' error='5.87645004468e-27'>
+    <tfset id='1' value='1.70266817039e-24' error='6.03220690953e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='70' value='1.60784337588e-28' error='2.19371424003e-30'>
+    <tfset id='1' value='1.60819522153e-28' error='2.15314399785e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='42' value='6.65150505375e-24' error='3.62135892225e-26'>
+    <tfset id='1' value='6.65156210627e-24' error='3.69728628173e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='16' value='5.91627018493e-26' error='5.92845826989e-28'>
+    <tfset id='1' value='5.91492169464e-26' error='6.01646684583e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='71' value='7.95554675496e-24' error='2.72030855571e-26'>
+    <tfset id='1' value='7.9563525795e-24' error='2.85378370342e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='68' value='2.02325153475e-26' error='7.99022764406e-29'>
+    <tfset id='1' value='2.0235177764e-26' error='8.37798125113e-29'></tfset>
+</event>
+</card><card id='3'>
+<event id='11' value='4.79599816161e-24' error='1.61549150716e-26'>
+    <tfset id='1' value='4.79572239692e-24' error='1.73942630237e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='34' value='2.19200577515e-23' error='6.97833678396e-26'>
+    <tfset id='1' value='2.19216417535e-23' error='7.44165921869e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='76' value='5.63844730162e-27' error='2.66539984653e-29'>
+    <tfset id='1' value='5.64058889186e-27' error='2.71328311952e-29'></tfset>
+</event>
+</card><card id='3'>
+<event id='18' value='1.86162123113e-22' error='6.39799088968e-25'>
+    <tfset id='1' value='1.86179097045e-22' error='6.68108492642e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='35' value='8.49324953608e-28' error='3.9765009302e-30'>
+    <tfset id='1' value='8.49546155283e-28' error='3.85917873767e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='80' value='8.70422876914e-25' error='3.02963907756e-27'>
+    <tfset id='1' value='8.70562732264e-25' error='3.27268201674e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='73' value='2.66903016695e-25' error='8.94307889287e-28'>
+    <tfset id='1' value='2.66877092873e-25' error='9.50409268374e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='61' value='1.14558424532e-27' error='4.54506942511e-30'>
+    <tfset id='1' value='1.14573694309e-27' error='4.64166473318e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='100' value='5.53825526446e-25' error='2.83989623451e-27'>
+    <tfset id='1' value='5.54137873757e-25' error='2.90604845581e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='49' value='1.10320390304e-25' error='7.87696681421e-28'>
+    <tfset id='1' value='1.1033863426e-25' error='7.72949494603e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='23' value='1.65171348739e-28' error='7.21303339445e-31'>
+    <tfset id='1' value='1.65253830791e-28' error='7.08643171974e-31'></tfset>
+</event>
+</card><card id='4'>
+<event id='30' value='1.54650142789e-27' error='1.21019163673e-29'>
+    <tfset id='1' value='1.54694494644e-27' error='1.22606565102e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='8' value='1.29745873437e-25' error='5.90011839754e-28'>
+    <tfset id='1' value='1.29726625126e-25' error='6.18362866961e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='97' value='7.6176305336e-23' error='2.62336587733e-25'>
+    <tfset id='1' value='7.61734756935e-23' error='2.73927627259e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='48' value='3.8842552778e-28' error='1.74155850462e-30'>
+    <tfset id='1' value='3.88435091512e-28' error='1.79714019053e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='85' value='5.04778578199e-23' error='1.65396681837e-25'>
+    <tfset id='1' value='5.04808293121e-23' error='1.72945064901e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='56' value='3.4861732097e-26' error='5.3601865169e-28'>
+    <tfset id='1' value='3.4874850572e-26' error='5.22524445144e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='31' value='1.55044925075e-27' error='7.64503640531e-30'>
+    <tfset id='1' value='1.55084789395e-27' error='7.80825874135e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='89' value='1.14184819663e-28' error='4.62500678092e-31'>
+    <tfset id='1' value='1.14217384301e-28' error='4.50545613354e-31'></tfset>
+</event>
+</card><card id='4'>
+<event id='84' value='4.24760518937e-25' error='4.79092836114e-27'>
+    <tfset id='1' value='4.24701853882e-25' error='4.39079725051e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='53' value='7.32041903095e-24' error='2.44130323579e-26'>
+    <tfset id='1' value='7.32185869753e-24' error='2.55259953879e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='60' value='4.1401851295e-24' error='1.61367623995e-26'>
+    <tfset id='1' value='4.14011836207e-24' error='1.6569889687e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='38' value='3.36718219053e-25' error='1.1794559492e-27'>
+    <tfset id='1' value='3.36738827113e-25' error='1.22090814336e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='26' value='3.0989532445e-29' error='1.88675497698e-31'>
+    <tfset id='1' value='3.10075617517e-29' error='1.88475682353e-31'></tfset>
+</event>
+</card><card id='5'>
+<event id='92' value='7.81464283576e-27' error='1.27894020243e-28'>
+    <tfset id='1' value='7.81609727343e-27' error='1.26750987466e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='1' value='3.28179516686e-23' error='1.14408036586e-25'>
+    <tfset id='1' value='3.28199151277e-23' error='1.19437856994e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='41' value='6.31449079404e-25' error='2.02681377196e-27'>
+    <tfset id='1' value='6.3147939688e-25' error='2.11700063183e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='75' value='1.715328617e-25' error='7.36808825059e-28'>
+    <tfset id='1' value='1.71516916817e-25' error='7.72037768738e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='87' value='2.66846831443e-28' error='1.50158105737e-30'>
+    <tfset id='1' value='2.66863564615e-28' error='1.56155506324e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='58' value='2.78024699538e-29' error='1.01380560284e-31'>
+    <tfset id='1' value='2.78028175747e-29' error='1.04480711596e-31'></tfset>
+</event>
+</card><card id='2'>
+<event id='40' value='3.91921509161e-28' error='1.74739053628e-30'>
+    <tfset id='1' value='3.91983540736e-28' error='1.76991528412e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='33' value='8.4725262868e-23' error='2.92563045157e-25'>
+    <tfset id='1' value='8.47065528725e-23' error='3.08482181514e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='5' value='2.1750825381e-23' error='4.59418219393e-25'>
+    <tfset id='1' value='2.17716982926e-23' error='4.09759307941e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='21' value='2.70483298767e-23' error='9.65059687407e-26'>
+    <tfset id='1' value='2.70493498335e-23' error='1.00169470823e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='95' value='2.70231592449e-24' error='9.34589592724e-27'>
+    <tfset id='1' value='2.70251762009e-24' error='9.87799429009e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='46' value='1.20716605409e-25' error='5.08006604628e-28'>
+    <tfset id='1' value='1.20728659276e-25' error='5.35932313487e-28'></tfset>
+</event>
+</card><card id='4'>
+<event id='28' value='2.16383798255e-24' error='7.43673630191e-27'>
+    <tfset id='1' value='2.16388884956e-24' error='7.71654139011e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='94' value='1.42210036917e-22' error='1.29208105923e-24'>
+    <tfset id='1' value='1.42230597989e-22' error='1.21838158222e-24'></tfset>
+</event>
+</card><card id='5'>
+<event id='99' value='2.4264703126e-23' error='1.10163223821e-25'>
+    <tfset id='1' value='2.42677578119e-23' error='1.12987891889e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='10' value='5.40603988612e-25' error='2.33305854497e-27'>
+    <tfset id='1' value='5.40603147934e-25' error='2.41001575383e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='50' value='2.27514843892e-22' error='7.71683229103e-25'>
+    <tfset id='1' value='2.27559146662e-22' error='8.15021251599e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='43' value='1.5451791084e-22' error='5.29330233494e-25'>
+    <tfset id='1' value='1.54545867235e-22' error='5.54487015362e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='74' value='4.0738262427e-27' error='1.6950419966e-29'>
+    <tfset id='1' value='4.07448307366e-27' error='1.71972433938e-29'></tfset>
+</event>
+</card><card id='3'>
+<event id='82' value='5.38733487102e-28' error='4.33505889251e-30'>
+    <tfset id='1' value='5.38823771019e-28' error='2.30307364867e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='51' value='3.28721135473e-23' error='1.12162460167e-25'>
+    <tfset id='1' value='3.28680234297e-23' error='1.18764597093e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='4' value='8.93641415432e-23' error='7.37770495693e-25'>
+    <tfset id='1' value='8.93851477673e-23' error='7.28853300826e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='36' value='1.91614486588e-24' error='6.62385204444e-27'>
+    <tfset id='1' value='1.91589367163e-24' error='6.98076236766e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='94' value='3.71542035575e-22' error='3.06314574817e-24'>
+    <tfset id='1' value='3.71612342967e-22' error='2.98370438274e-24'></tfset>
+</event>
+</card><card id='3'>
+<event id='62' value='1.15386867275e-29' error='6.71127563205e-32'>
+    <tfset id='1' value='1.15385922251e-29' error='6.41090576252e-32'></tfset>
+</event>
+</card><card id='1'>
+<event id='43' value='3.04742261437e-22' error='1.06798157185e-24'>
+    <tfset id='1' value='3.04749006395e-22' error='1.1143435727e-24'></tfset>
+</event>
+</card><card id='4'>
+<event id='17' value='5.1162406281e-23' error='1.65226375028e-25'>
+    <tfset id='1' value='5.11652503469e-23' error='1.71935489666e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='74' value='1.98227348218e-27' error='7.99444702478e-30'>
+    <tfset id='1' value='1.98256546041e-27' error='8.22213509878e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='79' value='7.66946943847e-24' error='6.57459333661e-26'>
+    <tfset id='1' value='7.67176198338e-24' error='6.62228127785e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='12' value='1.58635173401e-23' error='1.01437091395e-25'>
+    <tfset id='1' value='1.5866114392e-23' error='1.024217793e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='40' value='8.89410402169e-28' error='5.68312900007e-30'>
+    <tfset id='1' value='8.89373653091e-28' error='5.66939628584e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='75' value='8.30675860564e-26' error='4.04289818794e-28'>
+    <tfset id='1' value='8.30723170359e-26' error='4.22115098112e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='95' value='7.9687161346e-24' error='2.72439803016e-26'>
+    <tfset id='1' value='7.9685473698e-24' error='2.89932820607e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='67' value='2.03414100405e-23' error='3.04495277332e-25'>
+    <tfset id='1' value='2.03480469583e-23' error='2.76024580484e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='46' value='2.70240176984e-25' error='1.23578467007e-27'>
+    <tfset id='1' value='2.70212987199e-25' error='1.30481219038e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='15' value='2.21198238588e-24' error='7.1977388112e-27'>
+    <tfset id='1' value='2.21196400014e-24' error='7.57796046935e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='38' value='5.83288793365e-25' error='2.06347094405e-27'>
+    <tfset id='1' value='5.83328944862e-25' error='2.15658221483e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='72' value='5.05118704872e-22' error='1.63611983526e-24'>
+    <tfset id='1' value='5.05150762125e-22' error='1.69375400861e-24'></tfset>
+</event>
+</card><card id='3'>
+<event id='69' value='2.84085218476e-24' error='1.02595458165e-26'>
+    <tfset id='1' value='2.84107351784e-24' error='1.06288453686e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='64' value='9.42622386278e-24' error='3.27110909022e-26'>
+    <tfset id='1' value='9.42685814613e-24' error='3.40864247611e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='65' value='1.77757048834e-28' error='8.58630542898e-31'>
+    <tfset id='1' value='1.77781757905e-28' error='9.07872843447e-31'></tfset>
+</event>
+</card><card id='4'>
+<event id='19' value='8.20854847232e-23' error='2.7770487453e-25'>
+    <tfset id='1' value='8.2086790805e-23' error='2.96836690765e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='14' value='2.7835119024e-27' error='1.75161721228e-28'>
+    <tfset id='1' value='2.78414813456e-27' error='1.02277358604e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='31' value='3.82703696783e-27' error='2.26581652186e-29'>
+    <tfset id='1' value='3.82817835245e-27' error='2.33723717249e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='77' value='7.88514455349e-23' error='2.66341970261e-25'>
+    <tfset id='1' value='7.88517313549e-23' error='2.79360110209e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='81' value='5.0097372607e-23' error='1.54336777386e-25'>
+    <tfset id='1' value='5.00964647313e-23' error='1.60753869893e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='80' value='1.76130009903e-24' error='5.87926141387e-27'>
+    <tfset id='1' value='1.76096826208e-24' error='6.47809376282e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='52' value='8.60757225469e-24' error='4.23597554935e-26'>
+    <tfset id='1' value='8.60789560472e-24' error='4.36748120377e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='35' value='5.09428250501e-28' error='2.62839127778e-30'>
+    <tfset id='1' value='5.09415231245e-28' error='2.64699824745e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='10' value='1.20040277665e-24' error='5.47704899417e-27'>
+    <tfset id='1' value='1.20048039691e-24' error='5.65046581843e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='27' value='1.52805971961e-31' error='6.7076857968e-34'>
+    <tfset id='1' value='1.52826943464e-31' error='6.93399157689e-34'></tfset>
+</event>
+</card><card id='2'>
+<event id='100' value='1.58844534775e-25' error='7.30969112564e-28'>
+    <tfset id='1' value='1.58867395975e-25' error='7.62345729273e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='4' value='3.47020923562e-23' error='2.53141597696e-25'>
+    <tfset id='1' value='3.47069929059e-23' error='2.51898751699e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='93' value='3.58058851772e-29' error='2.52238177647e-31'>
+    <tfset id='1' value='3.58376403942e-29' error='2.53368175358e-31'></tfset>
+</event>
+</card><card id='5'>
+<event id='44' value='2.095089593e-23' error='7.46580967475e-26'>
+    <tfset id='1' value='2.09537727623e-23' error='8.00486556379e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='49' value='3.19478507714e-26' error='1.82983450879e-28'>
+    <tfset id='1' value='3.19698226735e-26' error='1.69248365597e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='22' value='6.82381687915e-23' error='2.94733363358e-25'>
+    <tfset id='1' value='6.82371349936e-23' error='3.06407470149e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='96' value='1.56062539778e-24' error='1.5022864349e-26'>
+    <tfset id='1' value='1.56062380615e-24' error='1.40588576436e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='5' value='5.43347535715e-24' error='8.68121840283e-26'>
+    <tfset id='1' value='5.4353472198e-24' error='8.50692172816e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='45' value='1.10896651601e-24' error='1.30099992544e-26'>
+    <tfset id='1' value='1.10935026336e-24' error='1.3018729553e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='88' value='7.19059546063e-24' error='2.51552810474e-26'>
+    <tfset id='1' value='7.18954182745e-24' error='2.69022611843e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='57' value='3.05002077001e-27' error='5.08854824689e-29'>
+    <tfset id='1' value='3.05149045582e-27' error='4.82933869755e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='34' value='7.0849763953e-24' error='2.43425574213e-26'>
+    <tfset id='1' value='7.08621857639e-24' error='2.56011051504e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='39' value='1.51357122531e-29' error='2.76054619819e-31'>
+    <tfset id='1' value='1.51302765343e-29' error='2.36873518993e-31'></tfset>
+</event>
+</card><card id='4'>
+<event id='25' value='3.41464581992e-25' error='3.32505852351e-27'>
+    <tfset id='1' value='3.41479574269e-25' error='3.30710746809e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='91' value='7.79233912152e-25' error='2.80864608833e-27'>
+    <tfset id='1' value='7.79155864668e-25' error='2.92155990808e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='42' value='3.39000348018e-24' error='2.13892587866e-26'>
+    <tfset id='1' value='3.39053314057e-24' error='2.17486021638e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='83' value='3.82423422486e-25' error='1.36378107949e-27'>
+    <tfset id='1' value='3.82422239712e-25' error='1.47186733822e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='71' value='1.49659176587e-23' error='5.0513359908e-26'>
+    <tfset id='1' value='1.49658343383e-23' error='5.27723157177e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='90' value='2.66712168084e-25' error='1.21194339344e-27'>
+    <tfset id='1' value='2.66542668698e-25' error='1.25961822581e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='59' value='5.56973060189e-24' error='1.97466802293e-26'>
+    <tfset id='1' value='5.56947153626e-24' error='2.11340718067e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='54' value='3.95686975547e-23' error='1.36872252147e-25'>
+    <tfset id='1' value='3.95795703557e-23' error='1.42072007137e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='37' value='2.60829316371e-26' error='1.24696416529e-28'>
+    <tfset id='1' value='2.60888407356e-26' error='1.3251082748e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='1' value='9.4347910526e-23' error='3.33803209889e-25'>
+    <tfset id='1' value='9.43299392243e-23' error='3.49714608428e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='86' value='5.11264483033e-23' error='1.7179428795e-25'>
+    <tfset id='1' value='5.11238164746e-23' error='1.84567814542e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='78' value='6.44367086889e-28' error='7.51746865573e-30'>
+    <tfset id='1' value='6.44777143841e-28' error='6.97747734979e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='55' value='1.91583490295e-24' error='1.30672893524e-26'>
+    <tfset id='1' value='1.91645906323e-24' error='1.29579143291e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='8' value='2.60048151722e-25' error='1.17453239042e-27'>
+    <tfset id='1' value='2.60073075128e-25' error='1.22116814472e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='32' value='9.30134190156e-23' error='3.18367506755e-25'>
+    <tfset id='1' value='9.30153208196e-23' error='3.34540744505e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='29' value='4.8791410856e-23' error='1.64887383246e-25'>
+    <tfset id='1' value='4.87941746086e-23' error='1.71695350072e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='24' value='8.33575695742e-30' error='3.96465756048e-32'>
+    <tfset id='1' value='8.33644259721e-30' error='4.09475257149e-32'></tfset>
+</event>
+</card><card id='2'>
+<event id='98' value='1.32929899829e-24' error='4.7435905861e-27'>
+    <tfset id='1' value='1.32938983759e-24' error='4.89071977049e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='47' value='8.23356544907e-25' error='3.6950982492e-27'>
+    <tfset id='1' value='8.22990101769e-25' error='4.03158886667e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='21' value='6.05381691031e-23' error='2.06530592558e-25'>
+    <tfset id='1' value='6.0538361518e-23' error='2.15300833428e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='46' value='8.55612050044e-26' error='3.7621394154e-28'>
+    <tfset id='1' value='8.55733298596e-26' error='3.94495123348e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='67' value='9.3101862261e-23' error='1.45920710067e-24'>
+    <tfset id='1' value='9.3085461423e-23' error='1.44273055615e-24'></tfset>
+</event>
+</card><card id='3'>
+<event id='95' value='1.38725180561e-24' error='4.85878248503e-27'>
+    <tfset id='1' value='1.38735717601e-24' error='5.11052436866e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='58' value='4.24715953615e-29' error='1.59579541712e-31'>
+    <tfset id='1' value='4.2467589208e-29' error='1.65257756099e-31'></tfset>
+</event>
+</card><card id='2'>
+<event id='87' value='4.38682300492e-28' error='2.57676679983e-30'>
+    <tfset id='1' value='4.38814295444e-28' error='2.6397186428e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='33' value='3.70354961009e-23' error='1.22663272463e-25'>
+    <tfset id='1' value='3.703491872e-23' error='1.28436006429e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='40' value='2.5659028045e-28' error='1.44899734712e-30'>
+    <tfset id='1' value='2.56670318517e-28' error='1.44274519956e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='51' value='4.1637428353e-23' error='1.38875660289e-25'>
+    <tfset id='1' value='4.16337824759e-23' error='1.46495980562e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='82' value='8.29818305101e-28' error='3.03578274855e-30'>
+    <tfset id='1' value='8.29971026642e-28' error='3.19402651711e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='36' value='9.2626983747e-25' error='3.23015348459e-27'>
+    <tfset id='1' value='9.26187546171e-25' error='3.33974575072e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='28' value='6.01487255261e-24' error='2.0045892777e-26'>
+    <tfset id='1' value='6.01534175903e-24' error='2.07686986863e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='43' value='1.11458789923e-22' error='3.8025821996e-25'>
+    <tfset id='1' value='1.11475552636e-22' error='3.99885739803e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='50' value='7.66716463878e-23' error='2.56017652692e-25'>
+    <tfset id='1' value='7.66863602853e-23' error='2.72020228778e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='99' value='1.70914060098e-23' error='7.06783940546e-26'>
+    <tfset id='1' value='1.7092555688e-23' error='7.26199314822e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='62' value='4.40509832163e-29' error='2.27909293701e-31'>
+    <tfset id='1' value='4.40842049892e-29' error='2.33907413302e-31'></tfset>
+</event>
+</card><card id='3'>
+<event id='94' value='8.4132037353e-23' error='7.45104557715e-25'>
+    <tfset id='1' value='8.41248004314e-23' error='7.36149320614e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='56' value='1.3167395098e-25' error='2.27306869724e-27'>
+    <tfset id='1' value='1.31685099332e-25' error='2.17572291879e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='3' value='4.22142182093e-24' error='1.43442960083e-26'>
+    <tfset id='1' value='4.22149928689e-24' error='1.52376491009e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='85' value='1.00411316792e-22' error='3.42832094334e-25'>
+    <tfset id='1' value='1.00415519176e-22' error='3.55638896536e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='31' value='9.81606608568e-28' error='8.15276556815e-30'>
+    <tfset id='1' value='9.82011263194e-28' error='7.58052899159e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='14' value='1.26198998473e-26' error='4.12868679392e-28'>
+    <tfset id='1' value='1.26235816879e-26' error='3.94772808125e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='30' value='3.72797112889e-27' error='3.30465505594e-29'>
+    <tfset id='1' value='3.72821249195e-27' error='3.25971098159e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='23' value='2.36591388091e-28' error='1.05833004398e-30'>
+    <tfset id='1' value='2.36686350033e-28' error='1.10772413796e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='48' value='2.39410674581e-28' error='1.16663316499e-30'>
+    <tfset id='1' value='2.39421848117e-28' error='1.21398088834e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='97' value='3.79091936057e-23' error='1.22912067035e-25'>
+    <tfset id='1' value='3.79075112078e-23' error='1.28929894135e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='26' value='4.45434806636e-29' error='6.00716457889e-31'>
+    <tfset id='1' value='4.45501625391e-29' error='3.54074101965e-31'></tfset>
+</event>
+</card><card id='4'>
+<event id='41' value='2.88016807491e-25' error='9.86791589153e-28'>
+    <tfset id='1' value='2.88041184739e-25' error='1.03046086571e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='69' value='1.08270491107e-23' error='3.9010142487e-26'>
+    <tfset id='1' value='1.08276318877e-23' error='4.03924822982e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='92' value='2.40503211868e-27' error='4.16594113141e-29'>
+    <tfset id='1' value='2.40493354374e-27' error='4.25327356296e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='60' value='6.49275680204e-24' error='2.59322003416e-26'>
+    <tfset id='1' value='6.49287151642e-24' error='2.66407818667e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='53' value='1.86987053561e-23' error='6.11422610876e-26'>
+    <tfset id='1' value='1.86982715105e-23' error='6.43755246752e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='6' value='3.1809987677e-28' error='1.36757754344e-30'>
+    <tfset id='1' value='3.18076101792e-28' error='1.42373152015e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='84' value='1.37512900013e-24' error='2.62549773022e-26'>
+    <tfset id='1' value='1.37480007369e-24' error='1.64776836633e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='89' value='1.5004136293e-28' error='5.70498356978e-31'>
+    <tfset id='1' value='1.50073438918e-28' error='5.9642504106e-31'></tfset>
+</event>
+</card><card id='3'>
+<event id='38' value='2.58195871346e-25' error='9.41074390773e-28'>
+    <tfset id='1' value='2.58181111946e-25' error='9.70945073705e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='15' value='8.56336717795e-24' error='2.73585932379e-26'>
+    <tfset id='1' value='8.56338836823e-24' error='2.89124153073e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='11' value='7.15196617619e-24' error='2.36030351662e-26'>
+    <tfset id='1' value='7.15110638872e-24' error='2.53997082553e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='76' value='1.51773149836e-27' error='9.17475499887e-30'>
+    <tfset id='1' value='1.51812928302e-27' error='7.97177148291e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='4' value='1.7899191294e-23' error='1.28106729679e-25'>
+    <tfset id='1' value='1.79051743895e-23' error='1.2695852737e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='68' value='6.12953258885e-26' error='2.46235826316e-28'>
+    <tfset id='1' value='6.12998289595e-26' error='2.61018046438e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='22' value='2.40641507844e-22' error='1.13903687545e-24'>
+    <tfset id='1' value='2.40670050947e-22' error='1.13935603887e-24'></tfset>
+</event>
+</card><card id='4'>
+<event id='10' value='4.93785052686e-25' error='2.25370982866e-27'>
+    <tfset id='1' value='4.93811694331e-25' error='2.25158504729e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='61' value='2.71832438548e-27' error='1.19558582261e-29'>
+    <tfset id='1' value='2.7194539486e-27' error='1.20251082064e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='27' value='3.40946196489e-31' error='1.54281847618e-33'>
+    <tfset id='1' value='3.4112822183e-31' error='1.61672018582e-33'></tfset>
+</event>
+</card><card id='2'>
+<event id='18' value='3.0902359455e-22' error='1.08846072338e-24'>
+    <tfset id='1' value='3.09045898141e-22' error='1.1339217819e-24'></tfset>
+</event>
+</card><card id='3'>
+<event id='5' value='1.78381896824e-24' error='3.66060890475e-26'>
+    <tfset id='1' value='1.78383766862e-24' error='3.55921505388e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='73' value='1.30955649497e-25' error='4.34364732732e-28'>
+    <tfset id='1' value='1.30945768412e-25' error='4.60434651995e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='80' value='6.08510480056e-25' error='2.03088541062e-27'>
+    <tfset id='1' value='6.08405786603e-25' error='2.20363277586e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='66' value='4.18375952972e-27' error='2.49003562893e-29'>
+    <tfset id='1' value='4.18503503313e-27' error='2.47576622591e-29'></tfset>
+</event>
+</card><card id='4'>
+<event id='1' value='2.75051510589e-23' error='9.46349641517e-26'>
+    <tfset id='1' value='2.75043041664e-23' error='9.97531323653e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='29' value='2.2503131513e-22' error='7.37492308003e-25'>
+    <tfset id='1' value='2.25031616943e-22' error='7.62605775533e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='20' value='5.39671917554e-27' error='3.43938472245e-29'>
+    <tfset id='1' value='5.39723362406e-27' error='3.49054084235e-29'></tfset>
+</event>
+</card><card id='5'>
+<event id='13' value='2.47753762499e-24' error='1.02784745006e-26'>
+    <tfset id='1' value='2.47795696706e-24' error='1.03917397279e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='55' value='5.27022574198e-24' error='3.27644702778e-26'>
+    <tfset id='1' value='5.27053910913e-24' error='3.25944620315e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='78' value='2.04566467151e-28' error='2.11196098593e-30'>
+    <tfset id='1' value='2.04664912335e-28' error='2.12095243202e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='86' value='2.40253622582e-22' error='7.7805554918e-25'>
+    <tfset id='1' value='2.40208167206e-22' error='8.36267271785e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='16' value='1.49651392476e-25' error='1.60484540724e-27'>
+    <tfset id='1' value='1.49665788245e-25' error='1.64531498302e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='54' value='1.02617962593e-22' error='3.63635998571e-25'>
+    <tfset id='1' value='1.02625107777e-22' error='3.79508139603e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='71' value='5.94111690135e-24' error='1.96492796852e-26'>
+    <tfset id='1' value='5.94153710108e-24' error='2.07011349805e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='83' value='1.29516367872e-24' error='4.44573862269e-27'>
+    <tfset id='1' value='1.29479541357e-24' error='4.87441236765e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='70' value='2.57160214533e-28' error='3.75782858958e-30'>
+    <tfset id='1' value='2.57133064962e-28' error='3.77823017635e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='63' value='2.76949770123e-23' error='9.45577103701e-26'>
+    <tfset id='1' value='2.76962003968e-23' error='9.87976969009e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='8' value='1.18571126455e-25' error='5.66634149655e-28'>
+    <tfset id='1' value='1.18600428098e-25' error='5.87681987888e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='77' value='8.92211268924e-23' error='2.87290228625e-25'>
+    <tfset id='1' value='8.92317271856e-23' error='2.97027308863e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='85' value='3.96777468631e-23' error='1.2642850921e-25'>
+    <tfset id='1' value='3.96760796095e-23' error='1.31782868316e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='56' value='1.72699796723e-26' error='3.17848040309e-28'>
+    <tfset id='1' value='1.72762272738e-26' error='3.13078942863e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='7' value='7.50107377721e-23' error='5.21610116127e-25'>
+    <tfset id='1' value='7.50164533017e-23' error='5.18048331115e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='31' value='3.34320553382e-27' error='2.9456825724e-29'>
+    <tfset id='1' value='3.34444906981e-27' error='2.62733103917e-29'></tfset>
+</event>
+</card><card id='4'>
+<event id='23' value='2.2683702862e-28' error='1.16707016603e-30'>
+    <tfset id='1' value='2.26876135153e-28' error='1.2147376308e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='30' value='1.16736177985e-27' error='9.26175155741e-30'>
+    <tfset id='1' value='1.16741806842e-27' error='9.48296234497e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='97' value='4.19742738098e-23' error='1.36189279478e-25'>
+    <tfset id='1' value='4.19773916027e-23' error='1.42536520762e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='48' value='2.51817881659e-28' error='1.19329379769e-30'>
+    <tfset id='1' value='2.51857929733e-28' error='1.23170400235e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='26' value='3.8517661038e-29' error='2.25818097166e-31'>
+    <tfset id='1' value='3.85347947474e-29' error='2.18090855945e-31'></tfset>
+</event>
+</card><card id='2'>
+<event id='92' value='2.94841606181e-27' error='4.28605490567e-29'>
+    <tfset id='1' value='2.94876819874e-27' error='4.2596000474e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='41' value='3.14538140554e-25' error='9.92359067137e-28'>
+    <tfset id='1' value='3.14536931265e-25' error='1.03985761975e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='89' value='1.42570769634e-28' error='5.57356918684e-31'>
+    <tfset id='1' value='1.42614983623e-28' error='5.88918802322e-31'></tfset>
+</event>
+</card><card id='1'>
+<event id='72' value='5.64256293032e-22' error='1.75842068645e-24'>
+    <tfset id='1' value='5.6424297236e-22' error='1.81688308975e-24'></tfset>
+</event>
+</card><card id='3'>
+<event id='84' value='2.3654393627e-25' error='3.39146651671e-27'>
+    <tfset id='1' value='2.36537319255e-25' error='2.99202412394e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='53' value='4.96198154665e-24' error='1.71455532305e-26'>
+    <tfset id='1' value='4.96222603978e-24' error='1.80269487336e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='60' value='5.81569027973e-24' error='2.1624756639e-26'>
+    <tfset id='1' value='5.81617580747e-24' error='2.22873246088e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='38' value='4.81716947835e-25' error='1.77359491584e-27'>
+    <tfset id='1' value='4.81748188903e-25' error='1.85501723647e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='2' value='3.42642875025e-25' error='1.36481734062e-27'>
+    <tfset id='1' value='3.42724733761e-25' error='1.42406588973e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='21' value='1.8594939918e-23' error='6.22744102521e-26'>
+    <tfset id='1' value='1.85958403269e-23' error='6.46956904934e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='95' value='6.9491920051e-24' error='2.42170424231e-26'>
+    <tfset id='1' value='6.95011315243e-24' error='2.53296717411e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='6' value='1.36485065535e-28' error='7.50398352421e-31'>
+    <tfset id='1' value='1.36492538179e-28' error='7.80907320581e-31'></tfset>
+</event>
+</card><card id='5'>
+<event id='46' value='2.32721172674e-25' error='1.12930570567e-27'>
+    <tfset id='1' value='2.32732429581e-25' error='1.17641609993e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='87' value='3.89949923972e-28' error='2.0752530272e-30'>
+    <tfset id='1' value='3.90063834977e-28' error='2.09355546024e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='58' value='3.79058072202e-29' error='1.44392564972e-31'>
+    <tfset id='1' value='3.78930173302e-29' error='1.49700751453e-31'></tfset>
+</event>
+</card><card id='5'>
+<event id='40' value='7.66602736815e-28' error='4.68349715994e-30'>
+    <tfset id='1' value='7.66826686785e-28' error='4.78769809444e-30'></tfset>
+</event>
+</card><card id='2'>
+<event id='33' value='4.02442062809e-23' error='1.33482095524e-25'>
+    <tfset id='1' value='4.02457605069e-23' error='1.38888202848e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='79' value='8.88280102013e-24' error='7.07428845378e-26'>
+    <tfset id='1' value='8.88201870547e-24' error='7.23536785946e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='82' value='7.44393392334e-28' error='2.78229821911e-30'>
+    <tfset id='1' value='7.44556622976e-28' error='2.85832485985e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='51' value='3.76736509261e-23' error='1.2952550045e-25'>
+    <tfset id='1' value='3.76760814172e-23' error='1.37336328338e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='9' value='8.44961395273e-25' error='2.19252194112e-26'>
+    <tfset id='1' value='8.45109480867e-25' error='1.76024392527e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='36' value='1.04395408979e-24' error='3.58077836102e-27'>
+    <tfset id='1' value='1.04395182067e-24' error='3.68751417424e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='28' value='1.28292663556e-24' error='4.26382734031e-27'>
+    <tfset id='1' value='1.28304430766e-24' error='4.44500415366e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='3' value='1.83705521059e-24' error='6.05997393688e-27'>
+    <tfset id='1' value='1.8370372988e-24' error='6.49167188867e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='94' value='3.36035514808e-22' error='4.28166999635e-24'>
+    <tfset id='1' value='3.36103231062e-22' error='3.35366320172e-24'></tfset>
+</event>
+</card><card id='2'>
+<event id='99' value='1.9383168183e-23' error='1.10318251568e-25'>
+    <tfset id='1' value='1.93852529413e-23' error='1.12140743079e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='50' value='8.36492439698e-23' error='2.68250732229e-25'>
+    <tfset id='1' value='8.36606575896e-23' error='2.85694721393e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='43' value='2.64459610675e-22' error='9.13277763411e-25'>
+    <tfset id='1' value='2.64460083836e-22' error='9.44174159709e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='66' value='3.64566064307e-27' error='2.21016443375e-29'>
+    <tfset id='1' value='3.64588176835e-27' error='2.20836024415e-29'></tfset>
+</event>
+</card><card id='3'>
+<event id='13' value='4.36835228172e-25' error='1.96763005161e-27'>
+    <tfset id='1' value='4.3681400116e-25' error='2.07350462859e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='20' value='4.76625000226e-27' error='3.97258078715e-29'>
+    <tfset id='1' value='4.76746070882e-27' error='3.83439229832e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='32' value='1.07212111383e-22' error='3.59825451463e-25'>
+    <tfset id='1' value='1.07216298957e-22' error='3.83166191412e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='78' value='5.70009541279e-28' error='6.11772689654e-30'>
+    <tfset id='1' value='5.70115070316e-28' error='5.82680767805e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='16' value='3.91165797424e-26' error='3.71946150473e-28'>
+    <tfset id='1' value='3.9124097668e-26' error='3.79209093897e-28'></tfset>
+</event>
+</card><card id='1'>
+<event id='37' value='2.97711476049e-26' error='1.37010162394e-28'>
+    <tfset id='1' value='2.97752706289e-26' error='1.472968253e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='71' value='1.29257630129e-23' error='4.32231999874e-26'>
+    <tfset id='1' value='1.29262674399e-23' error='4.50733178477e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='63' value='2.49021168405e-23' error='8.47589664115e-26'>
+    <tfset id='1' value='2.49033619337e-23' error='8.97162622219e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='70' value='1.35482962121e-28' error='1.88511999678e-30'>
+    <tfset id='1' value='1.35490673751e-28' error='1.65834916659e-30'></tfset>
+</event>
+</card><card id='4'>
+<event id='11' value='6.53633782667e-24' error='2.18884426662e-26'>
+    <tfset id='1' value='6.53360929063e-24' error='2.36289229765e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='39' value='2.30080067793e-29' error='4.04529562652e-31'>
+    <tfset id='1' value='2.30190660026e-29' error='3.9865187014e-31'></tfset>
+</event>
+</card><card id='2'>
+<event id='76' value='1.84139922919e-27' error='9.46171861268e-30'>
+    <tfset id='1' value='1.84185602755e-27' error='9.76645863867e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='68' value='1.20053318273e-26' error='6.10052810796e-29'>
+    <tfset id='1' value='1.20052336458e-26' error='6.24102682268e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='96' value='1.79445449683e-24' error='1.84306570457e-26'>
+    <tfset id='1' value='1.7946972991e-24' error='1.73301479582e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='45' value='1.31644596794e-24' error='1.0783251071e-26'>
+    <tfset id='1' value='1.31696505455e-24' error='1.07335572943e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='61' value='7.93173489446e-28' error='3.37706952569e-30'>
+    <tfset id='1' value='7.93525870974e-28' error='3.44249769749e-30'></tfset>
+</event>
+</card><card id='1'>
+<event id='93' value='3.93971487239e-29' error='2.6429332975e-31'>
+    <tfset id='1' value='3.9416867749e-29' error='2.5828103627e-31'></tfset>
+</event>
+</card><card id='1'>
+<event id='44' value='2.33920976459e-23' error='8.18751366945e-26'>
+    <tfset id='1' value='2.33833271556e-23' error='8.8441749952e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='18' value='2.80627194287e-22' error='9.64655906692e-25'>
+    <tfset id='1' value='2.80610021976e-22' error='1.00736945719e-24'></tfset>
+</event>
+</card><card id='5'>
+<event id='80' value='1.54293148873e-24' error='5.20232648288e-27'>
+    <tfset id='1' value='1.54290848927e-24' error='5.64066932195e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='73' value='1.45342903291e-25' error='5.3251591764e-28'>
+    <tfset id='1' value='1.45332834184e-25' error='5.66551504116e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='15' value='7.53372173677e-24' error='2.5227540797e-26'>
+    <tfset id='1' value='7.53356548494e-24' error='2.68189153291e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='53' value='2.08463443076e-23' error='6.83648199796e-26'>
+    <tfset id='1' value='2.08499874854e-23' error='7.22307583039e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='84' value='1.56232682898e-24' error='1.76515174546e-26'>
+    <tfset id='1' value='1.56182625242e-24' error='1.65523113743e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='72' value='9.96968096216e-23' error='3.23756159291e-25'>
+    <tfset id='1' value='9.97020072772e-23' error='3.36108181431e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='64' value='1.04583767662e-23' error='3.67623237446e-26'>
+    <tfset id='1' value='1.04591066787e-23' error='3.89818932085e-26'></tfset>
+</event>
+</card><card id='5'>
+<event id='69' value='9.51290552142e-24' error='3.5564205683e-26'>
+    <tfset id='1' value='9.51425310525e-24' error='3.67027654278e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='7' value='3.47060428971e-23' error='2.60489042858e-25'>
+    <tfset id='1' value='3.47014235899e-23' error='2.61864452107e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='65' value='1.87085879186e-28' error='9.08169409062e-31'>
+    <tfset id='1' value='1.87096161834e-28' error='9.41982426064e-31'></tfset>
+</event>
+</card><card id='1'>
+<event id='30' value='4.72176063416e-27' error='3.74461289043e-29'>
+    <tfset id='1' value='4.72211762924e-27' error='3.81206414111e-29'></tfset>
+</event>
+</card><card id='4'>
+<event id='2' value='1.25976090532e-25' error='5.5365248605e-28'>
+    <tfset id='1' value='1.26004446856e-25' error='5.73393641223e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='14' value='1.13950723586e-26' error='1.25287991256e-27'>
+    <tfset id='1' value='1.13986707942e-26' error='4.07481832891e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='19' value='8.97667910724e-23' error='3.05602445167e-25'>
+    <tfset id='1' value='8.97580558089e-23' error='3.26527288616e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='56' value='1.64622638658e-25' error='4.48162159303e-27'>
+    <tfset id='1' value='1.6466441556e-25' error='4.24079034451e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='85' value='1.16266106989e-22' error='3.91614512818e-25'>
+    <tfset id='1' value='1.16261393861e-22' error='4.03430430136e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='77' value='2.86253879385e-23' error='9.73047978946e-26'>
+    <tfset id='1' value='2.86246355732e-23' error='1.01442710904e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='62' value='4.1453090486e-29' error='1.92721929263e-31'>
+    <tfset id='1' value='4.14826487656e-29' error='1.94317475903e-31'></tfset>
+</event>
+</card><card id='1'>
+<event id='28' value='6.71669177655e-24' error='2.34058207012e-26'>
+    <tfset id='1' value='6.71670960003e-24' error='2.44785122566e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='17' value='5.57106872854e-23' error='1.79936438605e-25'>
+    <tfset id='1' value='5.57104907796e-23' error='1.90545096889e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='79' value='1.4950444635e-24' error='1.29885672073e-26'>
+    <tfset id='1' value='1.49544401808e-24' error='1.30565363248e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='74' value='1.81221190215e-27' error='7.45563084253e-30'>
+    <tfset id='1' value='1.81211260217e-27' error='7.73463315231e-30'></tfset>
+</event>
+</card><card id='3'>
+<event id='6' value='8.51064544119e-29' error='3.53637141844e-31'>
+    <tfset id='1' value='8.51321293463e-29' error='3.66824032112e-31'></tfset>
+</event>
+</card><card id='2'>
+<event id='12' value='1.86996778403e-23' error='1.31474113415e-25'>
+    <tfset id='1' value='1.87021537027e-23' error='1.30357834188e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='3' value='1.19301285323e-24' error='3.99858858609e-27'>
+    <tfset id='1' value='1.19305355245e-24' error='4.30681675676e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='75' value='7.58916123496e-26' error='3.17760785175e-28'>
+    <tfset id='1' value='7.58971039239e-26' error='3.33007924227e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='67' value='8.18402715324e-23' error='7.79361528362e-25'>
+    <tfset id='1' value='8.18426120572e-23' error='7.9641787746e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='9' value='3.1373682983e-25' error='7.37001594347e-27'>
+    <tfset id='1' value='3.13888187339e-25' error='6.0458984467e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='21' value='6.82824211716e-23' error='2.27943698673e-25'>
+    <tfset id='1' value='6.8281967389e-23' error='2.37821296516e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='25' value='3.90159280269e-25' error='4.05534922035e-27'>
+    <tfset id='1' value='3.90260301771e-25' error='4.06710589521e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='42' value='3.08291954913e-24' error='2.43842646822e-26'>
+    <tfset id='1' value='3.08350938827e-24' error='2.45522243797e-26'></tfset>
+</event>
+</card><card id='4'>
+<event id='91' value='7.18524007849e-25' error='2.37828122978e-27'>
+    <tfset id='1' value='7.18497300069e-25' error='2.48257681333e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='70' value='3.08769799642e-28' error='4.8451020359e-30'>
+    <tfset id='1' value='3.08761671112e-28' error='5.01727925646e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='54' value='8.81206113037e-23' error='3.14176939306e-25'>
+    <tfset id='1' value='8.81305041015e-23' error='3.25774827604e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='59' value='6.32972881986e-24' error='2.46303471204e-26'>
+    <tfset id='1' value='6.33031281552e-24' error='2.60799516999e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='5' value='2.67609447497e-23' error='6.80289838462e-25'>
+    <tfset id='1' value='2.67613656309e-23' error='5.66843697032e-25'></tfset>
+</event>
+</card><card id='2'>
+<event id='90' value='2.89654353161e-25' error='1.31963429773e-27'>
+    <tfset id='1' value='2.89673373761e-25' error='1.40093330266e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='83' value='1.11567853327e-24' error='4.10507350278e-27'>
+    <tfset id='1' value='1.11483141538e-24' error='4.50776510577e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='37' value='1.33229498129e-26' error='6.16052954149e-29'>
+    <tfset id='1' value='1.33205242545e-26' error='6.65747650436e-29'></tfset>
+</event>
+</card><card id='1'>
+<event id='16' value='1.63264179967e-25' error='2.1578973961e-27'>
+    <tfset id='1' value='1.63317242998e-25' error='2.15291600022e-27'></tfset>
+</event>
+</card><card id='5'>
+<event id='55' value='4.49472291434e-24' error='2.90714770142e-26'>
+    <tfset id='1' value='4.4957919567e-24' error='2.86966351003e-26'></tfset>
+</event>
+</card><card id='1'>
+<event id='4' value='1.03155986066e-22' error='1.8315258104e-24'>
+    <tfset id='1' value='1.0317336701e-22' error='8.39701827886e-25'></tfset>
+</event>
+</card><card id='5'>
+<event id='86' value='2.17464121387e-22' error='6.87318602312e-25'>
+    <tfset id='1' value='2.17445619852e-22' error='7.33785527419e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='32' value='3.36751251086e-23' error='1.16161642448e-25'>
+    <tfset id='1' value='3.36759208915e-23' error='1.22905909904e-25'></tfset>
+</event>
+</card><card id='1'>
+<event id='13' value='2.98788598482e-24' error='1.11287410393e-26'>
+    <tfset id='1' value='2.98838083797e-24' error='1.15098550252e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='24' value='8.82734868353e-30' error='4.2755614464e-32'>
+    <tfset id='1' value='8.82922708012e-30' error='4.31423187506e-32'></tfset>
+</event>
+</card><card id='5'>
+<event id='29' value='1.85932029424e-22' error='6.37552252622e-25'>
+    <tfset id='1' value='1.8592660798e-22' error='6.63352691293e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='47' value='7.60658462665e-25' error='3.45891031172e-27'>
+    <tfset id='1' value='7.60528378006e-25' error='3.77065554681e-27'></tfset>
+</event>
+</card><card id='4'>
+<event id='98' value='1.19182890999e-24' error='4.28050963365e-27'>
+    <tfset id='1' value='1.19188531917e-24' error='4.36877804649e-27'></tfset>
+</event>
+</card><card id='2'>
+<event id='52' value='9.27064427221e-24' error='4.85961864003e-26'>
+    <tfset id='1' value='9.27115390809e-24' error='4.64269991022e-26'></tfset>
+</event>
+</card><card id='2'>
+<event id='81' value='5.6164192824e-23' error='1.84621032759e-25'>
+    <tfset id='1' value='5.61629369896e-23' error='1.92516826172e-25'></tfset>
+</event>
+</card><card id='4'>
+<event id='35' value='4.39030243275e-28' error='2.04694892864e-30'>
+    <tfset id='1' value='4.39221000968e-28' error='1.9384400697e-30'></tfset>
+</event>
+</card><card id='5'>
+<event id='27' value='2.88921700762e-31' error='1.36274288134e-33'>
+    <tfset id='1' value='2.88799350601e-31' error='1.44865137461e-33'></tfset>
+</event>
+</card><card id='4'>
+<event id='49' value='2.87585816142e-26' error='1.32340391505e-28'>
+    <tfset id='1' value='2.87728087223e-26' error='1.24444824786e-28'></tfset>
+</event>
+</card><card id='3'>
+<event id='44' value='6.67209897727e-24' error='2.33539781103e-26'>
+    <tfset id='1' value='6.67183294068e-24' error='2.46053095977e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='93' value='1.52744256856e-29' error='9.94874933159e-32'>
+    <tfset id='1' value='1.5278521834e-29' error='1.03504747903e-31'></tfset>
+</event>
+</card><card id='1'>
+<event id='61' value='3.23447597697e-27' error='1.7595356695e-29'>
+    <tfset id='1' value='3.23471641358e-27' error='1.75972793172e-29'></tfset>
+</event>
+</card><card id='4'>
+<event id='100' value='1.40126958908e-25' error='5.98313691399e-28'>
+    <tfset id='1' value='1.40127619844e-25' error='6.15968545772e-28'></tfset>
+</event>
+</card><card id='5'>
+<event id='22' value='2.15509645259e-22' error='9.51304163173e-25'>
+    <tfset id='1' value='2.1546771341e-22' error='9.88431715112e-25'></tfset>
+</event>
+</card><card id='3'>
+<event id='45' value='1.46287241498e-25' error='1.45441652531e-27'>
+    <tfset id='1' value='1.46285799707e-25' error='1.46811037343e-27'></tfset>
+</event>
+</card><card id='3'>
+<event id='96' value='3.32581339821e-25' error='2.91152663677e-27'>
+    <tfset id='1' value='3.32608150962e-25' error='2.94726310846e-27'></tfset>
+</event>
+</card><card id='1'>
+<event id='68' value='6.86953077538e-26' error='3.25448166921e-28'>
+    <tfset id='1' value='6.87136638203e-26' error='3.36934882959e-28'></tfset>
+</event>
+</card><card id='2'>
+<event id='57' value='3.54684787059e-27' error='7.09692390838e-29'>
+    <tfset id='1' value='3.54770360661e-27' error='6.80311975777e-29'></tfset>
+</event>
+</card><card id='2'>
+<event id='88' value='7.72790207491e-24' error='3.11185545083e-26'>
+    <tfset id='1' value='7.72938105209e-24' error='3.24453830352e-26'></tfset>
+</event>
+</card><card id='3'>
+<event id='39' value='4.82510595038e-30' error='5.14596365706e-32'>
+    <tfset id='1' value='4.82673299747e-30' error='4.60475717355e-32'></tfset>
+</event>
+</card><card id='4'>
+<event id='34' value='6.35550530365e-24' error='2.06690823296e-26'>
+    <tfset id='1' value='6.35706737024e-24' error='2.13499285167e-26'></tfset>
+</event>
+</card></subprocess>
+
+</madweight>

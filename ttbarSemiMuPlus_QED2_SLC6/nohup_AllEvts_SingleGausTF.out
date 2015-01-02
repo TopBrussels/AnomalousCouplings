@@ -1,0 +1,47 @@
+[?1034hNo module named madgraph.madweight.Cards
+************************************************************
+*                                                          *
+*           W E L C O M E  to  M A D G R A P H  5          *
+*                      M A D W E I G H T                   *
+*                                                          *
+*                 *                       *                *
+*                   *        * *        *                  *
+*                     * * * * 5 * * * *                    *
+*                   *        * *        *                  *
+*                 *                       *                *
+*                                                          *
+*         VERSION 5.2.1.0.beta                             *
+*                                                          *
+*    The MadGraph Development Team - Please visit us at    *
+*    https://server06.fynu.ucl.ac.be/projects/madgraph     *
+*                                                          *
+*               Type 'help' for in-line help.              *
+*                                                          *
+************************************************************
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/Cards/me5_configuration.txt  
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/input/mg5_configuration.txt  
+INFO: load configuration from /grid_mnt/storage__localgrid/aolbrech/madweight_amcnlo/ttbarSemiMuPlus_QED2_SLC6/Cards/me5_configuration.txt  
+No valid eps viewer found. Please set in ./input/mg5_configuration.txt
+No valid web browser found. Please set in ./input/mg5_configuration.txt
+submit_jobs
+INFO:  Idle: 1877,  Running: 123,  Completed: 0 [  0.91s  ] 
+INFO:  Idle: 1877,  Running: 123,  Completed: 0 [  31.6s  ] 
+INFO:  Idle: 1877,  Running: 123,  Completed: 0 [  1m 2s  ] 
+INFO:  Idle: 1877,  Running: 123,  Completed: 0 [  1m 32s  ] 
+INFO:  Idle: 1877,  Running: 123,  Completed: 0 [  2m 3s  ] 
+INFO: Start to wait 600s between checking status.
+Note that you can change this time in the configuration file.
+Press ctrl-C to force the update. 
+INFO:  Idle: 1869,  Running: 131,  Completed: 0 [  12m 4s  ] 
+INFO:  Idle: 1847,  Running: 153,  Completed: 0 [  22m 5s  ] 
+INFO:  Idle: 1775,  Running: 225,  Completed: 0 [  32m 6s  ] 
+INFO:  Idle: 1748,  Running: 252,  Completed: 0 [  42m 7s  ] 
+INFO:  Idle: 1685,  Running: 291,  Completed: 24 [  52m 8s  ] 
+INFO:  Idle: 1582,  Running: 313,  Completed: 105 [  1h 2m  ] 
+INFO:  Idle: 1445,  Running: 320,  Completed: 235 [  1h 12m  ] 
+INFO:  Idle: 1313,  Running: 332,  Completed: 355 [  1h 22m  ] 
+INFO:  Idle: 1076,  Running: 339,  Completed: 585 [  1h 32m  ] 
+INFO:  Idle: 777,  Running: 360,  Completed: 863 [  1h 42m  ] 
+qstat: Invalid credential 
+INFO: All jobs finished 
+launch in debug mode

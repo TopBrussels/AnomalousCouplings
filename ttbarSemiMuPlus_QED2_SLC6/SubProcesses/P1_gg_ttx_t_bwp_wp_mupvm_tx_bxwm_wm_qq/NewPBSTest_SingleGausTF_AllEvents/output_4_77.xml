@@ -1,0 +1,26 @@
+<card id='4'>
+<event id='617' value='2.74652870667e-23' error='9.86598442468e-26'>
+    <tfset id='1' value='2.74657038873e-23' error='1.03642729989e-25'></tfset>
+</event>
+<event id='618' value='2.85026465653e-23' error='9.78330407913e-26'>
+    <tfset id='1' value='2.85016932498e-23' error='1.02474627752e-25'></tfset>
+</event>
+<event id='619' value='4.97067718525e-25' error='7.79594848014e-27'>
+    <tfset id='1' value='4.97094133551e-25' error='6.95066482117e-27'></tfset>
+</event>
+<event id='620' value='2.28702926069e-24' error='7.88058720857e-27'>
+    <tfset id='1' value='2.28714565132e-24' error='8.18486849923e-27'></tfset>
+</event>
+<event id='621' value='2.08206092753e-24' error='7.9233050631e-27'>
+    <tfset id='1' value='2.08174129579e-24' error='8.45715745975e-27'></tfset>
+</event>
+<event id='622' value='1.106878285e-27' error='1.76014495991e-29'>
+    <tfset id='1' value='1.10772051036e-27' error='1.72118209635e-29'></tfset>
+</event>
+<event id='623' value='2.71463018147e-25' error='9.3016282108e-27'>
+    <tfset id='1' value='2.71764014995e-25' error='8.14736036282e-27'></tfset>
+</event>
+<event id='624' value='3.75343044958e-22' error='1.31837375139e-24'>
+    <tfset id='1' value='3.75366886075e-22' error='1.37693545002e-24'></tfset>
+</event>
+</card>

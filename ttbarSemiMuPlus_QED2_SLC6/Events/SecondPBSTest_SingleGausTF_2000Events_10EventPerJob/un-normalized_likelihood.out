@@ -1,0 +1,4 @@
+# Warning:  this Likelihood needs a bin by bin normalization !
+# IF more than one set of transfer function are define. ONLY the first one is # include in this file.# format: card_id value integration_error
+1 110089.114939 2.35053685059e-12 
+2 107430.472055 1.44305407812e-12 
