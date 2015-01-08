@@ -195,15 +195,15 @@ $E$ START_TRANSFER_FCT $E$
 ##
 ##
 ##########################################################################
-$B$ START_TF_E_FOR_PART $B$
+$B$ START_TF_PT_FOR_PART $B$
 ##************************************************************************
 C+-----------------------------------------------------------------------+
-C|     Subroutine: tf_E_for_part(MG_num)                                 |
+C|     Subroutine: tf_PT_for_part(MG_num)                                 |
 C|                                                                       |
 C|     purpose: returns the value of the transfert function (in energy)  |
 C|              for the particles associated to the MG_number            |
 C+-----------------------------------------------------------------------+
-      double precision function  tf_E_for_part(MG_num)
+      double precision function  tf_PT_for_part(MG_num)
       implicit none
 c
 c     ARGUMENTS
@@ -229,12 +229,12 @@ c
       integer n_lhco
 c
 ##************************************************************************
-$E$ START_TF_E_FOR_PART $E$
+$E$ START_TF_PT_FOR_PART $E$
 ##************************************************************************
 ##
 ##
 ##########################################################################
-$B$ DEF_TF_E_FOR_ONE_PART $B$
+$B$ DEF_TF_PT_FOR_ONE_PART $B$
 ##************************************************************************
       implicit none
 c
@@ -256,6 +256,6 @@ c     LOCAL
 c
       integer i,k,n_lhco
 ##************************************************************************
-$E$ DEF_TF_E_FOR_ONE_PART $E$
+$E$ DEF_TF_PT_FOR_ONE_PART $E$
 ##************************************************************************
 
