@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/var/torque/mom_priv/jobs/1271272.cream02.iihe.ac.be.SC", line 351, in <module>
+    card_nb, first_event, nb_event, evt, mw_int_points, log_level, sample_nb = open('arguments').read().split() 
+IOError: [Errno 2] No such file or directory: 'arguments'

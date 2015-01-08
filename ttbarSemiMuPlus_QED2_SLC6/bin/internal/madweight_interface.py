@@ -634,7 +634,7 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
                     if value:
                         if card not in likelihood:
                             likelihood[card], err_likelihood[card] = 0, 0
-			print "Looking at value : ", value
+			#print "Looking at value : ", value
 			if value < 0:
 				print "Skipping negative weight! : ",value, " --> Excluded from likelihood calculation now ..."
 			else:

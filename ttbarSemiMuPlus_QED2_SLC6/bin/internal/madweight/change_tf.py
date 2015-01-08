@@ -533,7 +533,7 @@ class TF_in_SubProcesses:
 
         text2='' #text containing all the single call
         #Comment-subroutine-definition-init weight
-        text='$B$ START_TF_E_FOR_PART $E$\n'
+        text='$B$ START_TF_PT_FOR_PART $E$\n'
         
         for i in range(0,len(self.blockname_list)):
             text2+='\n'+self.text_tf_PT_for_one_part(i)+'\n'         #CHANGED 8/12/2014
@@ -563,7 +563,7 @@ class TF_in_SubProcesses:
         text+=' double precision function tf_PT_for_%s()\n\n' % (i+1)      #CHANGED 8/12/2014
        
         #Comment-subroutine-definition-init weight
-        text+='$B$ DEF_TF_E_FOR_ONE_PART $E$\n'
+        text+='$B$ DEF_TF_PT_FOR_ONE_PART $E$\n'
         
         blockname=self.blockname_list[i]            
         if not isinstance(blockname, basestring):        
