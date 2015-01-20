@@ -1,0 +1,3 @@
+# Weight (un-normalize) for each card/event/set of transfer fct
+# format: LHCO_event_number card_id tf_set_id value integration_error
+1062 1 1 8.9586321181e-28 8.39284330951e-30 
