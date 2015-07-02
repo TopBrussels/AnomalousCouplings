@@ -1,0 +1,201 @@
+##########################################################################
+##                                                                      ##
+##                             MadWeigth                                ##
+##                             =============                            ##
+##                                                                      ##
+##                              Run control                             ##
+##                              -----------                             ##
+##                                                                      ##
+##                                                                      ##
+##    Author: Mattelaer Olivier (UCL-CP3)                               ##
+##            Artoisenet Pierre (UCL-CP3)                               ##
+##                                                                      ##
+##    Version:     5.0.0                                                ##
+##    Last change: 01/10/14                                             ##
+##                                                                      ##
+##########################################################################
+#                                                                      ##
+##  This Card defines all specific parameters of Madweight              ## 
+##                                                                      ##
+##########################################################################
+#*************************************************************************
+##                      select run options                              ##  
+#*************************************************************************
+Block MW_Run 
+#   TAG                 VALUE                    UTILITY
+#     name                 RVR_GenSingleGausTF_DoubleWidth_50000Evts_20hWallTime    # name for the run
+#     name                 RVR_MGSampleSM_SingleGausTFWidthX2_10000Evts_MGv155    # name for the run
+#     name                 RVR_MGSampleNeg02_SingleGausTF_10000Evts_WideRange_MGv155    # name for the run
+#     name                 RgR_MGSamplePos005_SingleGausTF_10000Evts_NarrowRange    # name for the run
+     name                 ResolutionTestingTwo
+     nb_exp_events        10   # number of experimental events to consider
+     MW_int_points        2000    # number of points (by permutation) in MadWeight integration for survey 
+     MW_int_refine        10000   # number of points (by permutation) in MadWeight integration for refine 
+     precision            0.005   # stops computation if precision is reached.
+     nb_event_by_node     1     # one job submission compute the weight for N events
+     log_level            weight  # from low level of log to extensive log: 
+                                  # weight, permutation, channel, full
+     use_cut              F       # use the cut defined in run_card.dat
+     bw_cut               F       # use the BW cut 
+     nwa                  0.1     # width below narrow width approximation is used.
+     isr                  0       # isr=0 : ignore ISR effect (except if all FS particles are visible)
+                                  # isr=1 : correct kinematic based on reconstructed Pt(isr)
+# Inputfile input has been changed in bin/internal/madweight_interface.py such that only the filename should be given!
+# Now MadWeight will no longer search for the input.lhco file but will use the one given below!
+#     inputfile          'CombinedRecoEvents_PositiveMuon.lhco' # path to the input file (in lhco format)
+#     inputfile          'WrongRecoEvents_PositiveMuon.lhco' # path to the input file (in lhco format)
+#     inputfile          'UnmatchedRecoEvents_PositiveMuon.lhco' # path to the input file (in lhco format)
+#     inputfile          'CorrectRecoEvents_PositiveMuon.lhco' # path to the input file (in lhco format)
+#     inputfile          'Gen_ManyEvts.lhco' # path to the input file (in lhco format)
+#     inputfile          './Events/WrongGeneratorEvents.lhco' # path to the input file (in lhco format)
+#     inputfile          './Events/Reco_ManyEvts.lhco' # path to the input file (in lhco format)
+#---- MadGraph samples created with different RVR values ----#
+#     inputfile          'RVRPos008_RVL1_100000Evts.lhco' # path to the input file (in lhco format)
+#     inputfile          'RVR0_RVL1_100000Evts.lhco' # path to the input file (in lhco format)
+#     inputfile          'RVRNeg008_RVL1_100000Evts.lhco' # path to the input file (in lhco format)
+     inputfile          'TopMass174_100000Evts.lhco' # path to the input file (in lhco format)
+#     inputfile          'TopMass172_100000Evts.lhco' # path to the input file (in lhco format)
+#     inputfile          'RVR03_RVL1_100000Evts.lhco'
+#     inputfile          'RVRNeg1_RVL1_100000Evts.lhco'                                 
+#     inputfile          'RVR05_RVL1_100000Evts.lhco'
+#     inputfile          'RgRNeg03_RVL1_100000Evts.lhco'
+#     inputfile          'RgRNeg01_RVL1_100000Evts.lhco'
+#     inputfile          'RVR0_RVL1_100000Evts.lhco'
+#     inputfile          'StandardModel_100000Evts.lhco'
+#     inputfile          'CloseToSM_VL1_VR005.lhco'
+#     inputfile          'ReVL1_ReVRNeg05_100000Evts.lhco'
+#     inputfile          'RVL1_RVRPos05_100000Evts.lhco'
+#     inputfile          'VL1_VRPos01_CutsApplied_100000Evts.lhco'
+#     inputfile          'SMModelMG_NoCuts_100000Evts.lhco'
+#     inputfile          'TTbarLHCO_PositiveMuon_PhiPositive.lhco'
+#     inputfile          'RVL1_RVR0_10000Evts.lhco'
+#     inputfile          'SM_NoCuts_MGv155.lhco'
+#     inputfile          'VL1_VRNeg02_MGv155_NoCut.lhco'
+#     inputfile          'RgRPos005_RVL1_100000Evts.lhco'
+#*************************************************************************
+##                  define the different param_card's                   ##  
+#*************************************************************************
+Block MW_parameter         
+#   TAG      VALUE                     UTILITY
+    mode         1         #    type of input 
+                           #    0 : inputs are read from the cards: param_card_1.dat, param_card_2.dat,...
+                           #    1 : redefines some values from param_card.dat according to the form below
+                           #    2 : same but the value for different parameters are modified simultaneously
+#                             
+#                             # first parameter #
+#     11       anom         # Block of the parameter to change  
+#     12       3            ## RVR component (id of the parameter to change )
+#     13       -1.0         # here you can enter the different values:
+#     13       -0.5         
+#     13       -0.3  
+#     13       -0.275       
+#     13       -0.25       
+#     13       -0.225    
+#     13       -0.2       
+#     13       -0.175
+#     13       -0.15 
+#     13       -0.125    
+#     13       -0.1     
+#     13       -0.09   
+#     13       -0.08
+#     13       -0.075  
+#     13       -0.07         
+#     13       -0.06        
+#     13       -0.05       
+#     13       -0.04      
+#     13       -0.03     
+#     13       -0.025
+#     13       -0.02    
+#     13       -0.01   
+#     13       0.0    
+#     13       0.01  
+#     13       0.02     
+#     13       0.025
+#     13       0.03    
+#     13       0.04   
+#     13       0.05  
+#     13       0.06 
+#     13       0.07      
+#     13       0.075
+#     13       0.08     
+#     13       0.09    
+#     13       0.1    
+#     13       0.125
+#     13       0.15 
+#     13       0.175 
+#     13       0.2  
+#     13       0.225
+#     13       0.25 
+#     13       0.275    
+#     13       0.3     
+#     13       0.5    
+#     13       1.0   
+     11       anom
+     12       7            ## RgR component!
+#     13       -0.5
+#     13       -0.3
+#     13       -0.2
+     13       -0.15
+     13       -0.1
+#     13       -0.05
+#     13       -0.025
+     13       0.0
+#     13       0.025
+#     13       0.05
+     13       0.1
+     13       0.15
+#     13       0.2
+#     13       0.3
+#     13       0.5
+#     11       mass          # Block of the parameter to change  
+#     12       6             # id of the parameter to change 
+##     13       153           # here you can enter the different values:
+##     13       163           #         add a new line with tag 13 to introduce a new value        
+##     13       169           #         add a new line with tag 13 to introduce a new value        
+##     13       170           #         add a new line with tag 13 to introduce a new value        
+#     13       171           #         add a new line with tag 13 to introduce a new value        
+#     13       172           #         add a new line with tag 13 to introduce a new value        
+#     13       173           #         add a new line with tag 13 to introduce a new value        
+#     13       174           #         add a new line with tag 13 to introduce a new value        
+#     13       175           #         add a new line with tag 13 to introduce a new value        
+##     13       176           #         add a new line with tag 13 to introduce a new value        
+##     13       177           #         add a new line with tag 13 to introduce a new value        
+##     13       183           #         add a new line with tag 13 to introduce a new value        
+##     13       193           #         add a new line with tag 13 to introduce a new value        
+#
+#
+#                            #  second parameter #
+#                            !DELETE ALL THE FOLLOWING TAG IF YOU WANT TO RUN WITH ONLY ONE PARAM!
+#     21       MGCKM          # Block of the parameter to change  
+#     22       1              # id of the paramter to change 
+#     22       2              # id2 of the paramter to change
+#     23       1.5E-02        # here you can enter the different values:
+#     23       1.8E-02        #        add a new line with tag 23 to introduce a new value
+#
+#  use same syntax for parameters 3,4,...
+#*************************************************************************
+##                                Permutations                          ##  
+#*************************************************************************
+Block MW_perm
+#   TAG           VALUE                    UTILITY
+     permutation  T         # make permutation
+     bjet_is_jet  F         # consider permutation between b-jets and light jets
+     bjet_perm    T         # consider permutation between the two b-jets (only works if bjet_is_jet is set to False)
+     montecarlo   T         # Monte-Carlo over permutation (Huge speed up if many permutation)
+#     preselect    'default' # How to pre-select the correct permutation set. 
+     preselect    'nobperm' # This means no permutation for the b-jets! 
+                            # put 'None' if no pre-selection to perform.
+                            # You can set the path to a fortran file defining the require function
+                            # See file SubProcesses/permutation_weight_default.dat for
+                            # instructions.
+     min_perm_cut 5e-4      # Cut for discarding permutation on the preselected method
+#*************************************************************************
+##                       Phase-Space Integration mapping                ##
+#*************************************************************************
+Block MW_gen
+    force_nwa     2         # Only consider the change of variable alligning particles 
+                            # with width smaller than this value. This speed up the code
+                            # but can lead to zero weight for background event where the
+                            # kinematic doesn't agree with the associated mass.
+                            # if "mw_run nwa" parameter is bigger than this value, that
+                            # value is used for this parameter automatically.
