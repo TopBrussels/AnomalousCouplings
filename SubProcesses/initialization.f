@@ -125,7 +125,7 @@ c     call graph_init
          read(24,*,err=48,end=48) k,type(k),eta_init(k),
      &           phi_init(k),pt_init(k),j_mass(k),ntrk(k),btag(k),
      &           had_em(k) ,dummy1(k),dummy2(k)
-         write (*,*) 'Value of k and MG : ',k,' and ',MG
+
          call four_momentum_set2(eta_init(k),phi_init(k),pt_init(k),
      &         j_mass(k),pexp_init(0,MG))
          px_visible=px_visible+pexp_init(1,MG)
@@ -324,8 +324,7 @@ c
 c------
 c Begin Code
 c------
-c      s = 4d0*ebeam(1)*ebeam(2)
-      write(*,*) 'ebeam values: ',ebeam(1),' and ',ebeam(2)         
+      s = 4d0*ebeam(1)*ebeam(2)
       num_inv=0
 c
 c      define the central point
