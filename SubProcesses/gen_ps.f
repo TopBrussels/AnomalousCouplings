@@ -292,7 +292,6 @@ c                    jac=-1d0
 c                return
             endif
        gen_point=(point_max-point_min)*x+point_min
-       write(*,*) 'gen_point : ',gen_point
 
       endif
 
