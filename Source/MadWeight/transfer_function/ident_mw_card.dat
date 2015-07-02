@@ -1,0 +1,43 @@
+******************************************
+*                                        *
+*  Linking file between value and name   *
+*        O. Mattelaer   January 2014     * 
+*                                        * 
+* version 0.1.5                          *
+******************************************
+MW_perm         bjet_is_jet   perm_with_b      logical    .false.	
+MW_perm         permutation   use_perm         logical    .true. 
+MW_perm         montecarlo    montecarlo_perm  logical    .true.
+MW_perm         min_perm_cut  min_perm_cut     real       5d-4
+MW_run          mw_int_points nevents          integer    4000
+MW_run          mw_int_refine nevents_refine   integer    10000
+MW_run          precision     final_prec       real       0.005
+MW_run          710           min_prec_cut1    real       0.0005  
+MW_run          711           value_cut1       real       0.00
+MW_run          720           min_prec_cut2    real       0.0
+MW_run          721           value_cut2       real       0.0 
+MW_run          731           max_it_step1     integer    2 
+MW_run          732           max_it_step2     integer    16 
+MW_run          733           max_it_step3     integer    0 
+MW_run          734           max_it_step4     integer    0 
+MW_run          735           max_it_step5     integer    0 
+MW_run          histo         histo            logical    .false.
+MW_run          nwa           nwa              logical    .false.
+MW_run          isr           isr              integer    0
+MW_run          use_cut       use_cut          logical    .false.
+MW_run          bw_cut        bw_cut           logical    .false.
+MW_run          integrator    integrator       integer     0
+MW_run          use_sobol     use_sobol        logical    .false.
+MW_run          pretrained    pretrained       logical    .true.
+TF_LEPTON_PT             7       tf_lepton_PT_7 real  
+TF_LEPTON_PT             8       tf_lepton_PT_8 real  
+TF_LEPTON_PT             9       tf_lepton_PT_9 real  
+TF_LEPTON_PT             10       tf_lepton_PT_10 real  
+TF_LEPTON_PT             11       tf_lepton_PT_11 real  
+TF_LEPTON_PT             12       tf_lepton_PT_12 real  
+TF_JET_PT             1       tf_jet_PT_1 real  
+TF_JET_PT             2       tf_jet_PT_2 real  
+TF_JET_PT             3       tf_jet_PT_3 real  
+TF_JET_PT             4       tf_jet_PT_4 real  
+TF_JET_PT             5       tf_jet_PT_5 real  
+TF_JET_PT             6       tf_jet_PT_6 real  
