@@ -12,6 +12,8 @@
 #include "TFile.h"
 
 #include "TopTreeProducer/interface/TRootJet.h"
+#include "TopTreeAnalysisBase/Tools/interface/MultiSamplePlot.h"
+#include "TopTreeAnalysisBase/Content/interface/Dataset.h"
 
 using namespace std;
 using namespace TopTree;
@@ -19,13 +21,13 @@ using namespace TopTree;
 class BTagStudy{
 
   public:
-    BTagStudy(int);
+    BTagStudy(int, vector<Dataset*>);
     ~BTagStudy();
 
-    void CalculateJets(vector<TLorentzVector>, vector<float> bTagValues, vector<int> jetCombi, TLorentzVector lepton);
+    void CalculateJets(vector<TLorentzVector>, vector<float> bTagValues, vector<int> jetCombi, TLorentzVector lepton, Dataset*, float);
     void ReturnBTagTable(std::string);
     void ReturnThirdJetTable();    //Still to fill
-    void CreateHistograms(TFile*); 
+    void CreateHistograms(TFile*, bool, std::string, int); 
  
     int getBHadrIndex(int bTagNr)  {return bHadrIndex[bTagNr];};
     int getBLeptIndex(int bTagNr)  {return bLeptIndex[bTagNr];};
@@ -43,9 +45,9 @@ class BTagStudy{
 
   private:
     void CompareJetCombi(vector<int> jetCombi, int bTagNr, int jetCase, int lightJetOne, int lightJetTwo);
-    void InitializeBegin();
+    void InitializeBegin(vector<Dataset*>);
     void ResetEventArrays();
-    void CalculateMlbChiSq( int bTagNr, TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int>); 
+    void CalculateMlbChiSq( int bTagNr, TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int>, Dataset*, float); 
     vector<int> CalculateMqqbChiSq( int bTagNr, vector<TLorentzVector> Jets); 
 
     int LowestChiSqMlb[6], LowestChiSqMqqb[6];
@@ -70,6 +72,8 @@ class BTagStudy{
 
     map<std::string,TH1F*> histo1D;
     map<string,TH2F*> histo2D;
+    map<string,MultiSamplePlot*> MSPlot;
+    int nrDatasets_;
 
 };
 

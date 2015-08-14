@@ -26,6 +26,7 @@ class AnomCoupLight : public TObject
       ,leptonCharge_(0)
       ,correctJetCombi_()
       ,met_()
+      ,genCosTh_(0)
       ,genVectorLight1_()
       ,genVectorLight2_()
       ,genVectorHadrB_()
@@ -48,6 +49,7 @@ class AnomCoupLight : public TObject
     float leptonCharge() const {return leptonCharge_;}
     vector<int> correctJetCombi() const {return correctJetCombi_;}
     TLorentzVector met() const {return met_;}
+    float genCosTh() const {return genCosTh_;}
 
     TLorentzVector genVectorLight1() const {return genVectorLight1_;}
     TLorentzVector genVectorLight2() const {return genVectorLight2_;}
@@ -69,6 +71,7 @@ class AnomCoupLight : public TObject
     void setLeptonCharge( float leptonCharge) {leptonCharge_ = leptonCharge;}
     void setCorrectJetCombi( vector<int> correctJetCombi) {correctJetCombi_ = correctJetCombi;}
     void setMET(TLorentzVector met) {met_ = met;}
+    void setGenCosTheta(float genCosTh) {genCosTh_ = genCosTh;}
 
     void setGenVectorLight1(TLorentzVector genVectorLight1) {genVectorLight1_ = genVectorLight1;}
     void setGenVectorLight2(TLorentzVector genVectorLight2) {genVectorLight2_ = genVectorLight2;}
@@ -91,6 +94,7 @@ class AnomCoupLight : public TObject
     float leptonCharge_;
     vector<int> correctJetCombi_;
     TLorentzVector met_;
+    float genCosTh_;
 
     TLorentzVector genVectorLight1_;
     TLorentzVector genVectorLight2_;

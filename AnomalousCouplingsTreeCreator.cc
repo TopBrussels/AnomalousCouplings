@@ -30,7 +30,6 @@
 
 //Specific code for anomalous couplings analysis:
 #include "AnomalousCouplings/PersonalClasses/interface/LHCOOutput.h"
-//#include "AnomalousCouplings/PersonalClasses/interface/TFnTuple.h"
 #include "AnomalousCouplings/PersonalClasses/interface/AnomCoupLight.h"
 #include "AnomalousCouplings/PersonalClasses/interface/KinematicFunctions.h"
 
@@ -85,10 +84,9 @@ int main (int argc, char *argv[]){
   ///////////////////////////////
   //  Run specific parts only  //
   ///////////////////////////////
-  std::string GenOrReco = "Gen";
-  bool getLHCOOutput = true;
+  bool getLHCOOutput = false;
   bool getEventInfo = true;
-  //bool CalculateTF = true;
+  bool saveAsPDF = false;
 
   //Values needed for bTag study (select which of the 6 b-tag options is optimal!)
   int ChosenBTag;
@@ -208,10 +206,10 @@ int main (int argc, char *argv[]){
   map<string,TH1F*> histo1D;     
   map<string,TH2F*> histo2D;  
   
-  histo1D["genPt_Muon"] = new TH1F("genPt_Muon","genPt_Muon",400,0,200);
-  histo1D["recoPt_Muon"] = new TH1F("recoPt_Muon","recoPt_Muon",400,0,200);
-  histo1D["genPt_Elec"] = new TH1F("genPt_Elec","genPt_Elec",400,0,200);
-  histo1D["recoPt_Elec"] = new TH1F("recoPt_Elec","recoPt_Elec",400,0,200);
+  histo1D["Pt_genEvtMuon"] = new TH1F("Pt_genEvtMuon","Pt distribution for genEvt muon",100,0,150);
+  histo1D["Mass_genEvtMuon"] = new TH1F("Mass_genEvtMuon","Mass distribution for genEvt muon",100,0,0.2);
+  histo1D["Pt_genEvtElec"] = new TH1F("Pt_genEvtElec","Pt distribution for genEvt electron",100,0,150);
+  histo1D["Mass_genEvtElec"] = new TH1F("Mass_genEvtElec","Mass distribution for genEvt electron",100,0,0.001);
 
   histo1D["StCosTheta"] = new TH1F("StCosTheta","StCosTheta",200,-1,1);
   histo1D["CorrectBLeptCSVDiscr"] = new TH1F("CorrectBLeptCSVDiscr","CorrectBLeptCSVDiscr",400,-2.5,1.5);
@@ -221,8 +219,6 @@ int main (int argc, char *argv[]){
 
   histo1D["Quark1JetNumber"] = new TH1F("Quark1JetNumber","Quark1JetNumber",12,-1.5,10.5);
   histo1D["Quark2JetNumber"] = new TH1F("Quark2JetNumber","Quark2JetNumber",12,-1.5,10.5);
-
-  histo1D["lumiWeights"] = new TH1F("lumiWeights","lumiWeights", 200,-100,100);
 
   ////////////////////////////////////
   /// MultiSamplePlot
@@ -241,6 +237,8 @@ int main (int argc, char *argv[]){
   MSPlot["InitJets_METPt_METTypeOneCorrected"] = new MultiSamplePlot(datasets, "InitJets_METPt_METTypeOneCorrected", 60,0,300, "p_{T} (GeV)");
   MSPlot["InitJets_METPt_JerSmearingApplied"] = new MultiSamplePlot(datasets, "InitJets_METPt_JerSmearingApplied", 60,0,300, "p_{T} (GeV)");
 
+  MSPlot["nEventsAfterCutsSemiMu"] = new MultiSamplePlot(datasets, "nEventsAfterCutsSemiMu",15, -0.5, 14.5, "#events after each cut");
+
   //string leptFlavs[3]={"_other","_mu","_el"};
   string leptFlavs[2]={"_mu","_el"};
   for(int ii = 0; ii < 2; ii++){
@@ -253,6 +251,9 @@ int main (int argc, char *argv[]){
     MSPlot["Selected_Events_pT_alljets"+leptFlav] = new MultiSamplePlot(datasets, "Selected_Events_pT_alljets"+leptFlav, 60, 0, 600, "p_{T} (GeV)");
     MSPlot["Selected_Events_pT_lepton"+leptFlav] = new MultiSamplePlot(datasets, "Selected_Events_pT_lepton"+leptFlav,150,-100,350,"p_{t} (GeV)");
   }
+
+  MSPlot["lumiWeights"] = new MultiSamplePlot(datasets, "lumiWeights", 200,-1,2, "lumiWeight obtained from nTruePU");
+  MSPlot["nTruePU"] = new MultiSamplePlot(datasets, "nTruePU",100, 0, 75,"number of true PU interactions");
   
   ////////////////////////////////////
   /// Selection table
@@ -322,9 +323,10 @@ int main (int argc, char *argv[]){
     int iFile = -1;
     string dataSetName = datasets[d]->Name();
     
-    int nSelectedMu=0, nSelectedMuLCSV=0, nSelectedMuMCSV=0, nSelectedMuTCSV=0;
-    int nSelectedEl=0, nSelectedElLCSV=0, nSelectedElMCSV=0, nSelectedElTCSV=0;
-    int nLargeLCSVEvents = 0, nLargeMCSVEvents = 0, nLargeTCSVEvents = 0;
+    int nSelectedMuPos = 0, nSelectedMuNeg = 0;
+    int nSelectedElPos = 0, nSelectedElNeg = 0;
+    int nGenMu = 0;
+    int nGenEl = 0;
     
     if (verbose > 1){
       cout << "   Dataset " << d << ": " << datasets[d]->Name () << "/ title : " << datasets[d]->Title () << endl;
@@ -366,21 +368,16 @@ int main (int argc, char *argv[]){
    
     /////////////////////
     //  Used classes   //
-    /////////////////////  
-    LHCOOutput lhcoOutput(verbose, GenOrReco, getLHCOOutput); 
+    /////////////////////
+    LHCOOutput lhcoOutput(verbose, getLHCOOutput); 
+    if(dataSetName.find("TTbarJets") == 0) lhcoOutput.Initialize("Gen");
     KinematicFunctions kinFunctions;  //Variable accessible in KinematicFunctions using kinFunctions.CosTheta(TLorentzVector *Top, TLorentzVector *WLept, TLorentzVector *lepton)
-    //TFnTuple* tfNTuple = 0;
     AnomCoupLight* anomCoupLight = 0;
 
     //Initialize LightTuple (AnomCoupTree) specific stuff:
     TTree* LightTree = new TTree("LightTree","Tree containing the AnomCoup information");
     LightTree->Branch("TheAnomCoupLight","AnomCoupLight",&anomCoupLight);
     TFile* LightFile = new TFile(("LightTree/AnomalousCouplingsLight_"+dataSetName+".root").c_str(),"RECREATE");
-
-    //Initialize TFnTuple specific stuff:
-    //TTree* TFTree = new TTree("TFTree","Tree containing the Transfer Function information");
-    //TFTree->Branch("TheTFTree","TFnTuple",&tfNTuple);
-    //TFile* TFTreeFile = new TFile("TFInformation/TransferFunctionTree.root","RECREATE");
 
     /////////////////////////////////////////
     //  LHCO Output files + GeneratorInfo  //
@@ -391,16 +388,14 @@ int main (int argc, char *argv[]){
       EventInfoFile << " Event Number      Lepton Type       Event selection       selectedChannelNumber " << endl;
     }
     unsigned int NumberCorrectEvents = 0; //Counts the number of semi-leptonic events
-    
     ////////////////////////////////////
     //	loop on events
     ////////////////////////////////////
     nEvents[d] = 0;
     int itriggerSemiMu = -1,itriggerSemiEl = -1, previousRun = -1;
-    if (verbose > 1) cout << "	Loop over events " << endl;
 
-    //for (unsigned int ievt = 0; ievt < datasets[d]->NofEvtsToRunOver(); ievt++){
-    for (unsigned int ievt = 0; ievt < 5000; ievt++){
+    for (unsigned int ievt = 0; ievt < datasets[d]->NofEvtsToRunOver(); ievt++){
+    //for (unsigned int ievt = 0; ievt < 500; ievt++){
       
       if(verbosity > 3) std::cout << " Looking at event : " << ievt << std::endl;    
       vector < TRootVertex* > vertex;
@@ -415,7 +410,7 @@ int main (int argc, char *argv[]){
       nEvents[d]++;
       
       if(ievt%1000 == 0)
-	std::cout<<"Processing the "<<ievt<<"th event (" << ((double)ievt/(double)datasets[d]->NofEvtsToRunOver())*100  << "%)" << " +> # selected: " << nSelectedMu << " (mu+jets) " << nSelectedEl << " (e+jets)" << flush<<"\r";
+	std::cout<<"Processing the "<<ievt<<"th event (" << ((double)ievt/(double)datasets[d]->NofEvtsToRunOver())*100  << "%)" << " +> # selected: " << nSelectedMuPos+nSelectedMuNeg << " (mu+jets) " << nSelectedElPos+nSelectedElNeg << " (e+jets)" << flush<<"\r";
       
       ////////////////
       // LOAD EVENT //
@@ -433,21 +428,24 @@ int main (int argc, char *argv[]){
         treeLoader.LoadMCEvent(ievt, 0, 0, mcParticles,false);  
         sort(mcParticles.begin(),mcParticles.end(),HighestPt()); // HighestPt() is included from the Selection class
       }
-      
+
       // check with genEvent which ttbar channel it is
       if(dataSetName.find("TTbarJets") == 0)  {
 	TRootGenEvent* genEvt = treeLoader.LoadGenEvent(ievt,false);
 	if( genEvt->isSemiLeptonic(TRootGenEvent::kMuon) ) {
-	  isSemiMu=true;
-	  isSemiE=false;
+	  isSemiMu=true; isSemiE=false;
+          histo1D["Mass_genEvtMuon"]->Fill(genEvt->lepton().M());
+          histo1D["Pt_genEvtMuon"]->Fill(genEvt->lepton().Pt());
+          nGenMu++;
 	}
 	else if( genEvt->isSemiLeptonic(TRootGenEvent::kElec) ) {
-	  isSemiMu=false;
-	  isSemiE=true;
+	  isSemiMu=false; isSemiE=true;
+          histo1D["Mass_genEvtElec"]->Fill(genEvt->lepton().M());
+          histo1D["Pt_genEvtElec"]->Fill(genEvt->lepton().Pt());
+          nGenEl++;
 	}
 	else {
-	  isSemiMu=false;
-	  isSemiE=false;
+	  isSemiMu=false; isSemiE=false;
 	}
       }
       
@@ -466,11 +464,29 @@ int main (int argc, char *argv[]){
 	else if( genEvt->isFullLeptonic() )
 	  scaleFactor *= (0.108*9.)*(0.108*9.);
       }
-      MSPlot["InitJets_METPt"]->Fill(mets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      if(init_jets.size() > 0) MSPlot["InitJets_Pt_jet1"]->Fill(init_jets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      if(init_jets.size() > 1) MSPlot["InitJets_Pt_jet2"]->Fill(init_jets[1]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      if(init_jets.size() > 2) MSPlot["InitJets_Pt_jet3"]->Fill(init_jets[2]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      if(init_jets.size() > 3) MSPlot["InitJets_Pt_jet4"]->Fill(init_jets[3]->Pt(), datasets[d], true, Luminosity*scaleFactor);
+
+      //------------------------//
+      // Start with corrections //
+      //------------------------//
+
+      ////////////////////////////////////////
+      //  Beam scraping and PU reweighting      --> Will be moved to nTuple analyzer!
+      ////////////////////////////////////////
+      double lumiWeight = 1;  
+      if(! (dataSetName.find("Data") == 0 || dataSetName.find("data") == 0 || dataSetName.find("DATA") == 0) ){   
+        if(doLumiWeightShift == "Nominal")    lumiWeight = LumiWeights.ITweight( (int)event->nTruePU() );
+        else if(doLumiWeightShift == "Plus")  lumiWeight = LumiWeightsUp.ITweight( (int)event->nTruePU() );
+        else if(doLumiWeightShift == "Minus") lumiWeight = LumiWeightsDown.ITweight( (int)event->nTruePU() );
+      }
+      MSPlot["lumiWeights"]->Fill(lumiWeight, datasets[d], true, scaleFactor*Luminosity*lumiWeight);
+      MSPlot["nTruePU"]->Fill(event->nTruePU(), datasets[d], true, scaleFactor*Luminosity*lumiWeight);
+
+      //Plot some of the original kinematic information (but need this PUweight to be known ...)
+      MSPlot["InitJets_METPt"]->Fill(mets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      if(init_jets.size() > 0) MSPlot["InitJets_Pt_jet1"]->Fill(init_jets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      if(init_jets.size() > 1) MSPlot["InitJets_Pt_jet2"]->Fill(init_jets[1]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      if(init_jets.size() > 2) MSPlot["InitJets_Pt_jet3"]->Fill(init_jets[2]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      if(init_jets.size() > 3) MSPlot["InitJets_Pt_jet4"]->Fill(init_jets[3]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
       
       //////////////////////////////////////
       // Apply Jet Corrections on-the-fly //   
@@ -485,19 +501,8 @@ int main (int argc, char *argv[]){
 	jetTools->correctJets(init_jets, event->kt6PFJets_rho(), false);
 	jetTools->correctMETTypeOne(init_jets, mets[0], false);
       }
-      MSPlot["InitJets_METPt_METTypeOneCorrected"]->Fill(mets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor);
+      MSPlot["InitJets_METPt_METTypeOneCorrected"]->Fill(mets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 
-      ////////////////////////////////////////
-      //  Beam scraping and PU reweighting      --> Will be moved to nTuple analyzer!
-      ////////////////////////////////////////
-      double lumiWeight = 1;  
-      if(! (dataSetName == "Data" || dataSetName == "data" || dataSetName == "DATA") ){   
-        if(doLumiWeightShift == "Nominal")    lumiWeight = LumiWeights.ITweight( (int)event->nTruePU() );
-        else if(doLumiWeightShift == "Plus")  lumiWeight = LumiWeightsUp.ITweight( (int)event->nTruePU() );
-        else if(doLumiWeightShift == "Minus") lumiWeight = LumiWeightsDown.ITweight( (int)event->nTruePU() );
-      }
-      histo1D["lumiWeights"]->Fill(lumiWeight);	
-      
       ///////////////////
       // TRIGGER SETUP //
       ///////////////////
@@ -579,17 +584,18 @@ int main (int argc, char *argv[]){
 	if (doJESShift != "nominal")
 	  jetTools->correctJetJESUnc(init_jets, mets[0], doJESShift, 1);  //last integer (1) = nSigma
       }
-      MSPlot["InitJets_METPt_JerSmearingApplied"]->Fill(mets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      
+      MSPlot["InitJets_METPt_JerSmearingApplied"]->Fill(mets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+
       ////////////////////////////////////////////////////////
       // Access particle information before event selection //
       // Write this information to LHCO Output for MW       //
       ////////////////////////////////////////////////////////
       lhcoOutput.StoreGenInfo(mcParticles);
-      if(lhcoOutput.GenEventContentCorrect()) histo1D["StCosTheta"]->Fill(kinFunctions.CosTheta(lhcoOutput.getGenLeptTop(), lhcoOutput.getGenLeptW(), lhcoOutput.getGenLepton())); 	
-      
+      if(lhcoOutput.GenEventContentCorrect())
+        histo1D["StCosTheta"]->Fill(kinFunctions.CosTheta(lhcoOutput.getGenLeptTop(), lhcoOutput.getGenLeptW(), lhcoOutput.getGenLepton()));
+
       //Accessing information and store in EventInfoFile    
-      std::string leptonTypeString[4] = {"muPlus","muMinus","elPlus","elMinus"};      //Not possible to define this in header file of LHCOOutput ...
+      std::string leptonTypeString[5] = {"muPlus","muMinus","elPlus","elMinus","notIdentified"};      //Not possible to define this in header file of LHCOOutput ...
       
       if( getEventInfo == true){
         EventInfoFile << "     " << ievt << "         ";
@@ -605,10 +611,10 @@ int main (int argc, char *argv[]){
       // EVENT SELECTION //
       /////////////////////
       if(init_jets.size() >=4){ // MSPlots before 'basic' event selection (no b-tag)
-	MSPlot["InitJets_pT_jet1_beforeEvtSel"]->Fill(init_jets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-	MSPlot["InitJets_pT_jet2_beforeEvtSel"]->Fill(init_jets[1]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-	MSPlot["InitJets_pT_jet3_beforeEvtSel"]->Fill(init_jets[2]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-	MSPlot["InitJets_pT_jet4_beforeEvtSel"]->Fill(init_jets[3]->Pt(), datasets[d], true, Luminosity*scaleFactor);
+	MSPlot["InitJets_pT_jet1_beforeEvtSel"]->Fill(init_jets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+	MSPlot["InitJets_pT_jet2_beforeEvtSel"]->Fill(init_jets[1]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+	MSPlot["InitJets_pT_jet3_beforeEvtSel"]->Fill(init_jets[2]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+	MSPlot["InitJets_pT_jet4_beforeEvtSel"]->Fill(init_jets[3]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
       }
       
       //Declare selection instance    
@@ -618,7 +624,7 @@ int main (int argc, char *argv[]){
       selection.setElectronCuts(32,2.5,0.1,0.02,0.5,0.3,0); 
       selection.setLooseMuonCuts(10,2.5,0.2);
       selection.setLooseElectronCuts(20,2.5,0.15,0.);
-      
+
       bool triggedSemiMu = false;
       bool triggedSemiEl = false;
 
@@ -661,24 +667,34 @@ int main (int argc, char *argv[]){
       }
       
       // semi-mu selection
+      MSPlot["nEventsAfterCutsSemiMu"]->Fill(0, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
       selecTableSemiMu.Fill(d,0,scaleFactor*lumiWeight);              
       if (triggedSemiMu) {
+        MSPlot["nEventsAfterCutsSemiMu"]->Fill(1, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 	selecTableSemiMu.Fill(d,1,scaleFactor*lumiWeight);
 	if (isGoodPV) {
+          MSPlot["nEventsAfterCutsSemiMu"]->Fill(2, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 	  selecTableSemiMu.Fill(d,2,scaleFactor*lumiWeight);
 	  if (selectedMuons.size() == 1) {
+            MSPlot["nEventsAfterCutsSemiMu"]->Fill(3, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 	    selecTableSemiMu.Fill(d,3,scaleFactor*lumiWeight);
 	    if( vetoMuons.size() == 1 ) {
+              MSPlot["nEventsAfterCutsSemiMu"]->Fill(4, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 	      selecTableSemiMu.Fill(d,4,scaleFactor*lumiWeight);
 	      if (vetoElectronsSemiMu.size() == 0) {
+                MSPlot["nEventsAfterCutsSemiMu"]->Fill(5, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 		selecTableSemiMu.Fill(d,5,scaleFactor*lumiWeight);
 		if (selectedJets.size() >= 1) {
+                  MSPlot["nEventsAfterCutsSemiMu"]->Fill(6, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 		  selecTableSemiMu.Fill(d,6,scaleFactor*lumiWeight);
 		  if (selectedJets.size() >= 2) {
+                    MSPlot["nEventsAfterCutsSemiMu"]->Fill(7, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 		    selecTableSemiMu.Fill(d,7,scaleFactor*lumiWeight);
 		    if (selectedJets.size() >= 3) {
+                      MSPlot["nEventsAfterCutsSemiMu"]->Fill(8, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 		      selecTableSemiMu.Fill(d,8,scaleFactor*lumiWeight);
 		      if (selectedJets.size() >= 4) {
+                        MSPlot["nEventsAfterCutsSemiMu"]->Fill(9, datasets[d], true, Luminosity*scaleFactor*lumiWeight);
 			selecTableSemiMu.Fill(d,9,scaleFactor*lumiWeight);
 		 	eventselectedSemiMu = true;
 		      }
@@ -736,29 +752,32 @@ int main (int argc, char *argv[]){
       TLorentzVector* selectedLepton;
       float LeptonRecoCharge;
       if (eventselectedSemiMu){
-        nSelectedMu++; decayChannel = semiMu;
         selectedLepton = (TLorentzVector*)selectedMuons[0]; LeptonRecoCharge = selectedMuons[0]->charge();
+        decayChannel = semiMu;
+        if(LeptonRecoCharge > 0) nSelectedMuPos++;
+        else if(LeptonRecoCharge < 0) nSelectedMuNeg++;
 	datasetsPlot = datasetsMu; Luminosity = LuminosityMu;
         leptonFlav="_mu";
       }
       else if (eventselectedSemiEl){
-        nSelectedEl++; decayChannel = semiEl;
+        decayChannel = semiEl;
         selectedLepton = (TLorentzVector*)selectedElectrons[0]; LeptonRecoCharge = selectedElectrons[0]->charge();
+        if(LeptonRecoCharge > 0) nSelectedElPos++;
+        else if(LeptonRecoCharge < 0) nSelectedElNeg++;
 	datasetsPlot = datasetsEl; Luminosity = LuminosityEl;
         leptonFlav="_el";
       }
       
       // MSPlots after 'basic' event selection (no b-tag)
-      MSPlot["Selected_Events_pT_jet1"+leptonFlav]->Fill(selectedJets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      MSPlot["Selected_Events_pT_jet2"+leptonFlav]->Fill(selectedJets[1]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      MSPlot["Selected_Events_pT_jet3"+leptonFlav]->Fill(selectedJets[2]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      MSPlot["Selected_Events_pT_jet4"+leptonFlav]->Fill(selectedJets[3]->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      MSPlot["Selected_Events_pT_lepton"+leptonFlav]->Fill(selectedLepton->Pt(), datasets[d], true, Luminosity*scaleFactor);
-      
+      MSPlot["Selected_Events_pT_jet1"+leptonFlav]->Fill(selectedJets[0]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      MSPlot["Selected_Events_pT_jet2"+leptonFlav]->Fill(selectedJets[1]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      MSPlot["Selected_Events_pT_jet3"+leptonFlav]->Fill(selectedJets[2]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      MSPlot["Selected_Events_pT_jet4"+leptonFlav]->Fill(selectedJets[3]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+      MSPlot["Selected_Events_pT_lepton"+leptonFlav]->Fill(selectedLepton->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+
       for (unsigned int q=0; q<selectedJets.size(); q++) {
-	MSPlot["Selected_Events_pT_alljets"+leptonFlav]->Fill(selectedJets[q]->Pt(), datasets[d], true, Luminosity*scaleFactor);       
-	if(q<4)
-	  MSPlot["Selected_Events_pT_4leadingjets"+leptonFlav]->Fill(selectedJets[q]->Pt(), datasets[d], true, Luminosity*scaleFactor);
+	MSPlot["Selected_Events_pT_alljets"+leptonFlav]->Fill(selectedJets[q]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
+	if(q<4) MSPlot["Selected_Events_pT_4leadingjets"+leptonFlav]->Fill(selectedJets[q]->Pt(), datasets[d], true, Luminosity*scaleFactor*lumiWeight);
       }
       
       ////////////////////////////////////////////////////////////////////
@@ -780,12 +799,20 @@ int main (int argc, char *argv[]){
 	  if(mcParticles[i]->status() != 3) continue;
 	  
 	  //Muon identification:
-	  if(mcParticles[i]->type() == 13 && mcParticles[i]->motherType() == -24 && mcParticles[i]->grannyType() == -6){if(muMinusFromTop) cerr<<"muMinusFromTop already true"<<endl; muMinusFromTop = true;}
-	  if(mcParticles[i]->type() == -13 && mcParticles[i]->motherType() == 24 && mcParticles[i]->grannyType() == 6){if(muPlusFromTop) cerr<<"muPlusFromTop already true"<<endl; muPlusFromTop = true;}
+	  if(mcParticles[i]->type() == 13 && mcParticles[i]->motherType() == -24 && mcParticles[i]->grannyType() == -6){
+            if(muMinusFromTop) cerr<<"muMinusFromTop already true"<<endl; muMinusFromTop = true;
+          }
+	  if(mcParticles[i]->type() == -13 && mcParticles[i]->motherType() == 24 && mcParticles[i]->grannyType() == 6){
+            if(muPlusFromTop) cerr<<"muPlusFromTop already true"<<endl; muPlusFromTop = true;
+          }
 	  
 	  //Electron identification:
-	  if(mcParticles[i]->type() == 11 && mcParticles[i]->motherType() == -24 && mcParticles[i]->grannyType() == -6){if(elMinusFromTop) cerr<<"elMinusFromTop already true"<<endl; elMinusFromTop = true;}
-	  if(mcParticles[i]->type() == -11 && mcParticles[i]->motherType() == 24 && mcParticles[i]->grannyType() == 6){if(elPlusFromTop) cerr<<"elPlusFromTop already true"<<endl; elPlusFromTop = true;}
+	  if(mcParticles[i]->type() == 11 && mcParticles[i]->motherType() == -24 && mcParticles[i]->grannyType() == -6){
+            if(elMinusFromTop) cerr<<"elMinusFromTop already true"<<endl; elMinusFromTop = true;
+          }
+	  if(mcParticles[i]->type() == -11 && mcParticles[i]->motherType() == 24 && mcParticles[i]->grannyType() == 6){
+            if(elPlusFromTop) cerr<<"elPlusFromTop already true"<<endl; elPlusFromTop = true;
+          }
 	  
 	  if( abs(mcParticles[i]->type()) < 6 || abs(mcParticles[i]->type()) == 21 ){
 	    mcParticlesTLV.push_back(*mcParticles[i]); mcParticlesMatching.push_back(*mcParticles[i]);
@@ -861,6 +888,7 @@ int main (int argc, char *argv[]){
           genHadrB = (TLorentzVector) mcParticlesMatching[hadronicBJet_.second];
           genLeptB = (TLorentzVector) mcParticlesMatching[leptonicBJet_.second];
           genLepton = (TLorentzVector) *lhcoOutput.getGenLepton();
+
 	}//End of matched particles reconstructed
       
       }//End of TTbarJets!
@@ -889,6 +917,8 @@ int main (int argc, char *argv[]){
       anomCoupLight->setLeptonCharge(LeptonRecoCharge);
       anomCoupLight->setCorrectJetCombi(jetCombi);
       anomCoupLight->setMET(*mets[0]);
+      if(dataSetName.find("TTbarJets") == 0 && lhcoOutput.GenEventContentCorrect()) anomCoupLight->setGenCosTheta(kinFunctions.CosTheta(lhcoOutput.getGenLeptTop(), lhcoOutput.getGenLeptW(), lhcoOutput.getGenLepton()));
+      else anomCoupLight->setGenCosTheta(2.);
 	
       //Store the information needed for the TF (but only has value when dataset is ttbar)
       anomCoupLight->setGenVectorLight1( genLight1 );
@@ -902,7 +932,13 @@ int main (int argc, char *argv[]){
       //----  End of Tree file filling (LightAnomCoupAnalyzer)  ----//
 
     } //loop on events
-    cout << "\n -> " << nSelectedMu << " mu+jets and " << nSelectedEl << " e+jets events where selected" << endl;
+    cout << "\n -> " << nSelectedMuPos << " mu+ " << " and " << nSelectedMuNeg << " mu- events are selected on " << nGenMu << " ==> " << (float)(nSelectedMuPos+nSelectedMuNeg)/(float)nGenMu << endl;
+    cout <<   " -> " << nSelectedElPos << " el+ " << " and " << nSelectedElNeg << " el- events are selected on " << nGenEl << " ==> " << (float)(nSelectedElPos+nSelectedElNeg)/(float)nGenEl << endl;
+
+    //--------------------------------//
+    // Store the gen-level LHCO plots //
+    //--------------------------------//
+    lhcoOutput.WriteLHCOPlots(fout);
 
     //------ Store the LightAnomCoupAnalyzer tree ------//
     LightFile->cd();
@@ -951,7 +987,7 @@ int main (int argc, char *argv[]){
     MultiSamplePlot *temp = it->second;
     string name = it->first;
     temp->Draw(name, 0, false, false, false, 1);     //string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSSignal 
-    temp->Write(fout, name, true, "PlotsMacro/MSPlots/", "pdf");
+    temp->Write(fout, name, saveAsPDF, (pathPNG+"/MSPlots/").c_str(), "pdf");
   }
 
   TDirectory* th1dir = fout->mkdir("1D_histograms");

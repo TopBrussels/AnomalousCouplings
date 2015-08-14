@@ -4,17 +4,17 @@ float KinematicFunctions::CosTheta(TLorentzVector *leptTop, TLorentzVector *lept
 
     float CosTheta = 0;
     //-----    Initializing boost variables    -----//
-    TLorentzVector *leptonWRestFrame, *WLeptTopRestFrame, *topBooster;
-    leptonWRestFrame = lepton;
-    topBooster = leptTop;
-    WLeptTopRestFrame = leptW;
+    TLorentzVector leptonWRestFrame, WLeptTopRestFrame, topBooster;
+    leptonWRestFrame = *lepton;
+    topBooster = *leptTop;
+    WLeptTopRestFrame = *leptW;
 
     //-----    Applying boost on muon and W    -----//
-    leptonWRestFrame->Boost(-WLeptTopRestFrame->BoostVector());
-    WLeptTopRestFrame->Boost(-topBooster->BoostVector());
+    leptonWRestFrame.Boost(-WLeptTopRestFrame.BoostVector());
+    WLeptTopRestFrame.Boost(-topBooster.BoostVector());
     
     //-----   Calculating cos theta:   -----
-    CosTheta = ((WLeptTopRestFrame->Vect()).Dot(leptonWRestFrame->Vect()))/(((WLeptTopRestFrame->Vect()).Mag())*((leptonWRestFrame->Vect()).Mag()));
+    CosTheta = ((WLeptTopRestFrame.Vect()).Dot(leptonWRestFrame.Vect()))/(((WLeptTopRestFrame.Vect()).Mag())*((leptonWRestFrame.Vect()).Mag()));
 
     return CosTheta;
 }

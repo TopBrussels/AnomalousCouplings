@@ -1,8 +1,9 @@
 #include "../interface/BTagStudy.h"
 
-BTagStudy::BTagStudy(int outputVerbose){
-    BTagStudy::InitializeBegin();
-    verbose = outputVerbose;
+BTagStudy::BTagStudy(int outputVerbose, vector<Dataset*> datasets){
+  BTagStudy::InitializeBegin(datasets);
+  verbose = outputVerbose;
+  nrDatasets_ = datasets.size();  
     //evtSelOutput[0].open("/user/aolbrech/GitTopTree_Feb2014/TopBrussels/AnomalousCouplings/EventSelectionResults/AnalyzerOutput/eventSelectionChoiceTables4JetCase.tex");
     //evtSelOutput[1].open("/user/aolbrech/GitTopTree_Feb2014/TopBrussels/AnomalousCouplings/EventSelectionResults/AnalyzerOutput/eventSelectionChoiceTables5JetCase.tex");
 }
@@ -12,7 +13,7 @@ BTagStudy::~BTagStudy(){
     evtSelOutput[1].close();
 }
 
-void BTagStudy::InitializeBegin(){
+void BTagStudy::InitializeBegin(vector<Dataset*> datasets){
 
   for(int ii = 0; ii < 6; ii++){
     for(int jj = 0; jj < 2; jj++){
@@ -46,10 +47,10 @@ void BTagStudy::InitializeBegin(){
 
   //---  Create the histograms  ---//
   for(int itBTag = 0; itBTag < 6; itBTag++){
-    histo1D["Mlb_ChiSqDistribution_"+BTitle[itBTag]] = new TH1F(("Mlb_ChiSqDistribution_"+BTitle[itBTag]).c_str(),("#chi^{2}_{mlb} distribution for b-jet choice "+BName[itBTag]).c_str(),        150,0,10);
-    histo1D["Mlb_CorrectCombiChiSq_"+BTitle[itBTag]] = new TH1F(("Mlb_CorrectCombiChiSq_"+BTitle[itBTag]).c_str(),("#chi^{2}_{mlb} distribution for correct b-jet choice "+BName[itBTag]).c_str(),150,0,10);
-    histo1D["Mlb_WrongCombiChiSq_"+BTitle[itBTag]]   = new TH1F(("Mlb_WrongCombiChiSq_"+BTitle[itBTag]).c_str(),  ("#chi^{2}_{mlb} distribution for wrong b-jet choice "+BName[itBTag]).c_str(),  150,0,10);
-    histo1D["Mlb_MassDistribution_"+BTitle[itBTag]] = new TH1F(("Mlb_MassDistribution_"+BTitle[itBTag]).c_str(), ("Mass distribution of lepton and leptonic b-jet "+BName[itBTag]).c_str(), 150, 50, 180);
+    MSPlot["Mlb_MassDistribution_"+BTitle[itBTag]] = new MultiSamplePlot(datasets,("Mlb_MassDistribution_"+BTitle[itBTag]).c_str(),150,50,180, ("Mass of lepton and leptonic b-jet "+BName[itBTag]).c_str());
+    MSPlot["Mlb_ChiSqDistribution_"+BTitle[itBTag]] = new MultiSamplePlot(datasets,("Mlb_ChiSqDistribution_"+BTitle[itBTag]).c_str(),150, 0, 10, ("#chi^{2}_{mlb} for b-jet choice "+BName[itBTag]).c_str());
+    histo1D["Mlb_CorrectCombiChiSq_"+BTitle[itBTag]] = new TH1F(("Mlb_CorrectCombiChiSq_"+BTitle[itBTag]).c_str(),("#chi^{2}_{mlb} for correct b-jet choice "+BName[itBTag]).c_str(),150,0,10);
+    histo1D["Mlb_WrongCombiChiSq_"+BTitle[itBTag]]   = new TH1F(("Mlb_WrongCombiChiSq_"+BTitle[itBTag]).c_str(),("#chi^{2}_{mlb} for wrong b-jet choice "+BName[itBTag]).c_str(),150,0,10);
   }
 }
 
@@ -64,7 +65,7 @@ void BTagStudy::ResetEventArrays(){
   }
 }
 
-void BTagStudy::CalculateJets(vector<TLorentzVector> Jets, vector<float> CSVbTagValues, vector<int> jetCombi, TLorentzVector lepton){      //, float BTagWorkingPoint, float LightWorkingPoint, int OptionNr){
+void BTagStudy::CalculateJets(vector<TLorentzVector> Jets, vector<float> CSVbTagValues, vector<int> jetCombi, TLorentzVector lepton, Dataset* dataset, float weight){
 
   ResetEventArrays();
 
@@ -100,7 +101,7 @@ void BTagStudy::CalculateJets(vector<TLorentzVector> Jets, vector<float> CSVbTag
     if(bTaggedJetNr[bTagOption].size() >= 2 && LightJetNr[bTagOption].size() >=2 ){
 
       //--- Use Mlb chi-sq to select the b-jets ---//
-      CalculateMlbChiSq(bTagOption, lepton, Jets, jetCombi);
+      CalculateMlbChiSq(bTagOption, lepton, Jets, jetCombi, dataset, weight);
 
       //--- For 4-jet case jet combi numbers can be calculated directly ---//
       light1Index4Jets[bTagOption] = (LightJetNr[bTagOption])[0];
@@ -135,7 +136,7 @@ void BTagStudy::CalculateJets(vector<TLorentzVector> Jets, vector<float> CSVbTag
   }//Loop over all btag options!
 }
 
-void BTagStudy::CalculateMlbChiSq(int bTagNr, TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int> correctJetCombi){
+void BTagStudy::CalculateMlbChiSq(int bTagNr, TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int> correctJetCombi, Dataset* dataSet, float msPlotScale){
 
   //---  This will distinguish the leptonic and hadronic b-jets  ---//
   //---     ==> Identical for 4- and 5-jet case                  ---//
@@ -151,12 +152,12 @@ void BTagStudy::CalculateMlbChiSq(int bTagNr, TLorentzVector lepton, vector<TLor
     }
   }
   bLeptIndex[bTagNr] = (bTaggedJetNr[bTagNr])[LowestChiSqMlb[bTagNr]];
-  histo1D["Mlb_MassDistribution_"+BTitle[bTagNr]]->Fill( (lepton+Jets[bLeptIndex[bTagNr]]).M() );
+  MSPlot["Mlb_MassDistribution_"+BTitle[bTagNr]]->Fill( (lepton+Jets[bLeptIndex[bTagNr]]).M(), dataSet, true, msPlotScale);
+  MSPlot["Mlb_ChiSqDistribution_"+BTitle[bTagNr]]->Fill( (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]], dataSet, true, msPlotScale );
 
   //--- Save information in histograms ---//
   //jet combi order is : 0 = BLeptonic & 1 = BHadronic
   if(correctJetCombi[0] != 9999 && correctJetCombi[1] != 9999){
-    histo1D["Mlb_ChiSqDistribution_"+BTitle[bTagNr]]->Fill( (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]] );
     if(bLeptIndex[bTagNr] == correctJetCombi[0] && bHadrIndex[bTagNr] == correctJetCombi[1]) histo1D["Mlb_CorrectCombiChiSq_"+BTitle[bTagNr]]->Fill( (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]]);
     if(bLeptIndex[bTagNr] != correctJetCombi[0] || bHadrIndex[bTagNr] != correctJetCombi[1]) histo1D["Mlb_WrongCombiChiSq_"+BTitle[bTagNr]]->Fill( (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]]);
   }
@@ -188,27 +189,51 @@ vector<int> BTagStudy::CalculateMqqbChiSq(int bTagNr, vector<TLorentzVector> Jet
   return lightIndices;
 }
 
-void BTagStudy::CreateHistograms(TFile* outfile){
+void BTagStudy::CreateHistograms(TFile* outfile, bool savePDF, std::string pathPNG, int datasetNr){
   //--- Use this function to create ChiSq histograms ---//
   outfile->cd();
-  std::cout << " Inside CreateHistograms function of BTagStudy class ! " << std::endl;
-  std::cout << " Histograms will be filled in file : " << outfile->GetName() << " ************************************" << std::endl;
+  if(verbose > 3) std::cout << " Inside CreateHistograms function of BTagStudy class ! \n  Histograms will be filled in file : " << outfile->GetName() << " ********************************" << std::endl;
 
-  TDirectory* th1dir = outfile->mkdir("1D_histograms_BTagStudy");
-  th1dir->cd();
-  for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
-    TH1F *temp = it->second;
-    int N = temp->GetNbinsX();
-    temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
-    temp->SetBinContent(N+1,0);
-    temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
-    temp->Write();
+  //Only write out the MSPlots if the datasetNr == nrDatasets_-1!
+  std::cout << " Does MSPlots directory exist ?? --> " << outfile->GetDirectory("MSPlots") << std::endl;
+  if(datasetNr == nrDatasets_-1 && MSPlot.size() > 0){
+    TDirectory* msdir = outfile->GetDirectory("MSPlots_BTagStudy");
+    if(!msdir) msdir = outfile->mkdir("MSPlots_BTagStudy");
+    std::cout << " Number of MultiSamplePlots is : " <<MSPlot.size() << std::endl; 
+    msdir->cd(); 
+    for(map<string,MultiSamplePlot*>::const_iterator it = MSPlot.begin(); it != MSPlot.end(); it++){    
+      MultiSamplePlot *temp = it->second;
+      string name = it->first;
+      temp->Draw(name, 0, false, false, false, 1);     //string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSSignal 
+      temp->Write(outfile, name, savePDF, (pathPNG+"/MSPlots_BTagStudy/").c_str(), "pdf", "MSPlots_BTagStudy");
+    }
+    std::cout << " Does MSPlots directory exists after saving the bTag MSPlots ?? --> " << outfile->GetDirectory("MSPlots") << std::endl;
   }
-  TDirectory* th2dir = outfile->mkdir("2D_histograms_BTagStudy");
-  th2dir->cd();
-  for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){    
-    TH2F *temp = it->second;
-    temp->Write();
+
+  //Histo1D's
+  if(histo1D.size() > 0){
+    TDirectory* th1dir = outfile->GetDirectory("1D_histograms_BTagStudy");
+    if(!th1dir) th1dir = outfile->mkdir("1D_histograms_BTagStudy");
+    th1dir->cd();
+    for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
+      TH1F *temp = it->second;
+      int N = temp->GetNbinsX();
+      temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
+      temp->SetBinContent(N+1,0);
+      temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
+      temp->Write();
+    }
+  }
+
+  //Histo2D's
+  if(histo2D.size() > 0){
+    TDirectory* th2dir = outfile->GetDirectory("2D_histograms_BTagStudy");
+    if(!th2dir) th2dir = outfile->mkdir("2D_histograms_BTagStudy");
+    th2dir->cd();
+    for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){    
+      TH2F *temp = it->second;
+      temp->Write();
+    }
   }
   outfile->cd(); 
 }

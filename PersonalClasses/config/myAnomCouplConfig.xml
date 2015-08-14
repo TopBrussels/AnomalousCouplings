@@ -13,7 +13,8 @@ beta_QCD = 2.09
 
 <!-- Simulation samples : -->
 <!-- TTbarJets samples were created without HLT trigger HENCE can be used for both applied triggers !! -->
-<d name="TTbarJets_SemiLept" title="t#bar{t}+jets (semi-lept)" add="1" color="4" ls="1" lw="2" normf="1" xsection="110.61" EqLumi="974.7" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_14March2014/14032014_151053/TopTree_Skimmed_1.root"/>
+<d name="TTbarJets_SemiLept" title="t#bar{t}+jets (semi-lept)" add="0" color="4" ls="1" lw="2" normf="1" xsection="110.61" EqLumi="220488.346" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/TopTree_Skimmed_*.root"/>
+<d name="TTbarJets_SemiLept" title="t#bar{t}+jets (semi-lept, few evts)" add="1" color="4" ls="1" lw="2" normf="1" xsection="110.61" EqLumi="1549.317" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/TopTree_Skimmed_1.root"/>
 
 <!-- QCD Samples were created without HLT trigger HENCE can be used for both applied triggers !! -->
 <!-- QCD for muon channel HENCE MuEnriched DataDriven -->
@@ -59,8 +60,9 @@ beta_QCD = 2.09
 <d name="ST_SingleTop_tWChannel_tbar" title="SingleTop_tW_Channel_tbar" add="0" color="7" ls="1" lw="2" normf="1" xsection="7.87" EqLumi="92754.6379" filenames="/user/aolbrech/Samples/Summer11_v2/TriJetSkim_TriJetHLT_OR/TriJetSkim_TriJetHLT_OR_Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_1.root"/>
 
 <!-- Data samples : -->
-<!-- Data samples with IsoMu17/20/24 trigger (Run2011A only: 2141.961 EqLumi)-->
-<d name="Data" title="Data (19.6 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="19646.840" filenames=""/>
+<!-- Data samples with IsoMu24 trigger-->
+<d name="Data_Mu" title="Data (19.6 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="874.840" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3427/30042013_234038/*.root"/>
+<d name="Data_Mu" title="Data (19.6 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="874.840" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/blyweert/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3446/14052013_155527/*_1.root"/>
 
 </datasets>
 

@@ -4,25 +4,43 @@
 #include <fstream>
 #include <sstream>
 
-LHCOOutput::LHCOOutput(int verbosity, string GenOrReco, bool writeOutput){
-    
-  //Constructor: Define variables which have to be initialized in the beginning!
+LHCOOutput::LHCOOutput(int verbosity, bool writeOutput){
+  verbose_ = verbosity;
+  writeOutput_ = writeOutput;
+  GenOrReco_ = "";
+  CorrectGenEvtContent = false;
+  leptonType = notFound;
+  if(verbose_ > 3) std::cout << " In constructor of LHCOOutput! " << std::endl;
+}
+
+
+LHCOOutput::~LHCOOutput(){
+
+  //Close the output files:
+  for(int ii = 0; ii < 4; ii++){
+    if(GenOrReco_ == "Gen" && writeOutput_) GenOutFile[ii].close();
+    if(GenOrReco_ == "Reco" && writeOutput_) RecoOutFile[ii].close();
+  }
+  if(GenOrReco_ == "Reco" && writeOutput_){ WrongRecoMuPosFile.close(); CorrectRecoMuPosFile.close();UnmatchedRecoMuPosFile.close();}
+
+}
+
+void LHCOOutput::Initialize(string GenOrReco){
+  if(verbose_ > 3) std::cout << " In Initialize function of LHCOOutput ... " << std::endl;    
+
+  GenOrReco_ = GenOrReco; //Will be updated if the sample is TTbarJets and then the destructor will actually do something (for all other samples nothing will be executed in destructor)
   NumberNegativeElectrons = 0; NumberNegativeMuons = 0; NumberPositiveElectrons = 0; NumberPositiveMuons = 0;
   WrongEvtCounter = 0;
-  CorrectGenEvtContent = false;
-  NumberNegRecoEl = 0;         NumberNegRecoMu = 0;     NumberPosRecoEl = 0;         NumberPosRecoMu = 0; 
+  NumberNegRecoEl = 0;    NumberNegRecoMu = 0;  NumberPosRecoEl = 0;  NumberPosRecoMu = 0; 
   NrPosRecoMuCorrect = 0; NrPosRecoMuWrong = 0; NrPosRecoMuUnmatched = 0; 
-  writeOutput_ = writeOutput;
-  verbose_ = verbosity;
-  GenOrReco_ = GenOrReco;
 
-  if(GenOrReco == "Gen"){
+  if(GenOrReco == "Gen" && writeOutput_ == true){
     GenOutFile[0].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_PositiveMuon.lhco");
     GenOutFile[1].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_NegativeMuon.lhco");
     GenOutFile[2].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_PositiveElectron.lhco");
     GenOutFile[3].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_NegativeElectron.lhco");
   }
-  else if(GenOrReco == "Reco"){
+  else if(GenOrReco == "Reco" && writeOutput_ == true){
     RecoOutFile[0].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_PositiveMuon.lhco");
     RecoOutFile[1].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_NegativeMuon.lhco");
     RecoOutFile[2].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_PositiveElec.lhco");
@@ -58,17 +76,6 @@ LHCOOutput::LHCOOutput(int verbosity, string GenOrReco, bool writeOutput){
   histo1D[("deltaR_"+GenOrReco+"_MuonWithB").c_str()]       = new TH1F(("deltaR_"+GenOrReco+"_MuonWithB").c_str(),      ("deltaR distribution between muon and b-jet ("+GenOrReco+")").c_str(),250,0,10);
   histo1D[("deltaR_"+GenOrReco+"_ElectronWithJet").c_str()] = new TH1F(("deltaR_"+GenOrReco+"_ElectronWithJet").c_str(),("deltaR distribution between electron and jet ("+GenOrReco+")").c_str(),250,0,10);
   histo1D[("deltaR_"+GenOrReco+"_ElectronWithB").c_str()]   = new TH1F(("deltaR_"+GenOrReco+"_ElectronWithB").c_str(),  ("deltaR distribution between electron and b-jet ("+GenOrReco+")").c_str(),250,0,10);
-}
-
-LHCOOutput::~LHCOOutput(){
-
-  //Close the output files:
-  for(int ii = 0; ii < 4; ii++){
-    if(GenOrReco_ == "Gen" && writeOutput_) GenOutFile[ii].close();
-    if(GenOrReco_ == "Reco" && writeOutput_) RecoOutFile[ii].close();
-  }
-  if(GenOrReco_ == "Reco" && writeOutput_){ WrongRecoMuPosFile.close(); CorrectRecoMuPosFile.close();UnmatchedRecoMuPosFile.close();}
-
 }
 
 void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
@@ -112,10 +119,10 @@ void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
 
       else if((fabs(partType) == 13 || fabs(partType) == 11 ) && fabs(motherType) == 24 && fabs(grannyType) == 6){
 	EventContent[4]++;
-	string leptonType="";
-	if(fabs(partType) == 13){      if(verbose_>4) leptonType = "*Particle found: Muon";}
-	else if(fabs(partType) == 11){ if(verbose_>4) leptonType = "*Particle found: Electron";}
-	Lepton = (TRootMCParticle*) mcParticles[i]; if(verbose_ > 4) cout<<leptonType<<endl;
+	string LeptonType="";
+	if(fabs(partType) == 13){      if(verbose_>4) LeptonType = "*Particle found: Muon";}
+	else if(fabs(partType) == 11){ if(verbose_>4) LeptonType = "*Particle found: Electron";}
+	Lepton = (TRootMCParticle*) mcParticles[i]; if(verbose_ > 4) cout<<LeptonType<<endl;
       }//End of lepton identification
 	  
       else if((fabs(partType) == 14 || fabs(partType) == 12 ) && fabs(motherType) == 24 && fabs(grannyType) == 6){
@@ -410,27 +417,31 @@ void LHCOOutput::LHCOEventOutput(int LHCOIndex, ostream &outputFile, unsigned in
 }
 
 void LHCOOutput::WriteLHCOPlots(TFile* outfile){
-  //--- Use this function to create ChiSq histograms ---//
-  outfile->cd();
-  std::cout << " Inside WriteLHCOPlots function of LHCOOutput class ! " << std::endl;
-  std::cout << " Histograms will be filled in file : " << outfile->GetName() << " ************************************" << std::endl;
 
-  TDirectory* th1dir = outfile->mkdir("1D_histograms_LHCOOutput");
-  th1dir->cd();
-  for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
-    TH1F *temp = it->second;
-    int N = temp->GetNbinsX();
-    temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
-    temp->SetBinContent(N+1,0);
-    temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
-    temp->Write();
-  }
-  TDirectory* th2dir = outfile->mkdir("2D_histograms_LHCOOutput");
-  th2dir->cd();
-  for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){    
-    TH2F *temp = it->second;
-    temp->Write();
-  }
-  outfile->cd(); 
+  if(GenOrReco_ == "Gen" or GenOrReco_ == "Reco"){
+    //--- Use this function to create ChiSq histograms ---//
+    outfile->cd();
+    if(verbose_ > 3) std::cout << " Inside WriteLHCOPlots function of LHCOOutput class ! \n Histograms will be filled in file : " << outfile->GetName() << " ********************************" << std::endl;
 
+    TDirectory* th1dir = outfile->GetDirectory("1D_histograms_LHCOOutput");   //Check whether directory already exists ..
+    if(!th1dir) th1dir = outfile->mkdir("1D_histograms_LHCOOutput");          // .. and otherwise create it!
+    th1dir->cd();
+    for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
+      TH1F *temp = it->second;
+      int N = temp->GetNbinsX();
+      temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
+      temp->SetBinContent(N+1,0);
+      temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
+      temp->Write();
+    }
+    
+    TDirectory* th2dir = outfile->GetDirectory("2D_histograms_LHCOOutput");
+    if(!th2dir) th2dir = outfile->mkdir("2D_histograms_LHCOOutput");
+    th2dir->cd();
+    for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){    
+      TH2F *temp = it->second;
+      temp->Write();
+    }
+    outfile->cd(); 
+  }
 }
