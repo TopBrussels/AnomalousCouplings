@@ -335,5 +335,5 @@ def get_all_permutations(cat_list):
                 current_value[cat] = list(new_val)
                 current = 0
                 break
-                
+    print 'List of allowed permutations :',permutations               
     return permutations
