@@ -62,12 +62,14 @@ def verif_event(MWparam):
         os.mkdir('./Events/'+MWparam.name)
     except:
         pass
-    os.system('cp ./Events/input.lhco ./Events/'+MWparam.name+'/')
+    os.system('cp ./Events/'+MWparam['mw_run']['inputfile']+' ./Events/'+MWparam.name+'/')     #CHANGED 01/04/2015
+    #os.system('cp ./Events/input.lhco ./Events/'+MWparam.name+'/')
     # 1 ##############
     ####   take run information
     for MW_dir in MWparam.MW_listdir:
         start=time.time()
-        select=Lhco_filter(MW_dir,'input.lhco',MWparam)
+	select=Lhco_filter(MW_dir,MWparam['mw_run']['inputfile'],MWparam)       #CHANGED 01/04/2015
+        #select=Lhco_filter(MW_dir,'input.lhco',MWparam)
         print 'time Lhco_filter',time.time()-start
 
 def restrict_event_passing_cut(MWparam):
