@@ -186,8 +186,9 @@ class MG_diagram(diagram_class.MG_diagram):
         text = template % '\n'.join(data)
         fsock.write(text)
         
-        if self.MWparam['mw_perm']['preselect'] == 'default':
-            fsock.write(open(pjoin(self.directory, '../permutation_weight_default.dat')).read())
+        if self.MWparam['mw_perm']['preselect'] == 'default' or self.MWparam['mw_perm']['preselect'] == 'nobperm':
+	    print 'Opening file for preselection : ',pjoin(self.directory,'../permutation_weight_' + self.MWparam['mw_perm']['preselect'] + '.dat')
+            fsock.write(open(pjoin(self.directory, '../permutation_weight_' + self.MWparam['mw_perm']['preselect'] + '.dat')).read())
         else:
             fsock.write(open(pjoin(self.directory,'../..',self.MWparam['mw_perm']['preselect'])).read())
         
