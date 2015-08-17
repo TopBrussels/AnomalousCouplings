@@ -139,6 +139,7 @@ class Cluster(object):
         text = """#!/bin/bash
         MYTMP=%(tmpdir)s/run$%(job_id)s
         MYPWD=%(cwd)s
+	source /swmgrs/cmss/slc5_amd64_gcc462/external/gcc/4.6.2/etc/profile.d/init.sh
         mkdir -p $MYTMP
         cd $MYPWD
         input_files=( %(input_files)s )
@@ -212,12 +213,15 @@ class Cluster(object):
         while 1: 
             old_mode = mode
             nb_iter += 1
+            NrRemainingEvts = os.popen('qstat @cream02 | grep aolbrech | wc -l').read()
             idle, run, finish, fail = self.control(me_dir)
+            if int(NrRemainingEvts) != 0:
+              if idle+run == 0: logger.info('Still some jobs running on PBS ...')
             if fail:
                 raise ClusterManagmentError('Some Jobs are in a Hold/... state. Please try to investigate or contact the IT team')
-            if idle + run == 0:
+            if idle + run == 0 and int(NrRemainingEvts) == 0:
                 #time.sleep(20) #security to ensure that the file are really written on the disk
-                logger.info('All jobs finished')
+                logger.info('All jobs finished (double-checked using qstat)')
                 break
             if idle + run < minimal_job:
                 return
@@ -983,22 +987,27 @@ class PBSCluster(Cluster):
     running_tag = ['T','E','R']
     complete_tag = ['C']
     
-    maximum_submited_jobs = 2500
+    maximum_submited_jobs = 1000
 
     @multiple_try()
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, log=None,
                required_output=[], nb_submit=0):
         """Submit a job prog to a PBS cluster"""
         
-        
         me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
         me_dir = misc.digest(me_dir)[-14:]
+	CorrectMadWeightName = me_dir         #ADDED 21 JANUARY (Annik)
+	#print 'Name of me_dir after digest : ', me_dir, ' -- should be identical to CorrectMadWeightName = ', CorrectMadWeightName
         if not me_dir[0].isalpha():
             me_dir = 'a' + me_dir[1:]
 
-        if len(self.submitted_ids) > self.maximum_submited_jobs:
+	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
+        if len(self.submitted_ids) >= self.maximum_submited_jobs:
             fct = lambda idle, run, finish: logger.info('Waiting for free slot: %s %s %s' % (idle, run, finish))
             me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
+            #print 'Change name of me_dir in wait : '
+            #me_dir = misc.digest(me_dir)[-14:]    --> Wrong result!! (Seems to be some kind of random generator)
+	    #print 'Name of me_dir after digest : ', me_dir
             self.wait(me_dir, fct, self.maximum_submited_jobs)
 
         
@@ -1024,9 +1033,13 @@ class PBSCluster(Cluster):
         if argument:
             text += ' ' + ' '.join(argument)
 
+	#print 'Name used for qsub command : ', me_dir
+	#print 'Change name of qsub command just before sumbitting to : ',CorrectMadWeightName 
+	me_dir = CorrectMadWeightName         #ADDED 21 JANUARY (Annik)
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,
+		   '-l walltime=20:00:00',
                    '-V']
 
         if self.cluster_queue and self.cluster_queue != 'None':
