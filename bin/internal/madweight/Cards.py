@@ -71,8 +71,7 @@ class Card(dict):
     
     #2 #########################################################################
     def __init__(self,file,type=''):
-      
-        print "In __init__ of madgraph/madweight/Cards.py "  
+        
         dict.__init__(self)
         self.info = self #retro compatibility
         

@@ -350,7 +350,7 @@ class Param_card:
         print 'we have created ',num-1,' param_card\'s'
         if self.wrong_generation:
             print 'but ',len(self.wrong_generation),' are desactivated'
-                        
+
         if self.MWparam['mw_parameter']['2']:
             self.update_event_dir()
 
