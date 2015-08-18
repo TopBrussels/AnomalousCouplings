@@ -87,6 +87,8 @@ int main (int argc, char *argv[]){
   bool getLHCOOutput = false;
   bool getEventInfo = true;
   bool saveAsPDF = false;
+  bool splitLeptonCharge = false;
+  bool getCorrectWrong = false;
 
   //Values needed for bTag study (select which of the 6 b-tag options is optimal!)
   int ChosenBTag;
@@ -369,7 +371,7 @@ int main (int argc, char *argv[]){
     /////////////////////
     //  Used classes   //
     /////////////////////
-    LHCOOutput lhcoOutput(verbose, getLHCOOutput); 
+    LHCOOutput lhcoOutput(verbose, getLHCOOutput, splitLeptonCharge, getCorrectWrong); 
     if(dataSetName.find("TTbarJets") == 0) lhcoOutput.Initialize("Gen");
     KinematicFunctions kinFunctions;  //Variable accessible in KinematicFunctions using kinFunctions.CosTheta(TLorentzVector *Top, TLorentzVector *WLept, TLorentzVector *lepton)
     AnomCoupLight* anomCoupLight = 0;

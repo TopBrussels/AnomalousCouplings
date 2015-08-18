@@ -17,7 +17,7 @@ using namespace TopTree;
 class LHCOOutput{
 
 public:
-  LHCOOutput(int, bool);
+  LHCOOutput(int, bool, bool, bool);
   ~LHCOOutput();
 
   void Initialize(std::string);
@@ -45,7 +45,7 @@ private:
   bool CorrectGenEvtContent;
   ofstream GenOutFile[4], RecoOutFile[4], WrongGenFile, CorrectRecoMuPosFile, WrongRecoMuPosFile, UnmatchedRecoMuPosFile;
   int verbose_, LeptonCharge;
-  bool writeOutput_;
+  bool writeOutput_, splitLeptCharge_, splitCorrectWrong_;
   std::string GenOrReco_;
 
   enum LeptonType_t {muPlus, muMinus, elPlus, elMinus, notFound};
