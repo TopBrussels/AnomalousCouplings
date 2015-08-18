@@ -394,8 +394,8 @@ int main (int argc, char *argv[]){
     nEvents[d] = 0;
     int itriggerSemiMu = -1,itriggerSemiEl = -1, previousRun = -1;
 
-    for (unsigned int ievt = 0; ievt < datasets[d]->NofEvtsToRunOver(); ievt++){
-    //for (unsigned int ievt = 0; ievt < 500; ievt++){
+   for (unsigned int ievt = 0; ievt < datasets[d]->NofEvtsToRunOver(); ievt++){
+   // for (unsigned int ievt = 0; ievt < 500; ievt++){
       
       if(verbosity > 3) std::cout << " Looking at event : " << ievt << std::endl;    
       vector < TRootVertex* > vertex;
@@ -783,7 +783,7 @@ int main (int argc, char *argv[]){
       ////////////////////////////////////////////////////////////////////
       //   Use genEvent information to get the correct event topology   //
       ////////////////////////////////////////////////////////////////////
-      TLorentzVector genLight1 = 0., genLight2 = 0., genHadrB = 0., genLeptB = 0., genLepton = 0.;
+      TLorentzVector genLight1, genLight2, genHadrB, genLeptB, genLepton;
       if(dataSetName.find("TTbarJets_SemiLept") == 0){
         vector<TRootMCParticle> mcParticlesMatching;      	
         vector< pair<unsigned int, unsigned int> > JetPartonPair, ISRJetPartonPair; // First one is jet number, second one is mcParticle number

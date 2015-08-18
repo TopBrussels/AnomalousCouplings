@@ -6,7 +6,11 @@ source /cvmfs/cms.cern.ch/slc6_amd64_gcc472/external/dcap/2.47.5.0-cms2/etc/prof
 source /jefmount_mnt/jefmount/cmss/slc5_amd64_gcc462/external/dcap/2.47.5.0-cms/etc/profile.d/init.sh
 
 #Use the correct analyzer:
-#     -- TopTree analyzer --
+#     -- TopTree analyzer (in PBSRunning script to correctly deal with different /lib location!)--
+g++ -m64 -g -L lib -I ../ -l TopTreeAnaContent53 -l TopTreeAna53 -l AnomCoupAnalysis53 -l MLP -l TreePlayer -l TMVA -l XMLIO -I `root-config --incdir` `root-config --libs` AnomalousCouplingsTreeCreator.cc -o AnomalousCouplingsTreeCreator
+./AnomalousCouplingsTreeCreator
+
+#     -- TopTree analyzer (in ordinary GitTopTree directory)--
 g++ -m64 -g -L $HOME/lib -I ../ -l TopTreeAnaContent53 -l TopTreeAna53 -l AnomCoupAnalysis53 -l MLP -l TreePlayer -l TMVA -l XMLIO -I `root-config --incdir` `root-config --libs` AnomalousCouplingsTreeCreator.cc -o AnomalousCouplingsTreeCreator
 ./AnomalousCouplingsTreeCreator
 
