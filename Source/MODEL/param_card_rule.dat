@@ -1,0 +1,15 @@
+<file>######################################################################
+## VALIDITY RULE FOR THE PARAM_CARD   ####
+######################################################################
+<zero>
+     ckmblock 1 # 
+</zero>
+<one>
+</one>
+<identical>
+</identical>
+<opposite>
+</opposite>
+<constraint>
+</constraint>
+</file>
