@@ -56,10 +56,8 @@ int main (int argc, char *argv[]){
 
   //xml file
   string xmlFileName ="PersonalClasses/config/myAnomCouplConfig.xml";
-
-  if (argc > 3)
-    xmlFileName = (string)argv[3];
-  
+  if (argc >= 2)                            //--> Needed for the PBS script!!
+    xmlFileName = string(argv[2]);
   const char *xmlfile = xmlFileName.c_str();
   cout << "used config file: " << xmlfile << endl;
 
@@ -221,6 +219,10 @@ int main (int argc, char *argv[]){
 
   histo1D["Quark1JetNumber"] = new TH1F("Quark1JetNumber","Quark1JetNumber",12,-1.5,10.5);
   histo1D["Quark2JetNumber"] = new TH1F("Quark2JetNumber","Quark2JetNumber",12,-1.5,10.5);
+  histo1D["nSelectedEvents"] = new TH1F("nSelectedEvents","nSelectedEvents",8, 0.5, 8.5);
+  std::string BinLabel[8] = {"#mu+ selected","#mu- selected","#mu selected","gen #mu identified","e+ selected","e- selected","e selected","gen e identified"};
+  for(int iBin = 1; iBin <= 8; iBin++)
+    histo1D["nSelectedEvents"]->GetXaxis()->SetBinLabel(iBin,BinLabel[iBin-1].c_str());
 
   ////////////////////////////////////
   /// MultiSamplePlot
@@ -438,12 +440,14 @@ int main (int argc, char *argv[]){
 	  isSemiMu=true; isSemiE=false;
           histo1D["Mass_genEvtMuon"]->Fill(genEvt->lepton().M());
           histo1D["Pt_genEvtMuon"]->Fill(genEvt->lepton().Pt());
+          histo1D["nSelectedEvents"]->Fill(4);
           nGenMu++;
 	}
 	else if( genEvt->isSemiLeptonic(TRootGenEvent::kElec) ) {
 	  isSemiMu=false; isSemiE=true;
           histo1D["Mass_genEvtElec"]->Fill(genEvt->lepton().M());
           histo1D["Pt_genEvtElec"]->Fill(genEvt->lepton().Pt());
+          histo1D["nSelectedEvents"]->Fill(8);
           nGenEl++;
 	}
 	else {
@@ -756,16 +760,18 @@ int main (int argc, char *argv[]){
       if (eventselectedSemiMu){
         selectedLepton = (TLorentzVector*)selectedMuons[0]; LeptonRecoCharge = selectedMuons[0]->charge();
         decayChannel = semiMu;
-        if(LeptonRecoCharge > 0) nSelectedMuPos++;
-        else if(LeptonRecoCharge < 0) nSelectedMuNeg++;
+        histo1D["nSelectedEvents"]->Fill(3);
+        if(LeptonRecoCharge > 0)     { nSelectedMuPos++; histo1D["nSelectedEvents"]->Fill(1);}
+        else if(LeptonRecoCharge < 0){ nSelectedMuNeg++; histo1D["nSelectedEvents"]->Fill(2);}
 	datasetsPlot = datasetsMu; Luminosity = LuminosityMu;
         leptonFlav="_mu";
       }
       else if (eventselectedSemiEl){
-        decayChannel = semiEl;
         selectedLepton = (TLorentzVector*)selectedElectrons[0]; LeptonRecoCharge = selectedElectrons[0]->charge();
-        if(LeptonRecoCharge > 0) nSelectedElPos++;
-        else if(LeptonRecoCharge < 0) nSelectedElNeg++;
+        decayChannel = semiEl;
+        histo1D["nSelectedEvents"]->Fill(7);
+        if(LeptonRecoCharge > 0)     { nSelectedElPos++; histo1D["nSelectedEvents"]->Fill(5);}
+        else if(LeptonRecoCharge < 0){ nSelectedElNeg++; histo1D["nSelectedEvents"]->Fill(6);}
 	datasetsPlot = datasetsEl; Luminosity = LuminosityEl;
         leptonFlav="_el";
       }
