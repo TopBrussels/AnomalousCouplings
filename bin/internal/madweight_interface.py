@@ -364,7 +364,8 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
         """MadWeight Function: check that the events are valid
         and write the events to MG mapping"""
         self.configure()
-        evt_file = pjoin(self.me_dir,'Events','input.lhco')
+        evt_file = pjoin(self.me_dir,'Events',self.MWparam['mw_run']['inputfile'])
+	print " Looking at inputfile : ",evt_file
         if not os.path.exists(evt_file):
             question = 'Which LHCO file do you want to use?'
             default = ''            

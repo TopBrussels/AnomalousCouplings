@@ -712,7 +712,7 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
         if 'transfer_card.dat' in cards:
             question += '   - use the \'change_tf\' command to set a transfer functions.\n'
 
-        out = 'to_run'
+        out = '0'    #'to_run' --> CHANGED on 17/07/2015 because question came back when running through nohup ....
         while out not in ['0', 'done']:
             out = ask(question, '0', possible_answer, timeout=int(1.5*timeout),
                               path_msg='enter path', ask_class = AskforEditCard,
