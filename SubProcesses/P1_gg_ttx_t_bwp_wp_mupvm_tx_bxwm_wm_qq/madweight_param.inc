@@ -1,1 +1,0 @@
-../madweight_param.inc
