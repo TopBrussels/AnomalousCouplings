@@ -29,26 +29,17 @@ float xHigh = 0.225;
 std::string KinVar = "Re(g_{R})"; 
 int xMin = 4; 
 std::string title = "RecoFirstRun_50000Evts_DblGausTF"; 
-vector<std::string> NormTypeName; // = {"","_XS","_Acc"};
-bool OnlyXSPossible = false;
-//if(OnlyXSPossible == false){NormTypeName.push_back(""); NormTypeName.push_back("_Acc");}
-//else{                       NormTypeName.push_back(""); NormTypeName.push_back("_XS"); NormTypeName.push_back("Acc");}
+std::string NormTypeName[3] = {"","_XS","_Acc"};
+std::string NormType[3] = {"","",""};
+const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
  
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
 TFile* file_FitDist = new TFile("Events_RecoTest/RecoFirstRun_50000Evts_DblGausTF/FitDistributions_RecoFirstRun_50000Evts_DblGausTF_1000Evts.root","RECREATE"); 
-//TDirectory dir_OriginalLL[nrNorms]; //, dir_FirstFit[nrNorms], dir_SecondFit[nrNorms];
-//TDirectory *dirP_OriginalLL; //, *dirP_FirstFit, *dirP_SecondFit;
+TDirectory *dir_OriginalLL[nrNorms], *dir_FirstFit[nrNorms], *dir_SecondFit[nrNorms];
 
-//for(int iNorm = 0; iNorm < nrNorms; iNorm++){
-  //dirP_OriginalLL = dir_OriginalLL; *(dirP_OriginalLL+iNorm) = file_FitDist->mkdir(("OriginalLL"+NormTypeName[iNorm]).c_str());
-  //dir_OriginalLL[iNorm] = file_FitDist->mkdir(("OriginalLL"+NormTypeName[iNorm]).c_str());
-  //dir_FirstFit[iNorm] = file_FitDist->mkdir(("FirstPolynomialFit"+NormTypeName[iNorm]).c_str());
-  //dir_SecondFit[iNorm] = file_FitDist->mkdir(("SecondPolynomialFit"+NormTypeName[iNorm]).c_str());
-//}
-
-TDirectory *dir_OriginalLL = file_FitDist->mkdir("OriginalLL"),        *dir_OriginalLLXS = file_FitDist->mkdir("OriginalLL_XS"),        *dir_OriginalLLAcc = file_FitDist->mkdir("OriginalLL_Acc");
-TDirectory *dir_FirstFit = file_FitDist->mkdir("FirstPolynomialFit"),  *dir_FirstFitXS = file_FitDist->mkdir("FirstPolynomialFit_XS"),  *dir_FirstFitAcc = file_FitDist->mkdir("FirstPolynomialFit_Acc");
-TDirectory *dir_SecondFit = file_FitDist->mkdir("SecondPolynomialFit"),*dir_SecondFitXS = file_FitDist->mkdir("SecondPolynomialFit_XS"),*dir_SecondFitAcc = file_FitDist->mkdir("SecondPolynomialFit_Acc");
+//TDirectory *dir_OriginalLL = file_FitDist->mkdir("OriginalLL"),        *dir_OriginalLLXS = file_FitDist->mkdir("OriginalLL_XS"),        *dir_OriginalLLAcc = file_FitDist->mkdir("OriginalLL_Acc");
+//TDirectory *dir_FirstFit = file_FitDist->mkdir("FirstPolynomialFit"),  *dir_FirstFitXS = file_FitDist->mkdir("FirstPolynomialFit_XS"),  *dir_FirstFitAcc = file_FitDist->mkdir("FirstPolynomialFit_Acc");
+//TDirectory *dir_SecondFit = file_FitDist->mkdir("SecondPolynomialFit"),*dir_SecondFitXS = file_FitDist->mkdir("SecondPolynomialFit_XS"),*dir_SecondFitAcc = file_FitDist->mkdir("SecondPolynomialFit_Acc");
 
 const int NrConfigs = 9; 
 const int nEvts = 1000; 
@@ -133,9 +124,9 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCou
   for(int ii = 0; ii < NrConfigs; ii++)
     LogLikelihood[ii] = h_LogLik->GetBinContent(h_LogLik->FindBin(Var[ii]));
 
-  if(Type == ""){         dir_OriginalLL->cd(); TypeNr = 0;}
-  else if(Type == "XS"){  dir_OriginalLLXS->cd(); TypeNr = 1;}
-  else if(Type == "Acc"){ dir_OriginalLLAcc->cd(); TypeNr = 2;}
+  if(Type == ""){         dir_OriginalLL[0]->cd(); TypeNr = 0;}
+  else if(Type == "XS"){  dir_OriginalLL[1]->cd(); TypeNr = 1;}
+  else if(Type == "Acc"){ dir_OriginalLL[2]->cd(); TypeNr = 2;}
   h_LogLik->Write();
   std::string YAxisTitle = "-ln(L) value ("+TypeName[TypeNr]+" -- evt "+EvtNumber+")";
 
@@ -152,9 +143,9 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCou
   gr_LnLik->Fit(polFit_AllPoints,"Q","",polFit_AllPoints->GetXmin(), polFit_AllPoints->GetXmax());
   h_ChiSquaredFirstFit[TypeNr]->Fill(polFit_AllPoints->GetChisquare());
 
-  if(Type == "")         dir_FirstFit->cd();
-  else if(Type == "XS")  dir_FirstFitXS->cd();
-  else if(Type == "Acc") dir_FirstFitAcc->cd();
+  if(Type == "")         dir_FirstFit[0]->cd();
+  else if(Type == "XS")  dir_FirstFit[1]->cd();
+  else if(Type == "Acc") dir_FirstFit[2]->cd();
   polFit_AllPoints->Write();
 
   //Calculate the lowest value for the LnLik!
@@ -212,9 +203,9 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCou
   polFit_ReducedPoints = new TF1(("polFit"+Type+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"pol2",Var[1],Var[NrConfigs-2]); 
   gr_ReducedLnLik->Fit(polFit_ReducedPoints,"Q","",polFit_AllPoints->GetXmin(), polFit_AllPoints->GetXmax()); 
   h_ChiSquaredSecondFit[TypeNr]->Fill(polFit_ReducedPoints->GetChisquare());   //As expected NDF is always equal to NrConfigs-NrToDel-3 (= nr params needed to define a parabola)
-  if(Type == "")         dir_SecondFit->cd();
-  else if(Type == "XS")  dir_SecondFitXS->cd();
-  else if(Type == "Acc") dir_SecondFitAcc->cd();
+  if(Type == "")         dir_SecondFit[0]->cd();
+  else if(Type == "XS")  dir_SecondFit[1]->cd();
+  else if(Type == "Acc") dir_SecondFit[2]->cd();
   //Create a 2D-plot which contains the deviation of the expected minimum wrt the chi-squared of the fit
   if(Type == "Acc"){
     h_TotalFitDevVSChiSq->Fill(polFit_ReducedPoints->GetChisquare(), TotalRelFitDeviationReduced);
@@ -250,7 +241,13 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCou
 }
 
 void doublePolFitMacro(){
-  
+ 
+  for(int iNorm = 0; iNorm < nrNorms; iNorm++){
+    dir_OriginalLL[iNorm] = file_FitDist->mkdir(("OriginalLL"+NormTypeName[iNorm]).c_str());
+    dir_FirstFit[iNorm] = file_FitDist->mkdir(("FirstPolynomialFit"+NormTypeName[iNorm]).c_str());
+    dir_SecondFit[iNorm] = file_FitDist->mkdir(("SecondPolynomialFit"+NormTypeName[iNorm]).c_str());
+  }
+ 
   TH1F *h_LnLik = 0, *h_LnLikXS = 0, *h_LnLikAcc = 0;
   TDirectory *dir_SplitCanv = 0, *dir_LLSplit = 0, *dir_LLXSSplit = 0, *dir_LLAccSplit = 0;
   if(storeSplittedCanvas){
