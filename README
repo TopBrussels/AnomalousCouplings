@@ -1,0 +1,12 @@
+Events which will be studied here are processed on localgrid.
+The corresponding directory is:
+
+/localgrid/aolbrech/NewestMW_amcnlo_EDependentTF/mg5amcnlo/ttbarSemiMu_QED2_Restr/
+
+The scripts which will be stored in this directory were all developed in the following localgrid copy:
+
+LocalGridCopy/NewestMW_amcnlo_PTDependentTF/mg5amcnlo/ttbarSemiMuPlus_QED2_CKMRestrictions
+
+However since this directory is stored with old tests, the final analysis (gR only) will be solely done here.
+A separate Git branch is created for this directory, which is branched off from the "LocalGrid_PtTF_ttMuPl_CKMRestrictions" one.
+This branch used to only contain the scripts, while for this "FinalAnalysis_ScriptsAndResults" it is intended to also store some of the important results.
