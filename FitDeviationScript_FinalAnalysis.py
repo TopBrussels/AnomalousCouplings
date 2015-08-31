@@ -88,12 +88,12 @@ if len(sys.argv) >= 10:
 # -- Specific range
 if len(sys.argv) >= 11:
     VarWindowGiven = True
-    if sys.argv[10] == "Narrow":
+    if sys.argv[10] == "Normal":
         VarWindow = "1"
-    elif sys.argv[10] == "Full":
+    elif sys.argv[10] == "Wide":
+        VarWindow = "2"
+    elif sys.argv[10] == "Middle":
         VarWindow = "3"
-    elif sys.argv[10] == "CalibCurve":
-        VarWindow = "5"
 
 # Set the 'CreateTexFile' correctly:
 if sys.argv[5] == "y" or sys.argv[5] == "yes":
@@ -129,13 +129,19 @@ elif VarWindow == "3":
     ValuesToDelete = [-0.4, -0.025, 0.025, 0.4]
     xBin, xLow, xHigh = 13, -0.325, 0.325
 
-
+OnlyXSPossible = True
 if MGorRECO == "MG":
-    MGXS = array('d', [1.97357, 3.36424, 4.92909, 6.02588, 7.34593, 8.94878, 9.88333, 10.89487, 11.92922, 13.1987, 15.9457, 19.1623, 22.9185, 32.2975, 38.8312])
-    MGXSCut = array('d', [0.465328, 0.639413, 0.912292, 1.098184, 1.32024, 1.58727, 1.73857, 1.90447, 2.0856, 2.28471, 2.71983, 3.2418, 3.838581, 5.31357, 7.23931])  # Also MET cuts!
+    MGXS = array('d',
+                 [1.97357, 3.36424, 4.92909, 6.02588, 7.34593, 8.94878, 9.88333, 10.89487, 11.92922, 13.1987, 15.9457,
+                  19.1623, 22.9185, 32.2975, 38.8312])
+    MGXSCut = array('d', [0.465328, 0.639413, 0.912292, 1.098184, 1.32024, 1.58727, 1.73857, 1.90447, 2.0856, 2.28471,
+                          2.71983, 3.2418, 3.838581, 5.31357, 7.23931])  # Also MET cuts!
 elif MGorRECO == "RECO":
-    MGXS = array('d', [0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203, 3.3578, 3.97995, 5.50855, 0.0])
-    MGXSCut = array('d', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0., 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    MGXS = array('d', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    MGXSCut = array('d',
+                    [0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203, 3.3578,
+                     3.97995, 5.50855, 0.0])
+    OnlyXSPossible = False
 
 else:
     print "Should specify whether MG or RECO is desired! ", sys.exit()
@@ -145,10 +151,6 @@ for iVar in range(len(ValuesToDelete)):
     MGXS.pop(int(Var.index(ValuesToDelete[iVar])))
     MGXSCut.pop(Var.index(ValuesToDelete[iVar]))
     Var.pop(Var.index(ValuesToDelete[iVar]))
-    # print "Var after pop : ", Var
-
-if MGorRECO == "RECO":
-    MGXSCut = MGXS
 
 # --------------------------------------------#
 #   Special cases for MGXSCut initialization  #
@@ -162,7 +164,8 @@ if applyAccNorm == "n" or applyAccNorm == "no" or applyAccNorm == "No":
         print " -----> Applying no Acceptance normalisation for reco-level events .... \n"
 else:
     print " Applying acceptance normalisation ! \n"
-    if (len(whichDir) >= whichDir.find("MGSample") > 0 > whichDir.find("Cut")) or (len(whichDir) >= whichDir.find("GEN") > 0):
+    if (len(whichDir) >= whichDir.find("MGSample") > 0 > whichDir.find("Cut")) or (
+                    len(whichDir) >= whichDir.find("GEN") > 0):
         print " \n ************************* ERROR **************************** "
         print " -----> Applying Acceptance normalisation to generator-level events .... \n"
 
@@ -248,6 +251,22 @@ elif sys.argv[4] == "n" or sys.argv[4] == "no":
 if RunFitMacro:
     RootAnalyzer, NewRootAnalyzer = open(whichAnalysis, 'r'), open('output.C', 'w')
 
+    NormType = ["no", "XS", "acceptance"]
+    NormTypeName = ["", "_XS", "_Acc"]
+    if not OnlyXSPossible:
+        NormType.pop(1), NormTypeName.pop(1)
+    NormTypeC = 'std::string NormType[' + str(len(NormType)) + '] = {'
+    NormTypeNameC = 'std::string NormTypeName[' + str(len(NormTypeName)) + '] = {'
+    for ii in range(len(NormType)):
+        NormTypeC += '"' + NormType[ii] + '"'
+        NormTypeNameC += '"' + NormTypeName[ii] + '"'
+        if ii < len(NormType) - 1:
+            NormTypeC += ','
+            NormTypeNameC += ','
+        else:
+            NormTypeC += '}; \n'
+            NormTypeNameC += '}; \n'
+
     VarLine = 'double Var[] = {'
     MGXSLine, MGXSCutLine = 'double MGXS[] = {', 'double MGXSCut[] = {'
     for ii in range(len(Var)):
@@ -257,13 +276,6 @@ if RunFitMacro:
             VarLine, MGXSLine, MGXSCutLine = VarLine + ',', MGXSLine + ',', MGXSCutLine + ','
         else:
             VarLine, MGXSLine, MGXSCutLine = VarLine + '};\n', MGXSLine + '};\n', MGXSCutLine + '};\n'
-
-    xMinValueLine = 'int xMinValue[] = {'
-    for ii in range(len(xMinValue)):
-        if ii < len(xMinValue) - 1:
-            xMinValueLine += str(xMinValue[ii]) + ','
-        else:
-            xMinValueLine += str(xMinValue[ii]) + '}; \n'
 
     # -->Create the directory SplittedCanvasses if needed (otherwise delete the created pdf files ...)!
     if CreateTexFile:
@@ -293,12 +305,14 @@ if RunFitMacro:
             NewRootAnalyzer.write('float xLow = ' + str(xLow) + '; \n')
         elif re.search(r"float xHigh", RootLine):
             NewRootAnalyzer.write('float xHigh = ' + str(xHigh) + '; \n')
-        elif re.search(r"int xMinValue", RootLine):
-            NewRootAnalyzer.write(xMinValueLine)
+        elif re.search(r"int xMin", RootLine):
+            NewRootAnalyzer.write('int xMin = ' + str(xMin) + '; \n')
         elif re.search(r"string KinVar", RootLine):
             NewRootAnalyzer.write('std::string KinVar = "' + str(KinVar) + '"; \n')
-        elif re.search(r"int VarWindow", RootLine):
-            NewRootAnalyzer.write('int VarWindow = ' + str(VarWindow) + '; \n')
+        elif re.search(r"std::string NormTypeName", RootLine):
+            NewRootAnalyzer.write(NormTypeNameC)
+        elif re.search(r"std::string NormType", RootLine):
+            NewRootAnalyzer.write(NormTypeC)
         elif re.search(r"std::ifstream ifs", RootLine):
             NewRootAnalyzer.write('  std::ifstream ifs ("' + str(WeightsFileName) + '", std::ifstream::in); \n')
         elif re.search(r"std::string title", RootLine):
@@ -323,11 +337,11 @@ if RunFitMacro:
             print "\n ---> Fit will go between ", Var[1], " and ", Var[NrConfigs - 2], "\n"
             if re.search(r"AllPoints", RootLine):
                 NewRootAnalyzer.write(
-                    '  polFit_AllPoints = new TF1(("polFit"+Type+"_AllPoints_Evt"+EvtNumber).c_str(),"' + str(
+                    '  polFit_AllPoints = new TF1(("polFit"+NormTypeName[normType]+"_AllPoints_Evt"+EvtNumber).c_str(),"' + str(
                         FitType) + '",Var[1],Var[NrConfigs-2]); \n')
             elif re.search(r"ReducedPoints", RootLine):
                 NewRootAnalyzer.write(
-                    '  polFit_ReducedPoints = new TF1(("polFit"+Type+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"' + str(
+                    '  polFit_ReducedPoints = new TF1(("polFit"+NormTypeName[normType]+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"' + str(
                         FitType) + '",Var[1],Var[NrConfigs-2]); \n')
         elif whichAnalysis == "doublePolFitMacro.C" and re.search(r"new TFile", RootLine) and re.search(r"file_FitDist",
                                                                                                         RootLine):
@@ -405,9 +419,9 @@ if CreateTexFile and RunFitMacro:
         os.path.join('FitDeviationSplitCanvas_' + str(title) + '_' + str(nEvts) + 'Evts_AccNorm.tex'), 'w')
 
     print " Current working directory is : ", os.getcwd()
-    NormType = ["no", "XS", "acceptance"]
-    NormTypeName = ["", "XS", "Acc"]
     CanvasOutputFile = [CanvasOutputFile_NoNorm, CanvasOutputFile_XSNorm, CanvasOutputFile_AccNorm]
+    if not OnlyXSPossible:
+        CanvasOutputFile.pop(1)
 
     # Store the information in the correct directory:
     Canvaslist_dir = os.listdir('.')  # os.path.join(whichDir+'SplittedCanvasses/'))
@@ -433,7 +447,8 @@ if CreateTexFile and RunFitMacro:
         CanvasOutputFile[iNormType].write('\n \\centering \n')
 
         # Include the overall likelihood and secondPol distribution (together one 1 page!):
-        if ("TotalLnLik" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir and ("SecondPol" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir:
+        if ("TotalLnLik" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir and (
+                        "SecondPol" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir:
             CanvasOutputFile[iNormType].write(
                 '\\includegraphics[width = 0.32 \\textwidth]{TotalLnLik' + NormTypeName[iNormType] + '.pdf} \n')
             CanvasOutputFile[iNormType].write(

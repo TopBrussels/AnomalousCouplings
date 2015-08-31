@@ -29,20 +29,16 @@ float xHigh = 0.225;
 std::string KinVar = "Re(g_{R})"; 
 int xMin = 4; 
 std::string title = "RecoFirstRun_50000Evts_DblGausTF"; 
-std::string NormTypeName[3] = {"","_XS","_Acc"};
-std::string NormType[3] = {"","",""};
+std::string NormTypeName[2] = {"","_Acc"}; 
+std::string NormType[2] = {"no","acceptance"}; 
 const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
- 
-//ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_RecoTest/RecoFirstRun_50000Evts_DblGausTF/FitDistributions_RecoFirstRun_50000Evts_DblGausTF_1000Evts.root","RECREATE"); 
-TDirectory *dir_OriginalLL[nrNorms], *dir_FirstFit[nrNorms], *dir_SecondFit[nrNorms];
 
-//TDirectory *dir_OriginalLL = file_FitDist->mkdir("OriginalLL"),        *dir_OriginalLLXS = file_FitDist->mkdir("OriginalLL_XS"),        *dir_OriginalLLAcc = file_FitDist->mkdir("OriginalLL_Acc");
-//TDirectory *dir_FirstFit = file_FitDist->mkdir("FirstPolynomialFit"),  *dir_FirstFitXS = file_FitDist->mkdir("FirstPolynomialFit_XS"),  *dir_FirstFitAcc = file_FitDist->mkdir("FirstPolynomialFit_Acc");
-//TDirectory *dir_SecondFit = file_FitDist->mkdir("SecondPolynomialFit"),*dir_SecondFitXS = file_FitDist->mkdir("SecondPolynomialFit_XS"),*dir_SecondFitAcc = file_FitDist->mkdir("SecondPolynomialFit_Acc");
+//ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
+TFile* file_FitDist = new TFile("Events_RecoTest/RecoFirstRun_50000Evts_DblGausTF/FitDistributions_RecoFirstRun_50000Evts_DblGausTF_50000Evts.root","RECREATE"); 
+TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
 const int NrConfigs = 9; 
-const int nEvts = 1000; 
+const int nEvts = 50000; 
 const unsigned int NrToDel = 2; 
 int NrRemaining = NrConfigs-NrToDel;
 std::string sNrCanvas ="0";
@@ -114,38 +110,32 @@ void PaintOverflow(TH1F *h, TFile *FileToWrite, std::string dirName){  // This f
   delete h_tmp;
 }                  
 
-void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCounter, TCanvas *canv_SplittedLL){
+void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter, TCanvas *canv_SplittedLL){
   file_FitDist->cd();
   if(evtCounter == 1 && sNrRemaining == "") ssNrRemaining << NrRemaining; sNrRemaining = ssNrRemaining.str();
 
   double LogLikelihood[NrConfigs];
-  int TypeNr = 999;
-  std::string TypeName[3] = {"no norm","XS norm","Acc norm"};
   for(int ii = 0; ii < NrConfigs; ii++)
     LogLikelihood[ii] = h_LogLik->GetBinContent(h_LogLik->FindBin(Var[ii]));
 
-  if(Type == ""){         dir_OriginalLL[0]->cd(); TypeNr = 0;}
-  else if(Type == "XS"){  dir_OriginalLL[1]->cd(); TypeNr = 1;}
-  else if(Type == "Acc"){ dir_OriginalLL[2]->cd(); TypeNr = 2;}
+  dir_OriginalLL[normType]->cd();
   h_LogLik->Write();
-  std::string YAxisTitle = "-ln(L) value ("+TypeName[TypeNr]+" -- evt "+EvtNumber+")";
+  std::string YAxisTitle = "-ln(L) value ("+NormType[normType]+" norm -- evt "+EvtNumber+")";
 
   //Set name of chisquared distributions!
   if(evtCounter == 1){
-    h_ChiSquaredFirstFit[TypeNr]   = new TH1F(("ChiSquared_"+Type+"FirstFit").c_str(), ("Distribution of the chi-squared after the fit on all the points (norm = "+Type+")").c_str(),200,0,0.05);
-    h_ChiSquaredSecondFit[TypeNr]  = new TH1F(("ChiSquared_"+Type+"SecondFit").c_str(),("Distribution of the chi-squared after the fit on the reduced points (norm = "+Type+")").c_str(),200,0,0.005);
-    h_PointsDelByFitDev[TypeNr]    = new TH1F(("PointsDelBy"+Type+"FitDev").c_str(),   ("Overview of deleted points due to largest FitDeviation (norm = "+Type+")").c_str(),xBin,xLow,xHigh);
-    h_PointsDelByFitDevRel[TypeNr] = new TH1F(("PointsDelBy"+Type+"FitDevRel").c_str(),("Overview of deleted points due to largest relative FitDeviation (norm = "+Type+")").c_str(),xBin,xLow,xHigh);
+    h_ChiSquaredFirstFit[normType]  = new TH1F(("ChiSquared"+NormTypeName[normType]+"_FirstFit").c_str(), ("Distribution of the #chi^{2} after the fit on all the points ("+NormType[normType]+" norm)").c_str(),200,0,0.05);
+    h_ChiSquaredSecondFit[normType] = new TH1F(("ChiSquared"+NormTypeName[normType]+"_SecondFit").c_str(),("Distribution of the #chi^{2} after the fit on the reduced points ("+NormType[normType]+" norm)").c_str(),200,0,0.005);
+    h_PointsDelByFitDev[normType]    = new TH1F(("DeletedPointsFitDev"+NormTypeName[normType]).c_str(),   ("Overview of deleted points due to largest FitDeviation ("+NormType[normType]+" norm)").c_str(),xBin,xLow,xHigh);
+    h_PointsDelByFitDevRel[normType] = new TH1F(("DeletedPointsFitDevRel"+NormTypeName[normType]).c_str(),("Overview of deleted points due to largest relative FitDeviation ("+NormType[normType]+" norm)").c_str(),xBin,xLow,xHigh);
   }
  
-  polFit_AllPoints = new TF1(("polFit"+Type+"_AllPoints_Evt"+EvtNumber).c_str(),"pol2",Var[1],Var[NrConfigs-2]); 
+  polFit_AllPoints = new TF1(("polFit"+NormTypeName[normType]+"_AllPoints_Evt"+EvtNumber).c_str(),"pol2",Var[1],Var[NrConfigs-2]); 
   TGraph* gr_LnLik = new TGraph(NrConfigs,Var, LogLikelihood);
   gr_LnLik->Fit(polFit_AllPoints,"Q","",polFit_AllPoints->GetXmin(), polFit_AllPoints->GetXmax());
-  h_ChiSquaredFirstFit[TypeNr]->Fill(polFit_AllPoints->GetChisquare());
+  h_ChiSquaredFirstFit[normType]->Fill(polFit_AllPoints->GetChisquare());
 
-  if(Type == "")         dir_FirstFit[0]->cd();
-  else if(Type == "XS")  dir_FirstFit[1]->cd();
-  else if(Type == "Acc") dir_FirstFit[2]->cd();
+  dir_FirstFit[normType]->cd();
   polFit_AllPoints->Write();
 
   //Calculate the lowest value for the LnLik!
@@ -171,17 +161,17 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCou
   //Sort the fitdeviation values depending on the second value!
   std::sort(FitDeviation.begin(), FitDeviation.end(), sort_pred() );
   std::sort(FitDeviationRel.begin(), FitDeviationRel.end(), sort_pred() );
-  if(Type == "Acc") h_TotalRelFitDeviation->Fill(TotalRelFitDeviation);
+  if(NormTypeName[normType] == "_Acc") h_TotalRelFitDeviation->Fill(TotalRelFitDeviation);
 
   //Now loop again over all configurations, plot the FitDeviation in sorted order and save the configNr's which should be excluded 
   std::vector<int> FitDevPointsToDel, FitDevRelPointsToDel;
   for(int itSortedConfig = NrConfigs-1; itSortedConfig >= 0 ; itSortedConfig--){  //Looping from high to low values of the deviation!
-    if(Type == "Acc") h_FitDeviation[itSortedConfig]->Fill(FitDeviation[itSortedConfig].second);
-    if(Type == "Acc") h_FitDeviationRel[itSortedConfig]->Fill(FitDeviationRel[itSortedConfig].second);
+    if(NormTypeName[normType] == "_Acc") h_FitDeviation[itSortedConfig]->Fill(FitDeviation[itSortedConfig].second);
+    if(NormTypeName[normType] == "_Acc") h_FitDeviationRel[itSortedConfig]->Fill(FitDeviationRel[itSortedConfig].second);
     
     //Store the 'NrToDel' points which need to be excluded from the TGraph!
-    if(FitDevPointsToDel.size() < NrToDel){ FitDevPointsToDel.push_back(FitDeviation[itSortedConfig].first); h_PointsDelByFitDev[TypeNr]->Fill(Var[FitDeviation[itSortedConfig].first]);}
-    if(FitDevRelPointsToDel.size() < NrToDel){FitDevRelPointsToDel.push_back(FitDeviationRel[itSortedConfig].first);h_PointsDelByFitDevRel[TypeNr]->Fill(Var[FitDeviationRel[itSortedConfig].first]);}
+    if(FitDevPointsToDel.size() < NrToDel){ FitDevPointsToDel.push_back(FitDeviation[itSortedConfig].first); h_PointsDelByFitDev[normType]->Fill(Var[FitDeviation[itSortedConfig].first]);}
+    if(FitDevRelPointsToDel.size() < NrToDel){FitDevRelPointsToDel.push_back(FitDeviationRel[itSortedConfig].first);h_PointsDelByFitDevRel[normType]->Fill(Var[FitDeviationRel[itSortedConfig].first]);}
   }
 
   //Create new arrays with the reduced information!
@@ -200,14 +190,13 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCou
 
   //Define new TGraph and fit again
   TGraph* gr_ReducedLnLik = new TGraph(NrConfigs-NrToDel, ReducedVar, ReducedLogLik);
-  polFit_ReducedPoints = new TF1(("polFit"+Type+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"pol2",Var[1],Var[NrConfigs-2]); 
+  polFit_ReducedPoints = new TF1(("polFit"+NormTypeName[normType]+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"pol2",Var[1],Var[NrConfigs-2]); 
   gr_ReducedLnLik->Fit(polFit_ReducedPoints,"Q","",polFit_AllPoints->GetXmin(), polFit_AllPoints->GetXmax()); 
-  h_ChiSquaredSecondFit[TypeNr]->Fill(polFit_ReducedPoints->GetChisquare());   //As expected NDF is always equal to NrConfigs-NrToDel-3 (= nr params needed to define a parabola)
-  if(Type == "")         dir_SecondFit[0]->cd();
-  else if(Type == "XS")  dir_SecondFit[1]->cd();
-  else if(Type == "Acc") dir_SecondFit[2]->cd();
+  h_ChiSquaredSecondFit[normType]->Fill(polFit_ReducedPoints->GetChisquare());   //As expected NDF is always equal to NrConfigs-NrToDel-3 (= nr params needed to define a parabola)
+
+  dir_SecondFit[normType]->cd();
   //Create a 2D-plot which contains the deviation of the expected minimum wrt the chi-squared of the fit
-  if(Type == "Acc"){
+  if(NormTypeName[normType] == "_Acc"){
     h_TotalFitDevVSChiSq->Fill(polFit_ReducedPoints->GetChisquare(), TotalRelFitDeviationReduced);
   }
 
@@ -241,23 +230,25 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, std::string Type, int evtCou
 }
 
 void doublePolFitMacro(){
- 
+
+  TH1F *h_LnLik[nrNorms] = {0};
+  TDirectory *dir_SplitCanv = 0, *dir_LLSplit[nrNorms] = {0};
+  if(storeSplittedCanvas)
+    dir_SplitCanv = file_FitDist->mkdir("SplitCanvasses");
+
+  //Name the directories according to the number of normalisations that should be considered! 
   for(int iNorm = 0; iNorm < nrNorms; iNorm++){
     dir_OriginalLL[iNorm] = file_FitDist->mkdir(("OriginalLL"+NormTypeName[iNorm]).c_str());
     dir_FirstFit[iNorm] = file_FitDist->mkdir(("FirstPolynomialFit"+NormTypeName[iNorm]).c_str());
     dir_SecondFit[iNorm] = file_FitDist->mkdir(("SecondPolynomialFit"+NormTypeName[iNorm]).c_str());
+  
+    if(storeSplittedCanvas)
+      dir_LLSplit[iNorm] = dir_SplitCanv->mkdir(("LnLik"+NormTypeName[iNorm]).c_str());
   }
  
-  TH1F *h_LnLik = 0, *h_LnLikXS = 0, *h_LnLikAcc = 0;
-  TDirectory *dir_SplitCanv = 0, *dir_LLSplit = 0, *dir_LLXSSplit = 0, *dir_LLAccSplit = 0;
-  if(storeSplittedCanvas){
-    dir_SplitCanv = file_FitDist->mkdir("SplitCanvasses");
-    dir_LLSplit = dir_SplitCanv->mkdir("LnLik"); dir_LLXSSplit = dir_SplitCanv->mkdir("LnLikXS"); dir_LLAccSplit = dir_SplitCanv->mkdir("LnLikAcc");
-  }
-
   int consEvts = 0;
-  TCanvas *canv_SplitLL = 0, *canv_SplitLLXS = 0, *canv_SplitLLAcc = 0; 
-  double LnLik[NrConfigs] = {0.0}, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
+  TCanvas *canv_SplitLL[nrNorms] = {0};
+  double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
   std::ifstream ifs ("Events_RecoTest/RecoFirstRun_50000Evts_DblGausTF/weights_NoZero.out", std::ifstream::in); 
@@ -280,60 +271,52 @@ void doublePolFitMacro(){
       }
 
       //--- Initialize the event-per-event variables! ---//
-      if( config == 1){
-        //std::cout << " \n Looking at event : " << sEvt << " with cos theta* weight = " << CosThetaCorr  << std::endl;
-        h_LnLik = new TH1F(("LnLik_Evt"+sEvt).c_str(),("LnLik distribution for event "+sEvt+" -- "+title+" evts").c_str(),xBin,xLow,xHigh);
-        h_LnLik->SetMarkerStyle(20); h_LnLik->SetLineColor(1); h_LnLik->SetMarkerColor(1); h_LnLik->SetMarkerSize(1.2);
-        h_LnLikXS = new TH1F(("LnLikXS_Evt"+sEvt).c_str(),("LnLikXS distribution for event "+sEvt+" -- "+title+" evts").c_str(),xBin,xLow,xHigh);
-        h_LnLikXS->SetMarkerStyle(21); h_LnLikXS->SetLineColor(3); h_LnLikXS->SetMarkerColor(3); h_LnLikXS->SetMarkerSize(1.2);
-        h_LnLikAcc = new TH1F(("LnLikAcc_Evt"+sEvt).c_str(),("LnLikAcc distribution for event "+sEvt+" -- "+title+" evts").c_str(),xBin,xLow,xHigh);
-        h_LnLikAcc->SetMarkerStyle(22); h_LnLikAcc->SetLineColor(4); h_LnLikAcc->SetMarkerColor(4); h_LnLikAcc->SetMarkerSize(1.2);
-      }
-      //std::cout << " Changing LnLikAcc from " << (-log(weight)+log(MGXSCut[config-1])) << " to " << (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr << std::endl;	
-      LnLik[config-1] = -log(weight)*CosThetaCorr; LnLikXS[config-1] = (-log(weight)+log(MGXS[config-1]))*CosThetaCorr; LnLikAcc[config-1] = (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr;
-      //std::cout << " Checking whether cos theta* correction changes likelihood : " << (-log(weight)+log(MGXSCut[config-1])) << " --> " << LnLikAcc[config-1] << " ==> A difference of " << LnLikAcc[config-1] - (-log(weight)+log(MGXSCut[config-1])) << std::endl;
-
-      //---  Fill the LnLik histograms for each event and for all events together  ---//
-      h_LnLik->SetBinContent(   h_LnLik->FindBin(Var[config-1]),    LnLik[config-1]);
-      h_LnLikXS->SetBinContent( h_LnLikXS->FindBin(Var[config-1]),  LnLikXS[config-1]);
-      h_LnLikAcc->SetBinContent(h_LnLikAcc->FindBin(Var[config-1]), LnLikAcc[config-1]);
-
-      //---  Only perform the fit after all configurations are considered!  ---//
-      if( config == NrConfigs){
-        consEvts++;   //Count the number of full events!
-
-        //Save xDivide*yDivide of these histograms in one TCanvas!
-        if( storeSplittedCanvas == true){
-          if(consEvts == 1){
-            canv_SplitLL    = new TCanvas("SplitCanvasLL_Nr0",   "SplitCanvasLL");    canv_SplitLL->Divide(xDivide,yDivide);    
-            canv_SplitLLXS  = new TCanvas("SplitCanvasLLXS_Nr0", "SplitCanvasLLXS");  canv_SplitLLXS->Divide(xDivide,yDivide);  
-            canv_SplitLLAcc = new TCanvas("SplitCanvasLLAcc_Nr0","SplitCanvasLLAcc"); canv_SplitLLAcc->Divide(xDivide,yDivide); 
-          }
+      // --    Loop over the different allowed normalisations
+      for(int iNorm = 0; iNorm < nrNorms; iNorm++){
+  
+        if( config == 1){
+          //std::cout << " \n Looking at event : " << sEvt << " with cos theta* weight = " << CosThetaCorr  << std::endl;
+          h_LnLik[iNorm] = new TH1F(("LnLik"+NormTypeName[iNorm]+"_Evt"+sEvt).c_str(),("LnLik"+NormTypeName[iNorm]+" distribution for event "+sEvt+" -- "+title+" evts").c_str(),xBin,xLow,xHigh);
+          h_LnLik[iNorm]->SetMarkerStyle(20+iNorm); h_LnLik[iNorm]->SetLineColor(3+iNorm); h_LnLik[iNorm]->SetMarkerColor(1); h_LnLik[iNorm]->SetMarkerSize(1.2);
         }
+        //std::cout << " Changing LnLik[2] from " << (-log(weight)+log(MGXSCut[config-1])) << " to " << (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr << std::endl;	
+        if(iNorm == 0)                                                        LnLik[iNorm][config-1] = -log(weight)*CosThetaCorr;
+        else if(iNorm == 1 && nrNorms == 3)                                   LnLik[iNorm][config-1] = (-log(weight)+log(MGXS[config-1]))*CosThetaCorr;
+        else if((nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1)) LnLik[iNorm][config-1] = (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr;
+        //std::cout << " Checking whether cos theta* correction changes likelihood : " << (-log(weight)+log(MGXSCut[config-1])) << " --> " << LnLik[2][config-1] << " ==> A difference of " << LnLik[2][config-1] - (-log(weight)+log(MGXSCut[config-1])) << std::endl;
 
-        //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
-	calculateFit(h_LnLik,   sEvt,"",    consEvts, canv_SplitLL);
-	calculateFit(h_LnLikXS, sEvt,"XS",  consEvts, canv_SplitLLXS);
-        calculateFit(h_LnLikAcc,sEvt,"Acc", consEvts, canv_SplitLLAcc);
+        //---  Fill the LnLik histograms for each event and for all events together  ---//
+        h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]);
 
-        if( storeSplittedCanvas == true){
-          if( consEvts == (xDivide*yDivide*(NrCanvas+1)) || consEvts == nEvts){
-            canv_SplitLL->Print((SplittedDir+"/SplitCanvasLL_Nr"+sNrCanvas+".pdf").c_str());       dir_LLSplit->cd();    canv_SplitLL->Write();    delete canv_SplitLL;
-            canv_SplitLLXS->Print((SplittedDir+"/SplitCanvasLLXS_Nr"+sNrCanvas+".pdf").c_str());   dir_LLXSSplit->cd();  canv_SplitLLXS->Write();  delete canv_SplitLLXS;
-            canv_SplitLLAcc->Print((SplittedDir+"/SplitCanvasLLAcc_Nr"+sNrCanvas+".pdf").c_str()); dir_LLAccSplit->cd(); canv_SplitLLAcc->Write(); delete canv_SplitLLAcc;
-            delete h_LnLik; delete h_LnLikXS; delete h_LnLikAcc;
-            if( consEvts != nEvts){
-              NrCanvas++; stringstream ssNrCanvas; ssNrCanvas << NrCanvas; sNrCanvas = ssNrCanvas.str();
-              canv_SplitLL    = new TCanvas(("SplitCanvasLL_Nr"+sNrCanvas).c_str(),   "SplitCanvasLL");    canv_SplitLL->Divide(xDivide,yDivide);   
-              canv_SplitLLXS  = new TCanvas(("SplitCanvasLLXS_Nr"+sNrCanvas).c_str(), "SplitCanvasLLXS");  canv_SplitLLXS->Divide(xDivide,yDivide); 
-              canv_SplitLLAcc = new TCanvas(("SplitCanvasLLAcc_Nr"+sNrCanvas).c_str(),"SplitCanvasLLAcc"); canv_SplitLLAcc->Divide(xDivide,yDivide);
+        //---  Only perform the fit after all configurations are considered!  ---//
+        if( config == NrConfigs){
+          if(iNorm == 0) consEvts++;   //Count the number of full events!
+
+          //Save xDivide*yDivide of these histograms in one TCanvas!
+          if( storeSplittedCanvas == true){
+            if(consEvts == 1){
+              canv_SplitLL[iNorm] = new TCanvas(("SplitCanvasLL"+NormTypeName[iNorm]+"_Nr0").c_str(),("SplitCanvasLL"+NormTypeName[iNorm]).c_str()); canv_SplitLL[iNorm]->Divide(xDivide,yDivide);    
             }
           }
-        }//Draw the stacked canvasses!
-        else{
-          delete h_LnLik; delete h_LnLikXS; delete h_LnLikAcc;
+
+          //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
+	  calculateFit(h_LnLik[iNorm], sEvt, iNorm, consEvts, canv_SplitLL[iNorm]);
+
+          if( storeSplittedCanvas == true){
+            if( consEvts == (xDivide*yDivide*(NrCanvas+1)) || consEvts == nEvts){
+              canv_SplitLL[iNorm]->Print((SplittedDir+"/SplitCanvasLL"+NormTypeName[iNorm]+"_Nr"+sNrCanvas+".pdf").c_str()); dir_LLSplit[iNorm]->cd(); canv_SplitLL[iNorm]->Write(); delete canv_SplitLL[iNorm];
+              delete h_LnLik[iNorm];
+              if( consEvts != nEvts){
+                NrCanvas++; stringstream ssNrCanvas; ssNrCanvas << NrCanvas; sNrCanvas = ssNrCanvas.str();
+                canv_SplitLL[iNorm] = new TCanvas(("SplitCanvasLL"+NormTypeName[iNorm]+"_Nr"+sNrCanvas).c_str(), ("SplitCanvasLL"+NormTypeName[iNorm]).c_str()); canv_SplitLL[iNorm]->Divide(xDivide,yDivide);   
+              }
+            }
+          }//Draw the stacked canvasses!
+          else{
+            delete h_LnLik[iNorm];
+          }
         }
-      }
+      }//End of loop over nrNorms!
     }
   }
   ifs.close();
@@ -357,7 +340,7 @@ void doublePolFitMacro(){
   TDirectory *dir_RelFitDevDelete = dir_FitResults->GetDirectory("PointsDeletedByRelFitDev");
   if(!dir_RelFitDevDelete) dir_RelFitDevDelete = dir_FitResults->mkdir("PointsDeletedByRelFitDev");
 
-  for(int ii = 0; ii < 3; ii++){    
+  for(int ii = 0; ii < nrNorms; ii++){    
     dir_FitDevDelete->cd(); h_PointsDelByFitDev[ii]->Write();               delete h_PointsDelByFitDev[ii];
     dir_RelFitDevDelete->cd(); h_PointsDelByFitDevRel[ii]->Write();         delete h_PointsDelByFitDevRel[ii];
     PaintOverflow(h_ChiSquaredFirstFit[ii], file_FitDist, "FitResults_ChiSquaredFit"); delete h_ChiSquaredFirstFit[ii];
