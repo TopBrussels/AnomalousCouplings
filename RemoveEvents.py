@@ -62,8 +62,9 @@ print "Events with uncomplete weights has length = ",len(UncomplEventsToDelete)
  
 #In case events have to be deleted open a new file, else skip this step!
 if len(UncomplEventsToDelete) != 0:
-  NoUncomplEvtsFile = open(os.path.join(whichDir+'weights_NoUncompleteEvts.out'),'w')  
-  for line in weightFile:
+  NoUncomplEvtsFile = open(os.path.join(whichDir+'weights_NoUncompleteEvts.out'),'w')
+  WeightFile = open(weightFile.name)
+  for line in WeightFile:
     word = line.split()
     if str(word[0]) != "#":
       if not int(word[0]) in UncomplEventsToDelete: NoUncomplEvtsFile.write(line)
@@ -83,20 +84,26 @@ uncomplWeightFile = open(os.path.join(whichDir+'weights.out'),'r')
 for file_dir in list_dir:
   if file_dir.endswith(".out") and file_dir.startswith("weights_NoUncompleteEvts"): uncomplWeightFile = open(os.path.join(whichDir+'weights_NoUncompleteEvts.out'),'r') 
 
+print "Looking at file : ", uncomplWeightFile.name
+
 for uncomplWeightLine in uncomplWeightFile:
   uncomplWeightWord = uncomplWeightLine.split()
   #Only interested in files starting with a number
   if str(uncomplWeightWord[0]) != "#":
     if str(uncomplWeightWord[3]) == "0.0":
       if not int(uncomplWeightWord[0]) in ZeroEventsToDelete: ZeroEventsToDelete.append(int(uncomplWeightWord[0]))
+uncomplWeightFile.close()
 print "Events with a weight equal to 0 has length = ",len(ZeroEventsToDelete)
+print "Events to delete are : ", ZeroEventsToDelete
 
 if len(ZeroEventsToDelete) != 0:
   NoZeroEvtsFile = open(os.path.join(whichDir+'weights_NoZero.out'),'w')
-  for zeroLine in uncomplWeightFile:
+  UncomplWeightFile = open(uncomplWeightFile.name,'r')
+  for zeroLine in UncomplWeightFile:
     zeroWord = zeroLine.split()
     if str(zeroWord[0]) != "#":
-      if not int(zeroWord[0]) in ZeroEventsToDelete: NoZeroEvtsFile.write(zeroLine)
+      if not int(zeroWord[0]) in ZeroEventsToDelete:
+        NoZeroEvtsFile.write(zeroLine)
     else: NoZeroEvtsFile.write(zeroLine)
   NoZeroEvtsFile.close()
 uncomplWeightFile.close()
