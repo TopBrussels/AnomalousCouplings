@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////
 // Specify whether the stacked canvasses have to be stored //
 bool storeSplittedCanvas = false; 
-std::string SplittedDir = "Events_RecoTest/RecoFirstRun_50000Evts_DblGausTF/SplittedCanvasses"; 
+std::string SplittedDir = "Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/SplittedCanvasses"; 
 /////////////////////////////////////////////////////////////
 
 //std::string VarValues[] = {"Re(g_{R}) = -0.3","Re(g_{R}) = -0.2","Re(g_{R}) = -0.1","Re(g_{R}) = -0.05","Re(g_{R}) = 0.0","Re(g_{R}) = 0.05","Re(g_{R}) = 0.1","Re(g_{R}) = 0.2","Re(g_{R}) = 0.3"};
@@ -28,21 +28,23 @@ float xLow = -0.225;
 float xHigh = 0.225; 
 std::string KinVar = "Re(g_{R})"; 
 int xMin = 4; 
-std::string title = "RecoFirstRun_50000Evts_DblGausTF"; 
+std::string title = "Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_DeletedByExtraCuts"; 
 std::string NormTypeName[2] = {"","_Acc"}; 
 std::string NormType[2] = {"no","acceptance"}; 
 const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_RecoTest/RecoFirstRun_50000Evts_DblGausTF/FitDistributions_RecoFirstRun_50000Evts_DblGausTF_50000Evts.root","RECREATE"); 
+TFile* file_FitDist = new TFile("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/FitDistributions_Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_DeletedByExtraCuts_14533Evts.root","RECREATE"); 
 TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
 const int NrConfigs = 9; 
-const int nEvts = 50000; 
+const int nEvts = 14533; 
 const unsigned int NrToDel = 2; 
 int NrRemaining = NrConfigs-NrToDel;
 std::string sNrCanvas ="0";
 std::string sNrRemaining = ""; std::stringstream ssNrRemaining; 
+std::string sNEvts = ""; std::stringstream ssNEvts;
+std::string sNrConfigs = ""; std::stringstream ssNrConfigs;
 
 //Information for the stackedCanvas division!
 int NrCanvas = 0, xDivide = 4, yDivide = 4;
@@ -54,6 +56,10 @@ TH1F *h_ChiSquaredFirstFit[3], *h_ChiSquaredSecondFit[3];
 TH2F* h_TotalFitDevVSChiSq = new TH2F("TotalFitDevVSChiSq","Total fit deviation versus chi-squared",200,0,0.000005, 200, 0, 0.0005);
 TH1F* h_TotalRelFitDeviationReduced = new TH1F("TotalRelFitDeviationReduced","TotalRelFitDeviationReduced",200,0,0.001);
 TH1F* h_TotalRelFitDeviation = new TH1F("TotalRelFitDeviation","TotalRelFitDeviation",200,0,0.01);
+
+//Store all the fit parameters into a vector of doubles
+vector<double> FitParams_FirstFit[nrNorms];
+vector<double> FitParams_SecondFit[nrNorms];
 
 //Method to sort a pair based on the second element!
 struct sort_pred {
@@ -112,7 +118,6 @@ void PaintOverflow(TH1F *h, TFile *FileToWrite, std::string dirName){  // This f
 
 void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter, TCanvas *canv_SplittedLL){
   file_FitDist->cd();
-  if(evtCounter == 1 && sNrRemaining == "") ssNrRemaining << NrRemaining; sNrRemaining = ssNrRemaining.str();
 
   double LogLikelihood[NrConfigs];
   for(int ii = 0; ii < NrConfigs; ii++)
@@ -134,6 +139,16 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter
   TGraph* gr_LnLik = new TGraph(NrConfigs,Var, LogLikelihood);
   gr_LnLik->Fit(polFit_AllPoints,"Q","",polFit_AllPoints->GetXmin(), polFit_AllPoints->GetXmax());
   h_ChiSquaredFirstFit[normType]->Fill(polFit_AllPoints->GetChisquare());
+
+  if(evtCounter == 1){
+    FitParams_FirstFit[normType].clear();
+    for(int ipar = 0; ipar < polFit_AllPoints->GetNpar(); ipar++)
+      FitParams_FirstFit[normType].push_back(polFit_AllPoints->GetParameter(ipar));
+  }
+  else{
+    for(int ipar = 0; ipar < polFit_AllPoints->GetNpar(); ipar++)
+      FitParams_FirstFit[normType][ipar] += polFit_AllPoints->GetParameter(ipar);
+  }
 
   dir_FirstFit[normType]->cd();
   polFit_AllPoints->Write();
@@ -194,6 +209,17 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter
   gr_ReducedLnLik->Fit(polFit_ReducedPoints,"Q","",polFit_AllPoints->GetXmin(), polFit_AllPoints->GetXmax()); 
   h_ChiSquaredSecondFit[normType]->Fill(polFit_ReducedPoints->GetChisquare());   //As expected NDF is always equal to NrConfigs-NrToDel-3 (= nr params needed to define a parabola)
 
+  //Add the different parameters of the individual fits in order to form a final fit!
+  if(evtCounter == 1){
+    FitParams_SecondFit[normType].clear();
+    for(int ipar = 0; ipar < polFit_ReducedPoints->GetNpar(); ipar++)
+      FitParams_SecondFit[normType].push_back(polFit_ReducedPoints->GetParameter(ipar));
+  }
+  else{
+    for(int ipar = 0; ipar < polFit_ReducedPoints->GetNpar(); ipar++)
+      FitParams_SecondFit[normType][ipar] += polFit_ReducedPoints->GetParameter(ipar);
+  }
+
   dir_SecondFit[normType]->cd();
   //Create a 2D-plot which contains the deviation of the expected minimum wrt the chi-squared of the fit
   if(NormTypeName[normType] == "_Acc"){
@@ -231,6 +257,17 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter
 
 void doublePolFitMacro(){
 
+  clock_t start = clock();
+  
+  ssNrRemaining << NrRemaining; sNrRemaining = ssNrRemaining.str();
+  ssNEvts << nEvts; sNEvts = ssNEvts.str();
+  ssNrConfigs << NrConfigs; sNrConfigs = ssNrConfigs.str();
+
+  TH1F *histSum[nrNorms];
+  for(int iNorm = 0; iNorm < nrNorms; iNorm++){
+    histSum[iNorm] = new TH1F(("SummedHist"+NormTypeName[iNorm]).c_str(),("Sum of all individual histograms ("+NormType[iNorm]+" norm)").c_str(),xBin,xLow,xHigh); 
+  }
+
   TH1F *h_LnLik[nrNorms] = {0};
   TDirectory *dir_SplitCanv = 0, *dir_LLSplit[nrNorms] = {0};
   if(storeSplittedCanvas)
@@ -251,7 +288,7 @@ void doublePolFitMacro(){
   double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
-  std::ifstream ifs ("Events_RecoTest/RecoFirstRun_50000Evts_DblGausTF/weights_NoZero.out", std::ifstream::in); 
+  std::ifstream ifs ("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/weights_DeletedByExtraCuts.out", std::ifstream::in); 
   std::cout << " Value of ifs : " << ifs.eof() << std::endl;
   std::string line;
   int evt,config,tf;
@@ -260,7 +297,7 @@ void doublePolFitMacro(){
   while( std::getline(ifs,line) && consEvts < nEvts){
     std::istringstream iss(line);
     if( iss >> evt >> config >> tf >> weight >> weightUnc){ 
-      if(config == 1 && ((consEvts+1) % 500 == 0) ) std::cout << " Looking at event : " << consEvts+1 << std::endl;
+      if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
       stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
       stringstream ssConfig; ssConfig << config; string sConfig = ssConfig.str();
 
@@ -287,6 +324,7 @@ void doublePolFitMacro(){
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]);
+        histSum[iNorm]->Add( h_LnLik[iNorm] );
 
         //---  Only perform the fit after all configurations are considered!  ---//
         if( config == NrConfigs){
@@ -321,6 +359,7 @@ void doublePolFitMacro(){
   }
   ifs.close();
 
+
   //-- Save the histograms for which oveflow information is needed! --//
   for(int iConf = 0; iConf < NrConfigs; iConf++){
     PaintOverflow(h_FitDeviation[iConf],    file_FitDist, "FitResults_FitDeviation");         delete h_FitDeviation[iConf];
@@ -347,5 +386,28 @@ void doublePolFitMacro(){
     PaintOverflow(h_ChiSquaredSecondFit[ii],file_FitDist, "FitResults_ChiSquaredFit"); delete h_ChiSquaredSecondFit[ii];
   }
   
+  TDirectory *dir_FitSums = file_FitDist->GetDirectory("FitSums");
+  if (!dir_FitSums) dir_FitSums = file_FitDist->mkdir("FitSums");
+  dir_FitSums->cd();
+  //Now create the final fit from the individually summed fit parameters!
+  for(int iNorm = 0; iNorm < nrNorms; iNorm++){
+    histSum[iNorm]->Write();
+
+    TF1* FitSum_FirstFit = new TF1(("SummedFit_FirstFit_"+NormTypeName[iNorm]).c_str(),"pol2",xLow,xHigh);
+    TF1* FitSum_SecondFit = new TF1(("SummedFit_SecondFit_"+NormTypeName[iNorm]).c_str(),"pol2",xLow,xHigh);
+    FitSum_FirstFit->SetTitle(("Distribution of first fit after summing over "+sNrConfigs+" points ("+sNEvts+" events -- "+NormType[iNorm]+" norm)").c_str());
+    FitSum_SecondFit->SetTitle(("Distribution of second fit after summing over "+sNrConfigs+" points ("+sNEvts+" events -- "+NormType[iNorm]+" norm)").c_str());
+
+    for(int ipar = 0; ipar < FitSum_FirstFit->GetNpar(); ipar++) FitSum_FirstFit->SetParameter(ipar, FitParams_FirstFit[iNorm][ipar]);
+    FitSum_FirstFit->Write();
+    delete FitSum_FirstFit;
+
+    for(int ipar = 0; ipar < FitSum_SecondFit->GetNpar(); ipar++) FitSum_SecondFit->SetParameter(ipar, FitParams_SecondFit[iNorm][ipar]);
+    FitSum_SecondFit->Write();
+    delete FitSum_SecondFit;
+  }
+
   file_FitDist->Close();
+
+  cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program" << endl;
 }
