@@ -200,7 +200,7 @@ WeightsFile, LikelihoodFile = open(WeightsFileName, 'r'), open(WeightsFileName, 
 # Count the number of events actually present in the WeightsFile as the maximum numbers which can actually be used:
 # Check whether the file has enough events, otherwise use the maximum number
 maxNrEvts = os.popen('grep " 1 1 " ' + str(WeightsFileName) + ' | wc -l').read()
-if int(maxNrEvts) < int(nEvts):
+if nEvts == "-1" or int(maxNrEvts) < int(nEvts):
     nEvts = int(maxNrEvts)
 print " Will be using file : ", WeightsFileName, " with ", nEvts, " events ! "
 
@@ -222,6 +222,8 @@ if len(whichDir) >= whichDir.find("ChangingXS") > 0:
 #   --> Add weightsFileName  #
 # ---------------------------#
 title = str(whichDir[whichDir.find("/") + 1:-1])  # Only need the part after the "/"!!
+title += WeightsFileName[WeightsFileName.find("weights") + 7: -4]
+
 # Special cases!
 # *** Indicating that the cos theta* reweighting has been applied
 if applyCosTheta == "y" or applyCosTheta == "yes" or applyCosTheta == "Y":
@@ -334,8 +336,8 @@ if RunFitMacro:
         elif whichAnalysis == "doublePolFitMacro.C" and re.search(r"int NrToDel", RootLine):
             NewRootAnalyzer.write('const unsigned int NrToDel = ' + str(NumberOfPointsToRemove) + '; \n')
         elif whichAnalysis == "doublePolFitMacro.C" and re.search(r"new TF1", RootLine):
-            print "\n ---> Fit will go between ", Var[1], " and ", Var[NrConfigs - 2], "\n"
             if re.search(r"AllPoints", RootLine):
+                print "\n ---> Fit will go between ", Var[1], " and ", Var[NrConfigs - 2], "\n"
                 NewRootAnalyzer.write(
                     '  polFit_AllPoints = new TF1(("polFit"+NormTypeName[normType]+"_AllPoints_Evt"+EvtNumber).c_str(),"' + str(
                         FitType) + '",Var[1],Var[NrConfigs-2]); \n')
@@ -343,6 +345,8 @@ if RunFitMacro:
                 NewRootAnalyzer.write(
                     '  polFit_ReducedPoints = new TF1(("polFit"+NormTypeName[normType]+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"' + str(
                         FitType) + '",Var[1],Var[NrConfigs-2]); \n')
+            else:
+                NewRootAnalyzer.write(RootLine)
         elif whichAnalysis == "doublePolFitMacro.C" and re.search(r"new TFile", RootLine) and re.search(r"file_FitDist",
                                                                                                         RootLine):
             NewRootAnalyzer.write(
@@ -361,8 +365,7 @@ if RunFitMacro:
 
 # Now perform the fitOptimizations!
 if whichAnalysis == "doublePolFitMacro.C":
-    PerformFitOptAnalyzer, NewPerformFitOptAnalyzer = open('PerformFitOptimization.C', 'r'), open('fitOptimization.C',
-                                                                                                  'w')
+    PerformFitOptAnalyzer, NewPerformFitOptAnalyzer = open('PerformFitOptimization.C', 'r'), open('fitOptimization.C', 'w')
 
     for FitOptLine in PerformFitOptAnalyzer:
         FitOptWord = FitOptLine.split()
@@ -404,7 +407,8 @@ if whichAnalysis == "doublePolFitMacro.C":
         else:
             NewPerformFitOptAnalyzer.write(FitOptLine)
     NewPerformFitOptAnalyzer.close(), PerformFitOptAnalyzer.close()
-    os.rename('fitOptimization.C', 'PerformFitOptimization.C'), os.system("root -l -b -q PerformFitOptimization.C+")
+    os.rename('fitOptimization.C', 'PerformFitOptimization.C')
+    # os.system("root -l -b -q PerformFitOptimization.C+")
 
 # -- Now store the stacked canvasses in a .txt file --#
 if CreateTexFile and RunFitMacro:

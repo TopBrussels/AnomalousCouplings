@@ -28,17 +28,17 @@ float xLow = -0.225;
 float xHigh = 0.225; 
 std::string KinVar = "Re(g_{R})"; 
 int xMin = 4; 
-std::string title = "Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_DeletedByExtraCuts"; 
+std::string title = "Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_ExtraCuts"; 
 std::string NormTypeName[2] = {"","_Acc"}; 
 std::string NormType[2] = {"no","acceptance"}; 
 const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/FitDistributions_Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_DeletedByExtraCuts_14533Evts.root","RECREATE"); 
+TFile* file_FitDist = new TFile("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/FitDistributions_Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_ExtraCuts_117958Evts.root","RECREATE"); 
 TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
 const int NrConfigs = 9; 
-const int nEvts = 14533; 
+const int nEvts = 117958; 
 const unsigned int NrToDel = 2; 
 int NrRemaining = NrConfigs-NrToDel;
 std::string sNrCanvas ="0";
@@ -288,7 +288,7 @@ void doublePolFitMacro(){
   double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
-  std::ifstream ifs ("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/weights_DeletedByExtraCuts.out", std::ifstream::in); 
+  std::ifstream ifs ("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/weights_ExtraCuts.out", std::ifstream::in); 
   std::cout << " Value of ifs : " << ifs.eof() << std::endl;
   std::string line;
   int evt,config,tf;
@@ -324,10 +324,10 @@ void doublePolFitMacro(){
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]);
-        histSum[iNorm]->Add( h_LnLik[iNorm] );
 
         //---  Only perform the fit after all configurations are considered!  ---//
         if( config == NrConfigs){
+          histSum[iNorm]->Add( h_LnLik[iNorm] );
           if(iNorm == 0) consEvts++;   //Count the number of full events!
 
           //Save xDivide*yDivide of these histograms in one TCanvas!
@@ -393,17 +393,19 @@ void doublePolFitMacro(){
   for(int iNorm = 0; iNorm < nrNorms; iNorm++){
     histSum[iNorm]->Write();
 
-    TF1* FitSum_FirstFit = new TF1(("SummedFit_FirstFit_"+NormTypeName[iNorm]).c_str(),"pol2",xLow,xHigh);
-    TF1* FitSum_SecondFit = new TF1(("SummedFit_SecondFit_"+NormTypeName[iNorm]).c_str(),"pol2",xLow,xHigh);
+    TF1* FitSum_FirstFit = new TF1(("SummedFit_FirstFit"+NormTypeName[iNorm]).c_str(),"pol2",xLow,xHigh);
+    TF1* FitSum_SecondFit = new TF1(("SummedFit_SecondFit"+NormTypeName[iNorm]).c_str(),"pol2",xLow,xHigh);
     FitSum_FirstFit->SetTitle(("Distribution of first fit after summing over "+sNrConfigs+" points ("+sNEvts+" events -- "+NormType[iNorm]+" norm)").c_str());
     FitSum_SecondFit->SetTitle(("Distribution of second fit after summing over "+sNrConfigs+" points ("+sNEvts+" events -- "+NormType[iNorm]+" norm)").c_str());
 
     for(int ipar = 0; ipar < FitSum_FirstFit->GetNpar(); ipar++) FitSum_FirstFit->SetParameter(ipar, FitParams_FirstFit[iNorm][ipar]);
     FitSum_FirstFit->Write();
+    std::cout << " MinimumX value for " << FitSum_FirstFit->GetName() << " is : " << FitSum_FirstFit->GetMinimumX() << " +- " << FitSum_FirstFit->GetX(FitSum_FirstFit->GetMinimum()+0.5, FitSum_FirstFit->GetMinimumX(), 0.2) - FitSum_FirstFit->GetX(FitSum_FirstFit->GetMinimum()+0.5, -0.2, FitSum_FirstFit->GetMinimumX()) << endl;
     delete FitSum_FirstFit;
 
     for(int ipar = 0; ipar < FitSum_SecondFit->GetNpar(); ipar++) FitSum_SecondFit->SetParameter(ipar, FitParams_SecondFit[iNorm][ipar]);
     FitSum_SecondFit->Write();
+    std::cout << " MinimumX value for " << FitSum_SecondFit->GetName() << " is : " << FitSum_SecondFit->GetMinimumX() << " +- " << FitSum_SecondFit->GetX(FitSum_SecondFit->GetMinimum()+0.5, FitSum_SecondFit->GetMinimumX(), 0.2) - FitSum_SecondFit->GetX(FitSum_SecondFit->GetMinimum()+0.5, -0.2, FitSum_SecondFit->GetMinimumX()) << endl;
     delete FitSum_SecondFit;
   }
 
