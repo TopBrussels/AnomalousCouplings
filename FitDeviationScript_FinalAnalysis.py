@@ -41,7 +41,9 @@ MGorRECO = sys.argv[2]
 
 nEvts = "-1"
 if len(sys.argv) > 3:
-    nEvts = sys.argv[3]
+    if sys.argv[3] != "-1":
+        nEvts = int(sys.argv[3])
+print "Number of events should be : ", nEvts
 
 applyCosTheta = "n"
 if len(sys.argv) > 4:
@@ -138,7 +140,7 @@ if not WeightsFileGiven:
     list_dir = os.listdir(whichDir)
     WeightsFileArray, weightsFileCounter = [], 0
     for file in list_dir:
-        if (applyCosTheta == "n" and file.endswith(".out") or applyCosTheta == "y" and file.endswith("ApplyCosThetaReweighting.out")) and file.startswith("weights"):
+        if (applyCosTheta == "n" and not "CosTheta" in file or applyCosTheta == "y" and "_CosTheta" in file) and file.startswith("weights") and file.endswith(".out"):
             weightsFileCounter += 1
             WeightsFileArray.append(file)
 
@@ -190,7 +192,15 @@ else:
 # ---------------------------#
 # *** Indicating that the cos theta* reweighting has been applied
 if applyCosTheta == "y" or applyCosTheta == "yes" or applyCosTheta == "Y":
-    title += "_CosThetaReweightingApplied"
+    title += "_CosThetaApplied"
+    if nEvts != int(maxNrEvts):
+        print "\n *** ERROR: Since cos theta weights have to be normalized, this can only be applied if ALL events are considered ***"
+        cont = raw_input(' *** Decide whether the script should be continued, but then using all events (y).\n *** If (n) is chosen script will be terminated. ')
+        if cont == "y":
+            nEvts = int(maxNrEvts)
+            print " --> Will now be using ", nEvts
+        else:
+            sys.exit()
 
 # *** Indicating that XS-values are changed!
 if len(whichDir) >= whichDir.find("ChangingXS") > 0:
@@ -280,7 +290,7 @@ for RootLine in RootAnalyzer:
         NewRootAnalyzer.write('std::string SplittedDir = "' + str(whichDir) + 'SplittedCanvasses"; \n')
     elif re.search(r"iss >> evt", RootLine):
         if applyCosTheta == "y" or applyCosTheta == "Y":
-            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> CosThetaCorr >> weightUnc){ \n')
+            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> CosThetaCorr ){ \n')
             print " Cos theta* reweighting will be applied! \n"
         else:
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc){ \n')
