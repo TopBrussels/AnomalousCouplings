@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////
 // Specify whether the stacked canvasses have to be stored //
 bool storeSplittedCanvas = false; 
-std::string SplittedDir = "Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/SplittedCanvasses"; 
+std::string SplittedDir = "Events_RecoTest/Reco_UnmatchedEvts_DblGausTF_8Sept/SplittedCanvasses"; 
 /////////////////////////////////////////////////////////////
 
 //std::string VarValues[] = {"Re(g_{R}) = -0.3","Re(g_{R}) = -0.2","Re(g_{R}) = -0.1","Re(g_{R}) = -0.05","Re(g_{R}) = 0.0","Re(g_{R}) = 0.05","Re(g_{R}) = 0.1","Re(g_{R}) = 0.2","Re(g_{R}) = 0.3"};
@@ -28,17 +28,17 @@ float xLow = -0.225;
 float xHigh = 0.225; 
 std::string KinVar = "Re(g_{R})"; 
 int xMin = 4; 
-std::string title = "Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_ExtraCuts"; 
+std::string title = "Reco_UnmatchedEvts_DblGausTF_8Sept"; 
 std::string NormTypeName[2] = {"","_Acc"}; 
 std::string NormType[2] = {"no","acceptance"}; 
 const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/FitDistributions_Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry_ExtraCuts_117958Evts.root","RECREATE"); 
+TFile* file_FitDist = new TFile("Events_RecoTest/Reco_UnmatchedEvts_DblGausTF_8Sept/FitDistributions_Reco_UnmatchedEvts_DblGausTF_8Sept_64268Evts.root","RECREATE"); 
 TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
 const int NrConfigs = 9; 
-const int nEvts = 117958; 
+const int nEvts = 64268; 
 const unsigned int NrToDel = 2; 
 int NrRemaining = NrConfigs-NrToDel;
 std::string sNrCanvas ="0";
@@ -235,7 +235,6 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter
   std::ostringstream osParam4; osParam4 << polFit_AllPoints->GetParameter(4); std::string sParam4 = osParam4.str();
   h_LogLik->SetTitle(("FitInfo (slope req): "+sParam0+", "+sParam1+", "+sParam2+", "+sParam3+" & "+sParam4).c_str());
 
-
   if( storeSplittedCanvas == true){
     h_LogLik->GetYaxis()->SetTitle(YAxisTitle.c_str());
     h_LogLik->GetYaxis()->SetTitleOffset(1.4);
@@ -288,7 +287,7 @@ void doublePolFitMacro(){
   double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
-  std::ifstream ifs ("Events_RecoTest/Reco_AllCorrectEvts_DblGausTF_UpdatedMasses_NoExtraCuts_5Sept_ThirdTry/weights_ExtraCuts.out", std::ifstream::in); 
+  std::ifstream ifs ("Events_RecoTest/Reco_UnmatchedEvts_DblGausTF_8Sept/weights.out", std::ifstream::in); 
   std::cout << " Value of ifs : " << ifs.eof() << std::endl;
   std::string line;
   int evt,config,tf;
@@ -345,7 +344,8 @@ void doublePolFitMacro(){
               canv_SplitLL[iNorm]->Print((SplittedDir+"/SplitCanvasLL"+NormTypeName[iNorm]+"_Nr"+sNrCanvas+".pdf").c_str()); dir_LLSplit[iNorm]->cd(); canv_SplitLL[iNorm]->Write(); delete canv_SplitLL[iNorm];
               delete h_LnLik[iNorm];
               if( consEvts != nEvts){
-                NrCanvas++; stringstream ssNrCanvas; ssNrCanvas << NrCanvas; sNrCanvas = ssNrCanvas.str();
+                if(iNorm == nrNorms-1) NrCanvas++; 
+                stringstream ssNrCanvas; ssNrCanvas << NrCanvas; sNrCanvas = ssNrCanvas.str();
                 canv_SplitLL[iNorm] = new TCanvas(("SplitCanvasLL"+NormTypeName[iNorm]+"_Nr"+sNrCanvas).c_str(), ("SplitCanvasLL"+NormTypeName[iNorm]).c_str()); canv_SplitLL[iNorm]->Divide(xDivide,yDivide);   
               }
             }
@@ -389,7 +389,9 @@ void doublePolFitMacro(){
   TDirectory *dir_FitSums = file_FitDist->GetDirectory("FitSums");
   if (!dir_FitSums) dir_FitSums = file_FitDist->mkdir("FitSums");
   dir_FitSums->cd();
+  
   //Now create the final fit from the individually summed fit parameters!
+  std::cout << " " << endl;
   for(int iNorm = 0; iNorm < nrNorms; iNorm++){
     histSum[iNorm]->Write();
 
@@ -411,5 +413,5 @@ void doublePolFitMacro(){
 
   file_FitDist->Close();
 
-  cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program" << endl;
+  cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
 }
