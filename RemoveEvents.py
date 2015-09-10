@@ -3,6 +3,7 @@
 #  Script which will remove bad events  #
 #    - Uncomplete events                #
 #    - Zero-weight events               #
+#    - Events not surviving cuts (opt)  #
 #  Required inputs are:                 #
 #    - whichDir                         #
 #                                       #
@@ -14,96 +15,127 @@
 #    1) Original weights.out file       #
 #    2) output.xml for #evts & configs  #
 #                                       #
-#  !Add option to perform both removes  #
-#   separately (as was the case before  #
-#   with two separate files)            #
-#                                       #
 #########################################
 
-#! python
 import os
 import sys
 
 whichDir = sys.argv[1]
 
-#--------------------------------------------------------------------------------# 
+# In case extra cuts should be applied it should be mentioned explicitely!
+applyExtraCuts = False
+if len(sys.argv) > 3:
+  applyExtraCuts = True
+
+# -------------------------------------------------------------------------------#
 #  Step 1: Get the number of events and configurations from the output.xml file  #
-#--------------------------------------------------------------------------------# 
+# -------------------------------------------------------------------------------#
 NrConfigs, NrEvts = 0, 0
 keepCounting = True
 XMLFile = open(os.path.join(whichDir+'output.xml'),'r')
 for xmlLine in XMLFile:
   xmlWord = xmlLine.split()
   if len(xmlWord) > 1 and xmlWord[0] == "13" and keepCounting == True: NrConfigs += 1
-  #Stop counting as soon as the word 'Permutations' is encountered
-  #--> Otherwise the ymm and MM terms are counted as configs as well ...
+  # Stop counting as soon as the word 'Permutations' is encountered
+  # --> Otherwise the ymm and MM terms are counted as configs as well ...
   if len(xmlWord) > 2 and xmlWord[1] == "Permutations": keepCounting = False
   if len(xmlWord) > 2 and xmlWord[0] == "nb_exp_events": NrEvts = int(xmlWord[1])
 
 print "Number of configs is : ",NrConfigs
 print "Number of events is : ",NrEvts
 
-#----------------------------------------# 
-#  Step 2: Remove the uncomplete events  #
-#----------------------------------------# 
-UncomplEventsToDelete, NrConfigsPerEvent = [], []
+# ---------------------------------------------------------------------------#
+#  Step 2: Identify the different types of events which have to be removed  #
+# ---------------------------------------------------------------------------#
+UncomplEventsToDelete, NrConfigsPerEvent, ZeroEventsToDelete, CutEventsToKeep = [], [], [], []
 for ii in range(NrEvts): NrConfigsPerEvent.append(0)
 
-#Loop over all lines in file and count the number of configs for each event
+# Loop over all lines in original weights.out file, count the number of configs for each event and identify the zero and non-selected events
 weightFile = open(os.path.join(whichDir+'weights.out'),'r')
 for weightLine in weightFile:
   weightWord = weightLine.split()
   #Only interested in files starting with a number
-  if str(weightWord[0]) != "#": NrConfigsPerEvent[int(weightWord[0])-1] += 1
-
+  if str(weightWord[0]) != "#":
+    NrConfigsPerEvent[int(weightWord[0])-1] += 1
+    if str(weightWord[3]) == "0.0" and not int(weightWord[0]) in ZeroEventsToDelete:
+      ZeroEventsToDelete.append(int(weightWord[0]))
+# Now that the number of configs for each event has been calculated, store the events which don't have the correct number!
 for ii in range(NrEvts):
   if NrConfigsPerEvent[ii] != NrConfigs: UncomplEventsToDelete.append(ii+1)
-print "Events with uncomplete weights has length = ",len(UncomplEventsToDelete)
- 
-#In case events have to be deleted open a new file, else skip this step!
-if len(UncomplEventsToDelete) != 0:
-  NoUncomplEvtsFile = open(os.path.join(whichDir+'weights_NoUncompleteEvts.out'),'w')
+
+# The event numbers not surviving the cut can be obtained from the following file: EventNrMatching_TTbarJets_SemiLept.txt
+TypeCutEvts = "empty"
+if whichDir.find("Correct") >= 0: 
+  TypeCutEvts = "Correct"
+elif whichDir.find("Wrong") >= 0:
+  TypeCutEvts = "Wrong"
+elif whichDir.find("Unmatched") >= 0:
+  TypeCutEvts = "Unmatched"
+
+if TypeCutEvts == "Correct" and applyExtraCuts:
+  if os.path.exists(os.path.join(whichDir+'EventNrMatching_TTbarJets_SemiLept.txt')):
+    evtNrFile = open(os.path.join(whichDir+'EventNrMatching_TTbarJets_SemiLept.txt'),'r')
+    for evtNrLine in evtNrFile:
+      evtNrWord = evtNrLine.split()
+      if len(evtNrWord) == 7:   # For lines with this length, output exists!
+        if str(evtNrWord[3]) == "SemiMu" and str(evtNrWord[5]) == "Correct" and str(evtNrWord[1]) == "1":
+          CutEventsToKeep.append(int(evtNrWord[6]))
+    evtNrFile.close()
+  else:
+    print "Can only remove the non-selected events if an EventNrMatching file is given!!"
+    sys.exit()
+
+print "\n --> Number of events with uncomplete weights : ", len(UncomplEventsToDelete)
+print " --> Number of events with a weight equal to 0 : ", len(ZeroEventsToDelete)
+if applyExtraCuts:
+  print "Number of events surviving the extra cuts : ", len(CutEventsToKeep)
+
+# ----------------------------------------------------------------------#
+#  Step 3: Store the complete events and non-zero events in a new file  #
+# ----------------------------------------------------------------------#
+
+# In case events have to be deleted open a new file, else skip this step!
+if len(UncomplEventsToDelete) != 0 or len(ZeroEventsToDelete) != 0:
+  NoUncomplEvtsFile = open(os.path.join(whichDir+'weights_CheckedEvts.out'),'w')
   WeightFile = open(weightFile.name)
   for line in WeightFile:
     word = line.split()
     if str(word[0]) != "#":
-      if not int(word[0]) in UncomplEventsToDelete: NoUncomplEvtsFile.write(line)
-    else: NoUncomplEvtsFile.write(line)
+      if not int(word[0]) in UncomplEventsToDelete and not int(word[0]) in ZeroEventsToDelete:
+        NoUncomplEvtsFile.write(line)
+    else:
+      NoUncomplEvtsFile.write(line)
   NoUncomplEvtsFile.close()
 weightFile.close()
 
-#--------------------------------------------------------#
-#  Step 3: Check whether events with zero-weights exist  #
-#--------------------------------------------------------#
-ZeroEventsToDelete = []
+# ------------------------------------------------------------------------------------#
+#  Step 3: Now remove from this checked file the events not surviving the extra cuts  #
+# ------------------------------------------------------------------------------------#
 
-#The choice of weights_xx.out file depends on whether the weights_NoUncompleteEvts.out exists in the directory!
-#If yes, this one should be used!
+# The choice of weights_xx.out file depends on whether the weights_CheckedEvts.out exists in the directory!
+# If yes, this one should be used!
 list_dir = os.listdir(whichDir)
-uncomplWeightFile = open(os.path.join(whichDir+'weights.out'),'r')
+allCheckedWeightFile = open(os.path.join(whichDir+'weights.out'),'r')
 for file_dir in list_dir:
-  if file_dir.endswith(".out") and file_dir.startswith("weights_NoUncompleteEvts"): uncomplWeightFile = open(os.path.join(whichDir+'weights_NoUncompleteEvts.out'),'r') 
+  if file_dir.endswith(".out") and file_dir.startswith("weights_CheckedEvts"):
+    allCheckedWeightFile = open(os.path.join(whichDir+'weights_CheckedEvts.out'),'r')
 
-print "Looking at file : ", uncomplWeightFile.name
-
-for uncomplWeightLine in uncomplWeightFile:
-  uncomplWeightWord = uncomplWeightLine.split()
-  #Only interested in files starting with a number
-  if str(uncomplWeightWord[0]) != "#":
-    if str(uncomplWeightWord[3]) == "0.0":
-      if not int(uncomplWeightWord[0]) in ZeroEventsToDelete: ZeroEventsToDelete.append(int(uncomplWeightWord[0]))
-uncomplWeightFile.close()
-print "Events with a weight equal to 0 has length = ",len(ZeroEventsToDelete)
-print "Events to delete are : ", ZeroEventsToDelete
-
-if len(ZeroEventsToDelete) != 0:
-  NoZeroEvtsFile = open(os.path.join(whichDir+'weights_NoZero.out'),'w')
-  UncomplWeightFile = open(uncomplWeightFile.name,'r')
-  for zeroLine in UncomplWeightFile:
-    zeroWord = zeroLine.split()
-    if str(zeroWord[0]) != "#":
-      if not int(zeroWord[0]) in ZeroEventsToDelete:
-        NoZeroEvtsFile.write(zeroLine)
-    else: NoZeroEvtsFile.write(zeroLine)
-  NoZeroEvtsFile.close()
-uncomplWeightFile.close()
+if len(CutEventsToKeep) != 0 and applyExtraCuts:
+  print "Looking at file : ", allCheckedWeightFile.name
+  NoCutsEvtsFile = open(os.path.join(whichDir+'weights_ExtraCuts.out'),'w')
+  DeletedEvtsFile = open(os.path.join(whichDir+'weights_DeletedByExtraCuts.out'),'w')
+  for checkedLine in allCheckedWeightFile:
+    checkedWord = checkedLine.split()
+    # Only interested in files starting with a number
+    if str(checkedWord[0]) != "#":
+      if int(checkedWord[0]) in CutEventsToKeep:
+        NoCutsEvtsFile.write(checkedLine)
+      else:
+        DeletedEvtsFile.write(checkedLine)
+    else:
+      NoCutsEvtsFile.write(checkedLine)
+      DeletedEvtsFile.write(checkedLine)
+  print "Done, closing all files ! "
+  NoCutsEvtsFile.close()
+  DeletedEvtsFile.close()
+allCheckedWeightFile.close()
