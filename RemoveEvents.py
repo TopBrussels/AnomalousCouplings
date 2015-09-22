@@ -24,17 +24,17 @@ whichDir = sys.argv[1]
 
 YesOptions = ["y", "yes", "Y", "Yes", "YES"]
 # In case extra cuts should be applied it should be mentioned explicitly!
-applyExtraCuts = False
+applyCosTheta = False
 if len(sys.argv) >= 3:
   if sys.argv[2] in YesOptions:
-    print "\n ** Changing applyExtraCuts variable to True! **"
-    applyExtraCuts = True
-
-applyCosTheta = False
-if len(sys.argv) >= 4:
-  if sys.argv[3] in YesOptions:
     print "\n ** Will be applying cos theta reweighting ! **"
     applyCosTheta = True
+
+applyExtraCuts = False
+if len(sys.argv) >= 4:
+  if sys.argv[3] in YesOptions:
+    print "\n ** Changing applyExtraCuts variable to True! **"
+    applyExtraCuts = True
 
 # -------------------------------------------------------------------------------#
 #  Step 1: Get the number of events and configurations from the output.xml file  #
@@ -50,14 +50,17 @@ for xmlLine in XMLFile:
   if len(xmlWord) > 2 and xmlWord[1] == "Permutations": keepCounting = False
   if len(xmlWord) > 2 and xmlWord[0] == "nb_exp_events": NrEvts = int(xmlWord[1])
 
-print "\nNumber of configs is : ",NrConfigs
-print "Number of events is : ",NrEvts
+if len(sys.argv) >= 5 and sys.argv[4] != "-1":
+  NrEvts = int(sys.argv[4])
+
+print "\nNumber of configs is : ", NrConfigs
+print "Number of events is : ", NrEvts
 
 # ---------------------------------------------------------------------------#
 #  Step 2: Identify the different types of events which have to be removed  #
 # ---------------------------------------------------------------------------#
 IncomplEventsToDelete, NrConfigsPerEvent, ZeroEventsToDelete, CutEventsToKeep = [], [], [], []
-for ii in range(NrEvts): NrConfigsPerEvent.append(0)
+for ii in range(NrEvts*3): NrConfigsPerEvent.append(0)
 
 # Loop over all lines in original weights.out file, count the number of configs for each event and identify the zero and non-selected events
 weightFile = open(os.path.join(whichDir+'weights.out'),'r')
@@ -118,8 +121,8 @@ if not os.path.exists(os.path.join(whichDir+'EventNrMatching_TTbarJets_SemiLept.
 
 if applyCosTheta:
 
-  MadAnalysisPath = '/user/aolbrech/AnomalousCouplings/MadAnalysis_v112/RVRAcceptance/SampleAnalyzer/CosThetaReweighting_'+str(AnomCoef)+'/'+str(VarConfig)+'_'+str(AnomCoef)
-  CosThetaFile = open(os.path.join(MadAnalysisPath+'/HistoWeight_'+str(VarConfig)+'_'+str(AnomCoef)+'_PtCutsApplied_AlsoOnMET.txt'),'r')
+  MadAnalysisPath = '/user/aolbrech/AnomalousCouplings/MadAnalysis_v112/RgR_SemiMu_CosTheta/SampleAnalyzer/CosThetaReweighting/'+str(VarConfig)+'_SemiMu'
+  CosThetaFile = open(os.path.join(MadAnalysisPath+'/HistoWeight_'+str(VarConfig)+'_SemiMu_PtCutsApplied_AlsoOnMET.txt'),'r')
 
   print "\n CosTheta info taken from : ", CosThetaFile.name
 
