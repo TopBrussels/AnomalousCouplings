@@ -192,7 +192,6 @@ else:
 # ---------------------------#
 # *** Indicating that the cos theta* reweighting has been applied
 if applyCosTheta == "y" or applyCosTheta == "yes" or applyCosTheta == "Y":
-    title += "_CosThetaApplied"
     if nEvts != int(maxNrEvts):
         print "\n *** ERROR: Since cos theta weights have to be normalized, this can only be applied if ALL events are considered ***"
         cont = raw_input(' *** Decide whether the script should be continued, but then using all events (y).\n *** If (n) is chosen script will be terminated. ')
@@ -303,10 +302,10 @@ for RootLine in RootAnalyzer:
         NewRootAnalyzer.write('const unsigned int NrToDel = ' + str(NumberOfPointsToRemove) + '; \n')
     elif re.search(r"new TF1", RootLine):
         if re.search(r"AllPoints", RootLine):
-            print " ---> Polynomial fits will go between ", Var[1], " and ", Var[NrConfigs - 2], "\n"
-            NewRootAnalyzer.write('  polFit_AllPoints = new TF1(("polFit"+NormTypeName[normType]+"_AllPoints_Evt"+EvtNumber).c_str(),"' + str(FitType) + '",Var[1],Var[NrConfigs-2]); \n')
+            print " ---> Polynomial fits will go between ", Var[0], " and ", Var[NrConfigs - 1], "\n"
+            NewRootAnalyzer.write('  polFit_AllPoints = new TF1(("polFit"+NormTypeName[normType]+"_AllPoints_Evt"+EvtNumber).c_str(),"' + str(FitType) + '",Var[0],Var[NrConfigs-1]); \n')
         elif re.search(r"ReducedPoints", RootLine):
-            NewRootAnalyzer.write('  polFit_ReducedPoints = new TF1(("polFit"+NormTypeName[normType]+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"' + str(FitType) + '",Var[1],Var[NrConfigs-2]); \n')
+            NewRootAnalyzer.write('  polFit_ReducedPoints = new TF1(("polFit"+NormTypeName[normType]+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"' + str(FitType) + '",Var[0],Var[NrConfigs-1]); \n')
         else:
             NewRootAnalyzer.write(RootLine)
     elif re.search(r"new TFile", RootLine) and re.search(r"file_FitDist", RootLine):
@@ -356,10 +355,10 @@ if CreateTexFile:
         CanvasOutputFile.write('\n \\centering \n')
 
         # Include the overall likelihood and secondPol distribution (together one 1 page!):
-        if ("TotalLnLik" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir and ("SecondPol" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir:
-            CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{TotalLnLik' + NormTypeName[iNormType] + '.pdf} \n')
-            CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{FirstPol' + NormTypeName[iNormType] + '.pdf} \n')
-            CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{SecondPol' + NormTypeName[iNormType] + '.pdf} \n')
+        # if ("Summed" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir and ("SummedFit_FirstFit" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir:
+        CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{SummedHist' + NormTypeName[iNormType] + '.pdf} \n')
+        CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{SummedFit_FirstFit' + NormTypeName[iNormType] + '.pdf} \n')
+        CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{SummedFit_SecondFit' + NormTypeName[iNormType] + '.pdf} \n')
 
         for File in Canvaslist_dir:
             # Include the stacked canvasses:
