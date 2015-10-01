@@ -816,7 +816,7 @@ class CondorCluster(Cluster):
         try:
             id = pat.search(output).groups()[0]
         except:
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
+            raise ClusterManagmentError, 'fail to submit to the cluster (1): \n%s' \
                                                                         % output 
         self.submitted += 1
         self.submitted_ids.append(id)
@@ -901,7 +901,7 @@ class CondorCluster(Cluster):
         try:
             id = pat.search(output).groups()[0]
         except:
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
+            raise ClusterManagmentError, 'fail to submit to the cluster (2): \n%s' \
                                                                         % output 
         self.submitted += 1
         self.submitted_ids.append(id)
@@ -987,7 +987,7 @@ class PBSCluster(Cluster):
     running_tag = ['T','E','R']
     complete_tag = ['C']
     
-    maximum_submited_jobs = 1000
+    maximum_submited_jobs = 2000
 
     @multiple_try()
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, log=None,
@@ -1002,8 +1002,8 @@ class PBSCluster(Cluster):
             me_dir = 'a' + me_dir[1:]
 
 	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
-        if len(self.submitted_ids) >= self.maximum_submited_jobs:
-            fct = lambda idle, run, finish: logger.info('Waiting for free slot: %s %s %s' % (idle, run, finish))
+        if len(self.submitted_ids) >= self.maximum_submited_jobs or len(self.submitted_ids) > 2100:
+            fct = lambda idle, run, finish: logger.info('Waiting for free slot (max nr is set to %s): %s %s %s' % (maximum_submited_jobs, idle, run, finish))
             me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
             #print 'Change name of me_dir in wait : '
             #me_dir = misc.digest(me_dir)[-14:]    --> Wrong result!! (Seems to be some kind of random generator)
@@ -1039,7 +1039,7 @@ class PBSCluster(Cluster):
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,
-		   '-l walltime=20:00:00',
+		   '-l walltime=07:00:00',
                    '-V']
 
         if self.cluster_queue and self.cluster_queue != 'None':
@@ -1052,8 +1052,32 @@ class PBSCluster(Cluster):
         output = a.communicate(text)[0]
         id = output.split('.')[0]
         if not id.isdigit() or a.returncode !=0:
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
-                                                                        % output
+	    #Changing method such that it tries 5 times before raising the cluster error
+            #Maybe this way changing the queue system does not kill the script             (28/09/2015)
+	    #print "Going into the retry case ... "
+            #retry = 0
+            #while retry < 5:
+            #    print "Sleeping 120s before starting with retry #", retry
+            #    time.sleep(120)
+            #    me_dir = CorrectMadWeightName
+            #    command = ['qsub','-o', stdout,
+            #               '-N', me_dir,
+            #               '-e', stderr,
+            #               '-l walltime=07:00:00',
+            #               '-V']
+            #    if self.cluster_queue and self.cluster_queue != 'None':
+            #        command.extend(['-q', self.cluster_queue])
+            #    a = misc.Popen(command, stdout=subprocess.PIPE,
+            #                          stderr=subprocess.STDOUT,
+            #                          stdin=subprocess.PIPE, cwd=cwd)
+            #    output = a.communicate(text)[0]
+            #    id = output.split('.')[0]
+            #    if not id.isdigit() or a.returncode !=0:
+            #        if retry < 4: retry+=1
+            #        elif retry == 4: 
+	    #            raise ClusterManagmentError, 'fail to submit to the cluster (3): \n%s' \
+	    raise ClusterManagmentError, 'fail to submit to the cluster (3): \n%s' \
+                                                                                    % output
             
         self.submitted += 1
         self.submitted_ids.append(id)
@@ -1218,7 +1242,7 @@ class SGECluster(Cluster):
         output = a.communicate(text)[0]
         id = output.split(' ')[2]
         if not id.isdigit():
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
+            raise ClusterManagmentError, 'fail to submit to the cluster (4): \n%s' \
                                                                         % output 
         self.submitted += 1
         self.submitted_ids.append(id)
@@ -1333,10 +1357,10 @@ class LSFCluster(Cluster):
         try:
             id = output.split('>',1)[0].split('<')[1]
         except:
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
+            raise ClusterManagmentError, 'fail to submit to the cluster (5): \n%s' \
                                                                         % output 
         if not id.isdigit():
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
+            raise ClusterManagmentError, 'fail to submit to the cluster (6): \n%s' \
                                                                         % output 
         self.submitted += 1
         self.submitted_ids.append(id)
@@ -1463,7 +1487,7 @@ class GECluster(Cluster):
         try:
             id = pat.search(output).groups()[0]
         except:
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
+            raise ClusterManagmentError, 'fail to submit to the cluster (7): \n%s' \
                                                                         % output 
         self.submitted += 1
         self.submitted_ids.append(id)
@@ -1600,7 +1624,7 @@ class SLURMCluster(Cluster):
         id = output_arr[3].rstrip()
 
         if not id.isdigit():
-            raise ClusterManagmentError, 'fail to submit to the cluster: \n%s' \
+            raise ClusterManagmentError, 'fail to submit to the cluster (8): \n%s' \
 
         self.submitted += 1
         self.submitted_ids.append(id)
@@ -1769,7 +1793,7 @@ class HTCaaSCluster(Cluster):
             a=misc.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, cwd=cwd)
             id = a.stdout.read().strip()
             if nb_try > nb_limit :
-              raise ClusterManagementError, 'fail to submit to the HTCaaS cluster: \n %s' % id
+              raise ClusterManagmentError, 'fail to submit to the HTCaaS cluster: \n %s' % id
               break
 
         self.submitted += 1
