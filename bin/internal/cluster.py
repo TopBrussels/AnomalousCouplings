@@ -1003,7 +1003,7 @@ class PBSCluster(Cluster):
 
 	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
         if len(self.submitted_ids) >= self.maximum_submited_jobs or len(self.submitted_ids) > 2100:
-            fct = lambda idle, run, finish: logger.info('Waiting for free slot (max nr is set to %s): %s %s %s' % (maximum_submited_jobs, idle, run, finish))
+            fct = lambda idle, run, finish: logger.info('Waiting for free slot (max nr set to %s, nr submitted is %s): %s %s %s' % (self.maximum_submited_jobs, len(self.submitted_ids), idle, run, finish))
             me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
             #print 'Change name of me_dir in wait : '
             #me_dir = misc.digest(me_dir)[-14:]    --> Wrong result!! (Seems to be some kind of random generator)
@@ -1039,7 +1039,7 @@ class PBSCluster(Cluster):
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,
-		   '-l walltime=07:00:00',
+		   '-l walltime=05:00:00',
                    '-V']
 
         if self.cluster_queue and self.cluster_queue != 'None':
