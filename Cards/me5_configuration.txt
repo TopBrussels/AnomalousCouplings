@@ -100,7 +100,7 @@ cluster_temp_path = /localgrid/aolbrech/temp
 #! Cluster waiting time for status update 
 #!  First number is when the number of waiting job is higher than the number 
 #!  of running one (time in second). The second number is in the second case.
-cluster_status_update = 120 30
+cluster_status_update = 600 300
 
 #! How to deal with failed submission (can occurs on cluster mode)
 #!  0: crash, -1: print error, hangs the program up to manual instructions, N(>0) retry up to N times.
