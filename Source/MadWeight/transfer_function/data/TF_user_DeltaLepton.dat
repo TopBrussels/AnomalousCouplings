@@ -81,27 +81,27 @@
           prov3 = 0.116505
           prov4 = -2.49195
           prov5 = 12.7281
-        ELIF( p(0) .GE. 230) THEN 
+        ELSE IF( p(0) .GE. 230) THEN 
           prov1 = -0.618212
           prov2 = 19.9502
           prov3 = 0.883837
           prov4 = 16.9089
           prov5 = 47.5426
         ELSE  
-          prov1=(#1+#2*dsqrt(p(0))+#3*p(0))
-          prov2=(#4+#5*dsqrt(p(0))+#6*p(0))
-          prov3=(#7+#8*p(0)+#9*p(0)**2+#10*p(0)**3+#11*p(0)**4+#12*p(0)**5))
-          prov4=(#13+#14*dsqrt(p(0))+#15*p(0))
-          prov5=(#16+#17*dsqrt(p(0))+#18*p(0))
-        ENDIF 
+          prov1=(#1+#2*dsqrt(p(0))+#3*p(0) )
+          prov2=(#4+#5*dsqrt(p(0))+#6*p(0) )
+          prov3=(#7+#8*p(0)+#9*p(0)**2+#10*p(0)**3+#11*p(0)**4+#12*p(0)**5 )
+          prov4=(#13+#14*dsqrt(p(0))+#15*p(0) )
+          prov5=(#16+#17*dsqrt(p(0))+#18*p(0) )
+        END IF 
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))                  !first gaussian
         tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2))         !second gaussian
         tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))   !normalisation
     </tf> 
     <width>
-        prov2=(#4+#5*dsqrt(pexp(0))+#6*pexp(0))
-        prov5=(#16+#17*dsqrt(pexp(0))+#18*pexp(0))
+        prov2=(#4+#5*dsqrt(pexp(0))+#6*pexp(0) )
+        prov5=(#16+#17*dsqrt(pexp(0))+#18*pexp(0) )
  
         width = max(prov2, prov5) 
     </width> 
@@ -123,27 +123,27 @@
           prov3 = 0.152154
           prov4 = -13.8137
           prov5 = 10.1616
-        ELIF( p(0) .GE. 164.219) THEN 
+        ELSE IF( p(0) .GE. 164.219) THEN 
           prov1 = -3.46876
           prov2 = 20.0735
           prov3 = 0.850542
           prov4 = -2.21242
           prov5 = 37.0505
         ELSE  
-          prov1=(#1+#2*dsqrt(p(0))+#3*p(0))
-          prov2=(#4+#5*dsqrt(p(0))+#6*p(0))
-          prov3=(#7+#8*p(0)+#9*p(0)**2+#10*p(0)**3
-          prov4=(#11+#12*dsqrt(p(0))+#13*p(0))
-          prov5=(#14+#15*dsqrt(p(0))+#16*p(0))
-        ENDIF 
+          prov1=(#1+#2*dsqrt(p(0))+#3*p(0) )
+          prov2=(#4+#5*dsqrt(p(0))+#6*p(0) )
+          prov3=(#7+#8*p(0)+#9*p(0)**2+#10*p(0)**3 )
+          prov4=(#11+#12*dsqrt(p(0))+#13*p(0) )
+          prov5=(#14+#15*dsqrt(p(0))+#16*p(0) )
+        END IF 
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))                  !first gaussian
         tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2))         !second gaussian
         tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))   !normalisation
     </tf> 
     <width>
-        prov2=(#4+#5*dsqrt(pexp(0))+#6*pexp(0))
-        prov5=(#14+#15*dsqrt(pexp(0))+#16*pexp(0))
+        prov2=(#4+#5*dsqrt(pexp(0))+#6*pexp(0) )
+        prov5=(#14+#15*dsqrt(pexp(0))+#16*pexp(0) )
  
         width = max(prov2, prov5) 
     </width> 
