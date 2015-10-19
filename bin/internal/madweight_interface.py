@@ -506,7 +506,8 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
 
     def check_collect(self, args):
         """ """
-        
+       
+	print "Length of arguments in check_collect: ", len(args)
         if len(args) >1:
             self.help_collect()
             raise self.InvalidCmd, 'Invalid Command format'
@@ -528,24 +529,30 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
         name = self.MWparam.name
         # 1. Concatanate the file. #############################################
         out_dir = pjoin(self.me_dir, 'Events', name)
+	if 'xx' in args: print "xx in arguments added ..."
+	print "List of arguments is : ", args
         if '-refine' in args:
             out_path = pjoin(out_dir, 'refine.xml') 
         else:
             out_path = pjoin(out_dir, 'output.xml')
             if os.path.exists(out_path):
-                logger.warning('Output file already exists. Current one will be tagged with _old suffix')
+                logger.warning('Output file already exists. Current one will be tagged with _old suffix (if present)')
                 logger.warning('Run "collect -refine to instead update your current results."')
-                files.mv(pjoin(out_dir, 'output.xml'), pjoin(out_dir, 'output_old.xml'))
-                files.mv(pjoin(out_dir, 'weights.out'), pjoin(out_dir, 'weights.out'))
+		print "Copying files in directory : ", out_dir
+                if os.path.exists('output.xml'): files.mv(pjoin(out_dir, 'output.xml'), pjoin(out_dir, 'output_old.xml'))
+                if os.path.exists('weights.out'): files.mv(pjoin(out_dir, 'weights.out'), pjoin(out_dir, 'weights.out'))
                 for MWdir in self.MWparam.MW_listdir:
+		    print "Looking at MWdir : ", MWdir
                     out_dir = pjoin(self.me_dir, 'Events', name, MWdir)
                     files.mv(pjoin(out_dir, 'output.xml'), pjoin(out_dir, 'output_old.xml'))
                 out_dir = pjoin(self.me_dir, 'Events', name)
                     
         fsock = open(out_path, 'w')
+	print "Writing in file : ", fsock.name
         fsock.write('<madweight>\n<banner>\n')
         # BANNER
         for card in ['proc_card_mg5.dat','MadWeight_card.dat','transfer_card.dat','param_card.dat','run_card.dat']:
+	    print "Looking at card : ", card
             cname = card[:-4]
             fsock.write('<%s>\n' % cname)
             fsock.write(open(pjoin(self.me_dir,'Cards',card)).read().replace('<','!>'))
@@ -555,6 +562,7 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
         for MWdir in self.MWparam.MW_listdir:
             out_dir = pjoin(self.me_dir, 'Events', name, MWdir)
             input_dir = pjoin(self.me_dir, 'SubProcesses', MWdir, name)
+	    print "Getting info from : ", input_dir
             if not os.path.exists(out_dir):
                 os.mkdir(out_dir)
             if '-refine' in args:
@@ -564,18 +572,23 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
             fsock2 = open(out_path,'w')
             fsock.write('<subprocess id=\'%s\'>\n' % MWdir)
             fsock2.write('<subprocess id=\'%s\'>\n' % MWdir)
+	    print "Value of boolean at_least_one : ", at_least_one
             for output in glob.glob(pjoin(input_dir, 'output_*_*.xml')):
+		print "Looking at xml file : ", output
                 at_least_one = True
+		print "Changing at_least_one boolean to True ... "
                 text = open(output).read()
                 fsock2.write(text)
                 fsock.write(text)
-                os.remove(output)
+                #os.remove(output)
+	    print "Value of boolean at_least_one : ", at_least_one
             fsock.write('</subprocess>\n')
             fsock2.write('</subprocess>\n')
             fsock2.close()
         fsock.write('\n</madweight>\n')          
         fsock.close()
         # 2. Special treatment for refine mode
+	if 'xx' in args: print "Testing extra argument "
         if '-refine' in args:
             xml_reader2 = MWParserXML(self.MWparam['mw_run']['log_level'])
             for MWdir in self.MWparam.MW_listdir:
@@ -590,11 +603,12 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
         elif not at_least_one:
             logger.warning("Nothing to collect restore _old file as current.")
             out_dir = pjoin(self.me_dir, 'Events', name)
-            files.mv(pjoin(out_dir, 'output_old.xml'), pjoin(out_dir, 'output.xml'))
-            files.mv(pjoin(out_dir, 'weights_old.out'), pjoin(out_dir, 'weights.out'))
+	    print "Looking at directory : ", out_dir
+            if os.path.exists(pjoin(out_dir, 'output_old.xml')): files.mv(pjoin(out_dir, 'output_old.xml'), pjoin(out_dir, 'output.xml'))
+            if os.path.exists(pjoin(out_dir, 'weights_old.out')): files.mv(pjoin(out_dir, 'weights_old.out'), pjoin(out_dir, 'weights.out'))
             for MWdir in self.MWparam.MW_listdir:
                 out_dir = pjoin(self.me_dir, 'Events', name, MWdir)
-                files.mv(pjoin(out_dir, 'output.xml'), pjoin(out_dir, 'output_old.xml'))
+                if os.path.exists(pjoin(out_dir, 'output.xml')): files.mv(pjoin(out_dir, 'output.xml'), pjoin(out_dir, 'output_old.xml'))
             
             
             
