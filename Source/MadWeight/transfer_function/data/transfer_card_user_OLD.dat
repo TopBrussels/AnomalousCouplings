@@ -1,0 +1,131 @@
+#+-----------------------------------------------------------------------+
+#|                         TRANSFER_CARD.DAT                             |
+#|                                                                       |
+#|     Author: Annik Olbrechts (VUB)                                     |
+#|             27 November 2014                                          |
+#+-----------------------------------------------------------------------+
+#|     This file is generated automaticly by MADWEIGHT                   |
+#|     card generation version: 1.0.0                                    |
+#+-----------------------------------------------------------------------+
+#|                                                                       |
+#|    To change the transfer function run ./bin/change_tf.py             |
+#|    Current parametrization : DblGaus_E                                |
+#|    Contains full double Gaussian for all kinematics and particles     |
+#|    ** Information for all eta-bins **                                 |
+#+-----------------------------------------------------------------------+
+#+--------------------------------------------------------------------------------------+
+#|     Parameter for particles: bjet
+#|      --> Used formula: Double Gaussian fit with parameters depending on momentum
+#|      --> Dependency defined as: A + B*sqrt(E) + C*E  for width of gaussians 
+#|      -->                        A + B*E + C*E² + D*E³ + F*E^4
+#+--------------------------------------------------------------------------------------+
+BLOCK TF_bjet_E
+1     75.6499     # Mean first gaussian
+2     -0.773692     # Mean first gaussian
+3     -0.000206017     # Mean first gaussian
+4     2.2324e-05     # Mean first gaussian
+5     -5.66326e-08     # Mean first gaussian
+6     33.6921     # Width first gaussian
+7     -5.24732     # Width first gaussian
+8     0.306612     # Width first gaussian
+9     0.999423     # Relative constant gaussians
+10     -0.000444539     # Relative constant gaussians
+11     -1.78186e-05     # Relative constant gaussians
+12     -6.49575e-08     # Relative constant gaussians
+13     4.94824e-10     # Relative constant gaussians
+14     123.053     # Mean second gaussian
+15     0.304267     # Mean second gaussian
+16     0.000275825     # Mean second gaussian
+17     -3.48029e-06     # Mean second gaussian
+18     -3.57373e-08     # Mean second gaussian
+19     -16.538     # Width second gaussian
+20     1.62898     # Width second gaussian
+21     0.278274     # Width second gaussian
+ 
+#+--------------------------------------------------------------------------------------+
+#|     Parameter for particles: electron
+#|      --> Used formula: Double Gaussian fit with parameters depending on momentum
+#|      --> Dependency defined as: A + B*sqrt(E) + C*E  for width of gaussians 
+#|      -->                        A + B*E + C*E² + D*E³ + F*E^4
+#+--------------------------------------------------------------------------------------+
+BLOCK TF_electron_E
+1     19.5801     # Mean first gaussian
+2     0.0870621     # Mean first gaussian
+3     0.000324753     # Mean first gaussian
+4     7.21608e-07     # Mean first gaussian
+5     -2.93561e-09     # Mean first gaussian
+6     44.9679     # Width first gaussian
+7     -0.684288     # Width first gaussian
+8     -0.397594     # Width first gaussian
+9     0.51632     # Relative constant gaussians
+10     0.00225663     # Relative constant gaussians
+11     7.90954e-06     # Relative constant gaussians
+12     1.13336e-08     # Relative constant gaussians
+13     -1.53605e-10     # Relative constant gaussians
+14     0.971457     # Mean second gaussian
+15     -0.00089793     # Mean second gaussian
+16     -2.48201e-05     # Mean second gaussian
+17     -9.39893e-08     # Mean second gaussian
+18     9.10522e-10     # Mean second gaussian
+19     19.0574     # Width second gaussian
+20     -3.01717     # Width second gaussian
+21     0.132277     # Width second gaussian
+ 
+#+--------------------------------------------------------------------------------------+
+#|     Parameter for particles: nonbjet
+#|      --> Used formula: Double Gaussian fit with parameters depending on momentum
+#|      --> Dependency defined as: A + B*sqrt(E) + C*E  for width of gaussians 
+#|      -->                        A + B*E + C*E² + D*E³ + F*E^4
+#+--------------------------------------------------------------------------------------+
+BLOCK TF_nonbjet_E
+1     -25.4917     # Mean first gaussian
+2     1.13858     # Mean first gaussian
+3     -0.0189462     # Mean first gaussian
+4     0.000135554     # Mean first gaussian
+5     -3.53541e-07     # Mean first gaussian
+6     4.97203     # Width first gaussian
+7     -1.70203     # Width first gaussian
+8     -0.0158571     # Width first gaussian
+9     0.318085     # Relative constant gaussians
+10     -0.000336292     # Relative constant gaussians
+11     -0.000129818     # Relative constant gaussians
+12     1.70154e-06     # Relative constant gaussians
+13     -5.81682e-09     # Relative constant gaussians
+14     229.297     # Mean second gaussian
+15     -10.5518     # Mean second gaussian
+16     0.123387     # Mean second gaussian
+17     -0.000512413     # Mean second gaussian
+18     6.08724e-07     # Mean second gaussian
+19     367.985     # Width second gaussian
+20     -84.2713     # Width second gaussian
+21     3.97514     # Width second gaussian
+ 
+#+--------------------------------------------------------------------------------------+
+#|     Parameter for particles: muon
+#|      --> Used formula: Double Gaussian fit with parameters depending on momentum
+#|      --> Dependency defined as: A + B*sqrt(E) + C*E  for width of gaussians 
+#|      -->                        A + B*E + C*E² + D*E³ + F*E^4
+#+--------------------------------------------------------------------------------------+
+BLOCK TF_muon_E
+1     11.1255     # Mean first gaussian
+2     0.0741702     # Mean first gaussian
+3     0.000494467     # Mean first gaussian
+4     3.29644e-06     # Mean first gaussian
+5     2.19762e-08     # Mean first gaussian
+6     150.893     # Width first gaussian
+7     0.710394     # Width first gaussian
+8     -0.887069     # Width first gaussian
+9     1.47859     # Relative constant gaussians
+10     0.00476099     # Relative constant gaussians
+11     2.17876e-06     # Relative constant gaussians
+12     -1.52409e-07     # Relative constant gaussians
+13     -1.93156e-09     # Relative constant gaussians
+14     -0.834542     # Mean second gaussian
+15     -0.00127225     # Mean second gaussian
+16     1.51087e-05     # Mean second gaussian
+17     2.26924e-07     # Mean second gaussian
+18     2.16717e-09     # Mean second gaussian
+19     19.3352     # Width second gaussian
+20     -0.144631     # Width second gaussian
+21     -0.13859     # Width second gaussian
+ 

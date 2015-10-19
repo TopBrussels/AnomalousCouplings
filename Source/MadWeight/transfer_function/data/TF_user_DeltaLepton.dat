@@ -75,49 +75,49 @@
   #width type should be thin or large (thin is for energy accurate up to 5-10%)
   <variable name='E'>
     <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
-        IF( p(0) .LE. 35.5556) THEN 
-          prov1=-0.612779
+        prov1=(#1+#2*dsqrt(p(0))+#3*p(0))
+        IF( p(0) .LE. 41.1111) THEN 
+          prov1=-0.8767
         ENDIF 
 
         IF( p(0) .GE. 235.556) THEN 
-          prov1 = -2.47477
+          prov1 = 5.65782
         ENDIF 
 
-        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
-        IF( p(0) .LE. 35.5556) THEN 
-          prov2=5.86346
-        ENDIF 
-
-        IF( p(0) .GE. 235.556) THEN 
-          prov2 = 22.1687
-        ENDIF 
-
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
-        IF( p(0) .LE. 57.7778) THEN 
-          prov3=0.134102
+        prov2=(#4+#5*dsqrt(p(0))+#6*p(0))
+        IF( p(0) .LE. 41.1111) THEN 
+          prov2=7.12828
         ENDIF 
 
         IF( p(0) .GE. 235.556) THEN 
-          prov3 = 0.318926
+          prov2 = 32.4861
         ENDIF 
 
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
-        IF( p(0) .LE. 57.7778) THEN 
-          prov4=84.4411
-        ENDIF 
-
-        IF( p(0) .GE. 235.556) THEN 
-          prov4 = 82.3582
-        ENDIF 
-
-        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
-        IF( p(0) .LE. 57.7778) THEN 
-          prov5=57.8199
+        prov3=(#7+#8*dsqrt(p(0))+#9*p(0))
+        IF( p(0) .LE. 41.1111) THEN 
+          prov3=0.0627626
         ENDIF 
 
         IF( p(0) .GE. 235.556) THEN 
-          prov5 = 76.0074
+          prov3 = 0.229706
+        ENDIF 
+
+        prov4=(#10+#11*dsqrt(p(0))+#12*p(0))
+        IF( p(0) .LE. 41.1111) THEN 
+          prov4=-218.747
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov4 = 187.447
+        ENDIF 
+
+        prov5=(#13+#14*dsqrt(p(0))+#15*p(0))
+        IF( p(0) .LE. 41.1111) THEN 
+          prov5=160.043
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov5 = 148.546
         ENDIF 
 
 
@@ -126,76 +126,8 @@
         tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
     </tf> 
     <width>
-        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
-        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
- 
-        width = max(prov2, prov5) 
-    </width> 
-  </variable>
-</block>
-##**********************************************************************##
-##             TF for electron                                      
-##**********************************************************************##
-<block name='electron'>   #name can be anything
-  <info> double gaussian with parameter depending on the energy </info>
-  <particles> el </particles>
-  <width_type> thin </width_type>
-  #width type should be thin or large (thin is for energy accurate up to 5-10%)
-  <variable name='E'>
-    <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
-        IF( p(0) .LE. 33.8) THEN 
-          prov1=16.7986
-        ENDIF 
-
-        IF( p(0) .GE. 223.8) THEN 
-          prov1 = 37.0324
-        ENDIF 
-
-        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
-        IF( p(0) .LE. 33.8) THEN 
-          prov2=6.65713
-        ENDIF 
-
-        IF( p(0) .GE. 223.8) THEN 
-          prov2 = 35.3889
-        ENDIF 
-
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
-        IF( p(0) .LE. 33.8) THEN 
-          prov3=0.999106
-        ENDIF 
-
-        IF( p(0) .GE. 223.8) THEN 
-          prov3 = 0.860786
-        ENDIF 
-
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
-        IF( p(0) .LE. 33.8) THEN 
-          prov4=-0.218691
-        ENDIF 
-
-        IF( p(0) .GE. 223.8) THEN 
-          prov4 = 0.411209
-        ENDIF 
-
-        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
-        IF( p(0) .LE. 33.8) THEN 
-          prov5=0.774809
-        ENDIF 
-
-        IF( p(0) .GE. 223.8) THEN 
-          prov5 = 2.82475
-        ENDIF 
-
-
-        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
-        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
-        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
-    </tf> 
-    <width>
-        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
-        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
+        prov2=(#4+#5*dsqrt(pexp(0))+#6*pexp(0))
+        prov5=(#13+#14*dsqrt(pexp(0))+#15*pexp(0))
  
         width = max(prov2, prov5) 
     </width> 
@@ -211,49 +143,49 @@
   #width type should be thin or large (thin is for energy accurate up to 5-10%)
   <variable name='E'>
     <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
+        prov1=(#1+#2*dsqrt(p(0))+#3*p(0))
         IF( p(0) .LE. 33.4375) THEN 
-          prov1=-3.37313
+          prov1=-3.49307
         ENDIF 
 
         IF( p(0) .GE. 151.562) THEN 
-          prov1 = -2.65096
+          prov1 = -3.95067
         ENDIF 
 
-        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
+        prov2=(#4+#5*dsqrt(p(0))+#6*p(0))
         IF( p(0) .LE. 33.4375) THEN 
-          prov2=5.1595
+          prov2=5.05119
         ENDIF 
 
         IF( p(0) .GE. 151.562) THEN 
-          prov2 = 18.1411
+          prov2 = 18.0245
         ENDIF 
 
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
+        prov3=(#7+#8*dsqrt(p(0))+#9*p(0))
         IF( p(0) .LE. 33.4375) THEN 
-          prov3=0.330858
+          prov3=0.257713
         ENDIF 
 
         IF( p(0) .GE. 151.562) THEN 
-          prov3 = 0.166345
+          prov3 = 0.207595
         ENDIF 
 
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
+        prov4=(#10+#11*dsqrt(p(0))+#12*p(0))
         IF( p(0) .LE. 46.0938) THEN 
-          prov4=-34.3731
+          prov4=-35.3933
         ENDIF 
 
         IF( p(0) .GE. 164.219) THEN 
-          prov4 = -0.0417661
+          prov4 = 4.59398
         ENDIF 
 
-        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
+        prov5=(#13+#14*dsqrt(p(0))+#15*p(0))
         IF( p(0) .LE. 46.0938) THEN 
-          prov5=17.4336
+          prov5=17.3455
         ENDIF 
 
         IF( p(0) .GE. 164.219) THEN 
-          prov5 = 45.2179
+          prov5 = 44.9815
         ENDIF 
 
 
@@ -262,76 +194,8 @@
         tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
     </tf> 
     <width>
-        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
-        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
- 
-        width = max(prov2, prov5) 
-    </width> 
-  </variable>
-</block>
-##**********************************************************************##
-##             TF for muon                                      
-##**********************************************************************##
-<block name='muon'>   #name can be anything
-  <info> double gaussian with parameter depending on the energy </info>
-  <particles> mu </particles>
-  <width_type> thin </width_type>
-  #width type should be thin or large (thin is for energy accurate up to 5-10%)
-  <variable name='E'>
-    <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
-        IF( p(0) .LE. 33.4375) THEN 
-          prov1=-3.37062
-        ENDIF 
-
-        IF( p(0) .GE. 164.219) THEN 
-          prov1 = -4.50341
-        ENDIF 
-
-        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
-        IF( p(0) .LE. 33.4375) THEN 
-          prov2=5.16118
-        ENDIF 
-
-        IF( p(0) .GE. 164.219) THEN 
-          prov2 = 19.1976
-        ENDIF 
-
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
-        IF( p(0) .LE. 33.4375) THEN 
-          prov3=0.331463
-        ENDIF 
-
-        IF( p(0) .GE. 164.219) THEN 
-          prov3 = 0.205041
-        ENDIF 
-
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
-        IF( p(0) .LE. 54.5312) THEN 
-          prov4=-43.1915
-        ENDIF 
-
-        IF( p(0) .GE. 164.219) THEN 
-          prov4 = 0.16805
-        ENDIF 
-
-        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
-        IF( p(0) .LE. 54.5312) THEN 
-          prov5=32.3167
-        ENDIF 
-
-        IF( p(0) .GE. 164.219) THEN 
-          prov5 = 43.5182
-        ENDIF 
-
-
-        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
-        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
-        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
-    </tf> 
-    <width>
-        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
-        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
+        prov2=(#4+#5*dsqrt(pexp(0))+#6*pexp(0))
+        prov5=(#13+#14*dsqrt(pexp(0))+#15*pexp(0))
  
         width = max(prov2, prov5) 
     </width> 

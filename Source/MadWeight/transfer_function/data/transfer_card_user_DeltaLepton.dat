@@ -1,0 +1,61 @@
+#+-----------------------------------------------------------------------+
+#|                         TRANSFER_CARD.DAT                             |
+#|                                                                       |
+#|     Author: Annik Olbrechts (VUB)                                     |
+#|             02 October 2015                                           |
+#+-----------------------------------------------------------------------+
+#|     This file is generated automaticly by MADWEIGHT                   |
+#|     card generation version: 1.0.0                                    |
+#+-----------------------------------------------------------------------+
+#|                                                                       |
+#|    To change the transfer function run ./bin/change_tf.py             |
+#|    Current parametrization : DblGaus_E                                |
+#|    Contains full double Gaussian for all kinematics and particles     |
+#|    ** Information for all eta-bins **                                 |
+#+-----------------------------------------------------------------------+
+#+--------------------------------------------------------------------------------------+
+#|     Parameter for particles: bjet
+#|      --> Used formula: Double Gaussian fit with parameters depending on momentum
+#|      --> Dependency defined as: A + B*sqrt(E) + C*E  for width of gaussians 
+#|      -->                        A + B*E + C*E² + D*E³ + F*sqrt(E)
+#+--------------------------------------------------------------------------------------+
+BLOCK TF_bjet_E
+1     -16.0286     # Mean first gaussian
+2     3.04488     # Mean first gaussian
+3     -0.106327     # Mean first gaussian
+4     -2.63176     # Width first gaussian
+5     0.972631     # Width first gaussian
+6     0.0857126     # Width first gaussian
+7     0.403541     # Relative constant gaussians
+8     -0.083157     # Relative constant gaussians
+9     0.00468019     # Relative constant gaussians
+10     -2789.56     # Mean second gaussian
+11     549.465     # Mean second gaussian
+12     -23.1626     # Mean second gaussian
+13     -246.651     # Width second gaussian
+14     90.4649     # Width second gaussian
+15     -4.2166     # Width second gaussian
+ 
+#+--------------------------------------------------------------------------------------+
+#|     Parameter for particles: nonbjet
+#|      --> Used formula: Double Gaussian fit with parameters depending on momentum
+#|      --> Dependency defined as: A + B*sqrt(E) + C*E  for width of gaussians 
+#|      -->                        A + B*E + C*E² + D*E³ + F*sqrt(E)
+#+--------------------------------------------------------------------------------------+
+BLOCK TF_nonbjet_E
+1     -26.7334     # Mean first gaussian
+2     5.93974     # Mean first gaussian
+3     -0.332153     # Mean first gaussian
+4     -6.79639     # Width first gaussian
+5     2.07785     # Width first gaussian
+6     -0.00501213     # Width first gaussian
+7     1.1731     # Relative constant gaussians
+8     -0.229053     # Relative constant gaussians
+9     0.0122351     # Relative constant gaussians
+10     215.828     # Mean second gaussian
+11     -60.1227     # Mean second gaussian
+12     3.40537     # Mean second gaussian
+13     -429.814     # Width second gaussian
+14     98.3272     # Width second gaussian
+15     -4.78171     # Width second gaussian
+ 

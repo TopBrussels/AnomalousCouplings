@@ -10,7 +10,7 @@
 ##    Author: Annik Olbrechts (VUB)                                      ##
 ##   			                                            ##
 ##    Version:     1.0.0                         		            ##
-##    Last change: 02/02/15			                            ##
+##    Last change: 27/11/14			                            ##
 ##					                                    ##
 ###########################################################################
 ###########################################################################
@@ -75,50 +75,50 @@
   #width type should be thin or large (thin is for energy accurate up to 5-10%)
   <variable name='E'>
     <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
-        IF( p(0) .LE. 35.5556) THEN 
-          prov1=-0.612779
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*p(0)**4)
+        IF( p(0) .LE. 46.6667) THEN 
+          prov1=0.723354
         ENDIF 
 
         IF( p(0) .GE. 235.556) THEN 
-          prov1 = -2.47477
-        ENDIF 
+          prov1 = -0.719046
+       ENDIF 
 
         prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
-        IF( p(0) .LE. 35.5556) THEN 
-          prov2=5.86346
+        IF( p(0) .LE. 46.6667) THEN 
+          prov2=7.45523
         ENDIF 
 
         IF( p(0) .GE. 235.556) THEN 
-          prov2 = 22.1687
-        ENDIF 
+          prov2 = 18.1598
+       ENDIF 
 
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
-        IF( p(0) .LE. 57.7778) THEN 
-          prov3=0.134102
-        ENDIF 
-
-        IF( p(0) .GE. 235.556) THEN 
-          prov3 = 0.318926
-        ENDIF 
-
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
-        IF( p(0) .LE. 57.7778) THEN 
-          prov4=84.4411
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*p(0)**4)
+        IF( p(0) .LE. 46.6667) THEN 
+          prov3=0.124422
         ENDIF 
 
         IF( p(0) .GE. 235.556) THEN 
-          prov4 = 82.3582
+          prov3 = 0.67119
+       ENDIF 
+
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*p(0)**4)
+        IF( p(0) .LE. 68.8889) THEN 
+          prov4=132.869
         ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov4 = 71.4781
+       ENDIF 
 
         prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
-        IF( p(0) .LE. 57.7778) THEN 
-          prov5=57.8199
+        IF( p(0) .LE. 68.8889) THEN 
+          prov5=91.3919
         ENDIF 
 
         IF( p(0) .GE. 235.556) THEN 
-          prov5 = 76.0074
-        ENDIF 
+          prov5 = 76.1959
+       ENDIF 
 
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
@@ -143,50 +143,50 @@
   #width type should be thin or large (thin is for energy accurate up to 5-10%)
   <variable name='E'>
     <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
-        IF( p(0) .LE. 33.8) THEN 
-          prov1=16.7986
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*p(0)**4)
+        IF( p(0) .LE. 41.4) THEN 
+          prov1=32.5346
         ENDIF 
 
-        IF( p(0) .GE. 223.8) THEN 
-          prov1 = 37.0324
-        ENDIF 
+        IF( p(0) .GE. 182) THEN 
+          prov1 = 46.7984
+       ENDIF 
 
         prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
+        IF( p(0) .LE. 41.4) THEN 
+          prov2=-14.0403
+        ENDIF 
+
+        IF( p(0) .GE. 182) THEN 
+          prov2 = -34.0929
+       ENDIF 
+
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*p(0)**4)
+        IF( p(0) .LE. 41.4) THEN 
+          prov3=1.99147
+        ENDIF 
+
+        IF( p(0) .GE. 182) THEN 
+          prov3 = 1.12398
+       ENDIF 
+
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*p(0)**4)
         IF( p(0) .LE. 33.8) THEN 
-          prov2=6.65713
+          prov4=-0.269237
         ENDIF 
 
-        IF( p(0) .GE. 223.8) THEN 
-          prov2 = 35.3889
-        ENDIF 
-
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
-        IF( p(0) .LE. 33.8) THEN 
-          prov3=0.999106
-        ENDIF 
-
-        IF( p(0) .GE. 223.8) THEN 
-          prov3 = 0.860786
-        ENDIF 
-
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
-        IF( p(0) .LE. 33.8) THEN 
-          prov4=-0.218691
-        ENDIF 
-
-        IF( p(0) .GE. 223.8) THEN 
-          prov4 = 0.411209
-        ENDIF 
+        IF( p(0) .GE. 182) THEN 
+          prov4 = 0.353716
+       ENDIF 
 
         prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
         IF( p(0) .LE. 33.8) THEN 
-          prov5=0.774809
+          prov5=0.736461
         ENDIF 
 
-        IF( p(0) .GE. 223.8) THEN 
-          prov5 = 2.82475
-        ENDIF 
+        IF( p(0) .GE. 182) THEN 
+          prov5 = 2.31736
+       ENDIF 
 
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
@@ -211,50 +211,50 @@
   #width type should be thin or large (thin is for energy accurate up to 5-10%)
   <variable name='E'>
     <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*p(0)**4)
         IF( p(0) .LE. 33.4375) THEN 
-          prov1=-3.37313
+          prov1=-3.97771
         ENDIF 
 
         IF( p(0) .GE. 151.562) THEN 
-          prov1 = -2.65096
-        ENDIF 
+          prov1 = -2.75746
+       ENDIF 
 
         prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
         IF( p(0) .LE. 33.4375) THEN 
-          prov2=5.1595
+          prov2=-5.40026
         ENDIF 
 
         IF( p(0) .GE. 151.562) THEN 
-          prov2 = 18.1411
-        ENDIF 
+          prov2 = -18.3852
+       ENDIF 
 
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*p(0)**4)
         IF( p(0) .LE. 33.4375) THEN 
-          prov3=0.330858
+          prov3=0.218029
         ENDIF 
 
         IF( p(0) .GE. 151.562) THEN 
-          prov3 = 0.166345
-        ENDIF 
+          prov3 = 0.139683
+       ENDIF 
 
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*p(0)**4)
         IF( p(0) .LE. 46.0938) THEN 
-          prov4=-34.3731
+          prov4=-42.3556
         ENDIF 
 
-        IF( p(0) .GE. 164.219) THEN 
-          prov4 = -0.0417661
-        ENDIF 
+        IF( p(0) .GE. 151.562) THEN 
+          prov4 = 1.59918
+       ENDIF 
 
         prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
         IF( p(0) .LE. 46.0938) THEN 
-          prov5=17.4336
+          prov5=-20.9231
         ENDIF 
 
-        IF( p(0) .GE. 164.219) THEN 
-          prov5 = 45.2179
-        ENDIF 
+        IF( p(0) .GE. 151.562) THEN 
+          prov5 = -67.0021
+       ENDIF 
 
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
@@ -279,50 +279,50 @@
   #width type should be thin or large (thin is for energy accurate up to 5-10%)
   <variable name='E'>
     <tf>
-        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
-        IF( p(0) .LE. 33.4375) THEN 
-          prov1=-3.37062
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*p(0)**4)
+        IF( p(0) .LE. 25) THEN 
+          prov1=23.4592
         ENDIF 
 
-        IF( p(0) .GE. 164.219) THEN 
-          prov1 = -4.50341
-        ENDIF 
+        IF( p(0) .GE. 165) THEN 
+          prov1 = 48.982
+       ENDIF 
 
         prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
-        IF( p(0) .LE. 33.4375) THEN 
-          prov2=5.16118
+        IF( p(0) .LE. 25) THEN 
+          prov2=-1.10451
         ENDIF 
 
-        IF( p(0) .GE. 164.219) THEN 
-          prov2 = 19.1976
+        IF( p(0) .GE. 165) THEN 
+          prov2 = -15.2469
+       ENDIF 
+
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*p(0)**4)
+        IF( p(0) .LE. 25) THEN 
+          prov3=2.23782
         ENDIF 
 
-        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
-        IF( p(0) .LE. 33.4375) THEN 
-          prov3=0.331463
+        IF( p(0) .GE. 165) THEN 
+          prov3 = 0.206801
+       ENDIF 
+
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*p(0)**4)
+        IF( p(0) .LE. 25) THEN 
+          prov4=0.0141653
         ENDIF 
 
-        IF( p(0) .GE. 164.219) THEN 
-          prov3 = 0.205041
-        ENDIF 
-
-        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
-        IF( p(0) .LE. 54.5312) THEN 
-          prov4=-43.1915
-        ENDIF 
-
-        IF( p(0) .GE. 164.219) THEN 
-          prov4 = 0.16805
-        ENDIF 
+        IF( p(0) .GE. 165) THEN 
+          prov4 = 1.92678
+       ENDIF 
 
         prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
-        IF( p(0) .LE. 54.5312) THEN 
-          prov5=32.3167
+        IF( p(0) .LE. 25) THEN 
+          prov5=0.32752
         ENDIF 
 
-        IF( p(0) .GE. 164.219) THEN 
-          prov5 = 43.5182
-        ENDIF 
+        IF( p(0) .GE. 165) THEN 
+          prov5 = 4.02352
+       ENDIF 
 
 
         tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian

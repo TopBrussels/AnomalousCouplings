@@ -1,0 +1,1064 @@
+<file>## ##################################################################
+##                                          ##
+##                          Matrix Element                               ##
+##                          ==============                               ##
+##                                                                       ##
+##		    Generate the transfer functions                         ##
+##	             -------------------------------                        ##
+## 	     			                                            ##
+##				                                            ##
+##    Author: Annik Olbrechts (VUB)                                      ##
+##   			                                            ##
+##    Version:     1.0.0                         		            ##
+##    Last change: 02/02/15			                            ##
+##					                                    ##
+###########################################################################
+###########################################################################
+##				                                            ##
+##    Instructions:			                                    ##
+##								            ##
+##	- This program  creates transfer functions in THETA/PHI/E           ##
+##	- Those functions must be defined in f77 standard                   ##
+##	- In addition to each transfer function(START_TF), you MUST give    ##
+##	   the typical width associated to your function (START_WIDTH)	    ##
+##      - If a transfer functions is not defined here it will by default ##
+##          - equals to one for neutrino/neutralino                      ##
+##          - a delta functions for the rest                             ##
+###########################################################################
+##                                                                       ##
+##   Syntax/variables:                                                   ## 
+##                                                                       ##
+##  - a definition for transfer functions should define the variable tf  ##
+##    while a definition for the width shoud define the variable width   ## 
+##	- You can use all standard f77 functions. (All variables are	    ##
+##		in double precision format). 	                            ##
+##	- The experimental event is  defined by the variable pexp(i)        ##
+##		i=0->3 (0->E,1->Px,2->Py,3->Pz)	                            ##
+##	- The partonic event is defined by the variable p(i)   	            ##
+##		i=0->3 (0->E,1->Px,2->Py,3->Pz)			            ##
+##		sigma can not depend on those variables		            ##
+##	- You can use 10 local variables			            ##
+##		(double precision):  prov1,prov2,...,prov10	            ##
+##	- You can call specific functions on p or pexp:	                    ##
+##		-pt(p)   : transverse momenta 			            ##
+##		-eta(p)  : pseudo-rapidity			            ##
+##		-rap(p)  : rapidity					    ##
+##		-theta(p): polar angle				            ##
+##		-phi(p)	 : azimuthal angle		  	     	    ##
+##	- The whole LHCO information is available.                          ##
+##              -run_number,trigger                       	 	    ##
+##		-eta_init(N),phi_init(N),pt_init(N)                         ##
+##              -j_mass(N),ntrk(N),btag(N),had_em(N)     	            ##
+##		-dummy1(N),dummy2(N)		                            ##
+##	    N is the LHCO tag(first column)	                            ##
+##		- current tag is n_lhco  				    ##
+##		- tag for missing ET is met_lhco			    ##
+##				  					    ##
+##	- You can incorporate parameters that will be passed through        ##
+##	        the transfert_card.dat. Those ones must have the            ##
+##		following syntax: #1,#2,#3,.. You can restart 		    ##
+##		the assignement for each different transfer function	    ##
+##	- In addition to each transfer function(tf_), you MUST give	    ##
+##		the typical width associated to your function (sigma_)	    ##
+##		This is needed for the phase space generator      	    ##
+##									    ##
+###########################################################################
+###########################################################################
+
+##**********************************************************************##
+##             TF for bjet                                      
+##**********************************************************************##
+<block name='bjet'>   #name can be anything
+  <info> double gaussian with parameter depending on the energy </info>
+  <particles> b </particles>
+  <width_type> thin </width_type>
+  #width type should be thin or large (thin is for energy accurate up to 5-10%)
+  <variable name='E'>
+    <tf>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
+        IF( p(0) .LE. 35.5556) THEN 
+          prov1=-0.658269
+        ENDIF 
+
+        IF( p(0) .GE. 163.333) THEN 
+          prov1 = -0.885147
+        ENDIF 
+
+        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
+        IF( p(0) .LE. 35.5556) THEN 
+          prov2=5.59434
+        ENDIF 
+
+        IF( p(0) .GE. 163.333) THEN 
+          prov2 = 13.1006
+        ENDIF 
+
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
+        IF( p(0) .LE. 35.5556) THEN 
+          prov3=0.263997
+        ENDIF 
+
+        IF( p(0) .GE. 163.333) THEN 
+          prov3 = 0.409588
+        ENDIF 
+
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
+        IF( p(0) .LE. 57.7778) THEN 
+          prov4=74.9003
+        ENDIF 
+
+        IF( p(0) .GE. 163.333) THEN 
+          prov4 = 88.7403
+        ENDIF 
+
+        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
+        IF( p(0) .LE. 57.7778) THEN 
+          prov5=42.6518
+        ENDIF 
+
+        IF( p(0) .GE. 163.333) THEN 
+          prov5 = 66.8361
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov1=(#22+#23*p(0)+#24*p(0)**2+#25*p(0)**3+#26*dsqrt(p(0)))
+        IF( p(0) .LE. 35.5556) THEN 
+          prov1=-2.57683
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov1 = -3.1616
+        ENDIF 
+
+        prov2=(#27+#28*dsqrt(p(0))+#29*p(0))
+        IF( p(0) .LE. 35.5556) THEN 
+          prov2=5.40482
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov2 = 15.9495
+        ENDIF 
+
+        prov3=(#30+#31*p(0)+#32*p(0)**2+#33*p(0)**3+#34*dsqrt(p(0)))
+        IF( p(0) .LE. 35.5556) THEN 
+          prov3=0.167133
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov3 = 0.419932
+        ENDIF 
+
+        prov4=(#35+#36*p(0)+#37*p(0)**2+#38*p(0)**3+#39*dsqrt(p(0)))
+        IF( p(0) .LE. 57.7778) THEN 
+          prov4=87.2978
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov4 = 111.423
+        ENDIF 
+
+        prov5=(#40+#41*dsqrt(p(0))+#42*p(0))
+        IF( p(0) .LE. 57.7778) THEN 
+          prov5=-50.0338
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov5 = -75.9238
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov1=(#43+#44*p(0)+#45*p(0)**2+#46*p(0)**3+#47*dsqrt(p(0)))
+        IF( p(0) .LE. 46.6667) THEN 
+          prov1=-2.95533
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov1 = 1.49496
+        ENDIF 
+
+        prov2=(#48+#49*dsqrt(p(0))+#50*p(0))
+        IF( p(0) .LE. 46.6667) THEN 
+          prov2=6.4942
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov2 = 19.7043
+        ENDIF 
+
+        prov3=(#51+#52*p(0)+#53*p(0)**2+#54*p(0)**3+#55*dsqrt(p(0)))
+        IF( p(0) .LE. 46.6667) THEN 
+          prov3=0.435588
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov3 = 0.488682
+        ENDIF 
+
+        prov4=(#56+#57*p(0)+#58*p(0)**2+#59*p(0)**3+#60*dsqrt(p(0)))
+        IF( p(0) .LE. 68.8889) THEN 
+          prov4=-156.763
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov4 = 36.1486
+        ENDIF 
+
+        prov5=(#61+#62*dsqrt(p(0))+#63*p(0))
+        IF( p(0) .LE. 68.8889) THEN 
+          prov5=106.624
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov5 = 77.9651
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov1=(#64+#65*p(0)+#66*p(0)**2+#67*p(0)**3+#68*dsqrt(p(0)))
+        IF( p(0) .LE. 91.1111) THEN 
+          prov1=-1.27788
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov1 = 6.31925
+        ENDIF 
+
+        prov2=(#69+#70*dsqrt(p(0))+#71*p(0))
+        IF( p(0) .LE. 91.1111) THEN 
+          prov2=13.9001
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov2 = 34.8513
+        ENDIF 
+
+        prov3=(#72+#73*p(0)+#74*p(0)**2+#75*p(0)**3+#76*dsqrt(p(0)))
+        IF( p(0) .LE. 91.1111) THEN 
+          prov3=0.252372
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov3 = 0.181651
+        ENDIF 
+
+        prov4=(#77+#78*p(0)+#79*p(0)**2+#80*p(0)**3+#81*dsqrt(p(0)))
+        IF( p(0) .LE. 91.1111) THEN 
+          prov4=-31.3788
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov4 = 69.0022
+        ENDIF 
+
+        prov5=(#82+#83*dsqrt(p(0))+#84*p(0))
+        IF( p(0) .LE. 91.1111) THEN 
+          prov5=25.4954
+        ENDIF 
+
+        IF( p(0) .GE. 235.556) THEN 
+          prov5 = 20.0772
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+    </tf> 
+    <width>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
+        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov2=(#27+#28*dsqrt(pexp(0))+#29*pexp(0))
+        prov5=(#40+#41*dsqrt(pexp(0))+#42*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov2=(#48+#49*dsqrt(pexp(0))+#50*pexp(0))
+        prov5=(#61+#62*dsqrt(pexp(0))+#63*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov2=(#69+#70*dsqrt(pexp(0))+#71*pexp(0))
+        prov5=(#82+#83*dsqrt(pexp(0))+#84*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+    </width> 
+  </variable>
+</block>
+##**********************************************************************##
+##             TF for electron                                      
+##**********************************************************************##
+<block name='electron'>   #name can be anything
+  <info> double gaussian with parameter depending on the energy </info>
+  <particles> el </particles>
+  <width_type> thin </width_type>
+  #width type should be thin or large (thin is for energy accurate up to 5-10%)
+  <variable name='E'>
+    <tf>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov1=15.6745
+        ENDIF 
+
+        IF( p(0) .GE. 144) THEN 
+          prov1 = 16.4318
+        ENDIF 
+
+        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
+        IF( p(0) .LE. 33.8) THEN 
+          prov2=-5.17424
+        ENDIF 
+
+        IF( p(0) .GE. 144) THEN 
+          prov2 = 1.16975
+        ENDIF 
+
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov3=0.741054
+        ENDIF 
+
+        IF( p(0) .GE. 144) THEN 
+          prov3 = 0.314815
+        ENDIF 
+
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov4=-0.230104
+        ENDIF 
+
+        IF( p(0) .GE. 144) THEN 
+          prov4 = 0.385264
+        ENDIF 
+
+        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
+        IF( p(0) .LE. 33.8) THEN 
+          prov5=-0.664595
+        ENDIF 
+
+        IF( p(0) .GE. 144) THEN 
+          prov5 = -1.48846
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov1=(#22+#23*p(0)+#24*p(0)**2+#25*p(0)**3+#26*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov1=-2.04323
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov1 = 1.2112
+        ENDIF 
+
+        prov2=(#27+#28*dsqrt(p(0))+#29*p(0))
+        IF( p(0) .LE. 33.8) THEN 
+          prov2=-0.0067783
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov2 = -0.00931496
+        ENDIF 
+
+        prov3=(#30+#31*p(0)+#32*p(0)**2+#33*p(0)**3+#34*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov3=0.00102931
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov3 = 0.000437312
+        ENDIF 
+
+        prov4=(#35+#36*p(0)+#37*p(0)**2+#38*p(0)**3+#39*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov4=-0.143238
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov4 = 1.60648
+        ENDIF 
+
+        prov5=(#40+#41*dsqrt(p(0))+#42*p(0))
+        IF( p(0) .LE. 33.8) THEN 
+          prov5=0.850889
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov5 = 2.59632
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov1=(#43+#44*p(0)+#45*p(0)**2+#46*p(0)**3+#47*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov1=14.2929
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov1 = 44.5651
+        ENDIF 
+
+        prov2=(#48+#49*dsqrt(p(0))+#50*p(0))
+        IF( p(0) .LE. 33.8) THEN 
+          prov2=-20
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov2 = -33.8654
+        ENDIF 
+
+        prov3=(#51+#52*p(0)+#53*p(0)**2+#54*p(0)**3+#55*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov3=3.09808e-08
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov3 = 0.562237
+        ENDIF 
+
+        prov4=(#56+#57*p(0)+#58*p(0)**2+#59*p(0)**3+#60*dsqrt(p(0)))
+        IF( p(0) .LE. 33.8) THEN 
+          prov4=-0.323144
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov4 = -0.108246
+        ENDIF 
+
+        prov5=(#61+#62*dsqrt(p(0))+#63*p(0))
+        IF( p(0) .LE. 33.8) THEN 
+          prov5=0.434162
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov5 = -2.64316
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov1=(#64+#65*p(0)+#66*p(0)**2+#67*p(0)**3+#68*dsqrt(p(0)))
+        IF( p(0) .LE. 79.4) THEN 
+          prov1=-9.5125
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov1 = -58.668
+        ENDIF 
+
+        prov2=(#69+#70*dsqrt(p(0))+#71*p(0))
+        IF( p(0) .LE. 79.4) THEN 
+          prov2=-0.00120507
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov2 = -0.126769
+        ENDIF 
+
+        prov3=(#72+#73*p(0)+#74*p(0)**2+#75*p(0)**3+#76*dsqrt(p(0)))
+        IF( p(0) .LE. 79.4) THEN 
+          prov3=0.019103
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov3 = 0.00593443
+        ENDIF 
+
+        prov4=(#77+#78*p(0)+#79*p(0)**2+#80*p(0)**3+#81*dsqrt(p(0)))
+        IF( p(0) .LE. 79.4) THEN 
+          prov4=-0.0010332
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov4 = -3.35214
+        ENDIF 
+
+        prov5=(#82+#83*dsqrt(p(0))+#84*p(0))
+        IF( p(0) .LE. 79.4) THEN 
+          prov5=0.628322
+        ENDIF 
+
+        IF( p(0) .GE. 223.8) THEN 
+          prov5 = 6.1356
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+    </tf> 
+    <width>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
+        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov2=(#27+#28*dsqrt(pexp(0))+#29*pexp(0))
+        prov5=(#40+#41*dsqrt(pexp(0))+#42*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov2=(#48+#49*dsqrt(pexp(0))+#50*pexp(0))
+        prov5=(#61+#62*dsqrt(pexp(0))+#63*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov2=(#69+#70*dsqrt(pexp(0))+#71*pexp(0))
+        prov5=(#82+#83*dsqrt(pexp(0))+#84*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+    </width> 
+  </variable>
+</block>
+##**********************************************************************##
+##             TF for nonbjet                                      
+##**********************************************************************##
+<block name='nonbjet'>   #name can be anything
+  <info> double gaussian with parameter depending on the energy </info>
+  <particles> u,d,s,c,g </particles>
+  <width_type> thin </width_type>
+  #width type should be thin or large (thin is for energy accurate up to 5-10%)
+  <variable name='E'>
+    <tf>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
+        IF( p(0) .LE. 33.4375) THEN 
+          prov1=-2.673
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov1 = -4.36697
+        ENDIF 
+
+        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
+        IF( p(0) .LE. 33.4375) THEN 
+          prov2=-5.3233
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov2 = -14.8163
+        ENDIF 
+
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
+        IF( p(0) .LE. 33.4375) THEN 
+          prov3=0.182876
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov3 = 0.0713764
+        ENDIF 
+
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
+        IF( p(0) .LE. 46.0938) THEN 
+          prov4=-53.5167
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov4 = -48.0189
+        ENDIF 
+
+        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
+        IF( p(0) .LE. 46.0938) THEN 
+          prov5=25.7294
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov5 = 107.032
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov1=(#22+#23*p(0)+#24*p(0)**2+#25*p(0)**3+#26*dsqrt(p(0)))
+        IF( p(0) .LE. 33.4375) THEN 
+          prov1=-4.15707
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov1 = -3.79181
+        ENDIF 
+
+        prov2=(#27+#28*dsqrt(p(0))+#29*p(0))
+        IF( p(0) .LE. 33.4375) THEN 
+          prov2=5.06628
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov2 = 15.4889
+        ENDIF 
+
+        prov3=(#30+#31*p(0)+#32*p(0)**2+#33*p(0)**3+#34*dsqrt(p(0)))
+        IF( p(0) .LE. 33.4375) THEN 
+          prov3=0.326782
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov3 = 0.0737233
+        ENDIF 
+
+        prov4=(#35+#36*p(0)+#37*p(0)**2+#38*p(0)**3+#39*dsqrt(p(0)))
+        IF( p(0) .LE. 54.5312) THEN 
+          prov4=-60.818
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov4 = -9.16242
+        ENDIF 
+
+        prov5=(#40+#41*dsqrt(p(0))+#42*p(0))
+        IF( p(0) .LE. 54.5312) THEN 
+          prov5=-44.0894
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov5 = -99.0242
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov1=(#43+#44*p(0)+#45*p(0)**2+#46*p(0)**3+#47*dsqrt(p(0)))
+        IF( p(0) .LE. 41.875) THEN 
+          prov1=-6.08276
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov1 = -3.31744
+        ENDIF 
+
+        prov2=(#48+#49*dsqrt(p(0))+#50*p(0))
+        IF( p(0) .LE. 41.875) THEN 
+          prov2=5.96764
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov2 = 19.9292
+        ENDIF 
+
+        prov3=(#51+#52*p(0)+#53*p(0)**2+#54*p(0)**3+#55*dsqrt(p(0)))
+        IF( p(0) .LE. 41.875) THEN 
+          prov3=0.381643
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov3 = 0.384105
+        ENDIF 
+
+        prov4=(#56+#57*p(0)+#58*p(0)**2+#59*p(0)**3+#60*dsqrt(p(0)))
+        IF( p(0) .LE. 54.5312) THEN 
+          prov4=-22.2928
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov4 = -0.232166
+        ENDIF 
+
+        prov5=(#61+#62*dsqrt(p(0))+#63*p(0))
+        IF( p(0) .LE. 54.5312) THEN 
+          prov5=12.4776
+        ENDIF 
+
+        IF( p(0) .GE. 151.562) THEN 
+          prov5 = 37.3247
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov1=(#64+#65*p(0)+#66*p(0)**2+#67*p(0)**3+#68*dsqrt(p(0)))
+        IF( p(0) .LE. 75.625) THEN 
+          prov1=-8.67378
+        ENDIF 
+
+        IF( p(0) .GE. 164.219) THEN 
+          prov1 = 12.3371
+        ENDIF 
+
+        prov2=(#69+#70*dsqrt(p(0))+#71*p(0))
+        IF( p(0) .LE. 75.625) THEN 
+          prov2=11.1165
+        ENDIF 
+
+        IF( p(0) .GE. 164.219) THEN 
+          prov2 = 18.446
+        ENDIF 
+
+        prov3=(#72+#73*p(0)+#74*p(0)**2+#75*p(0)**3+#76*dsqrt(p(0)))
+        IF( p(0) .LE. 75.625) THEN 
+          prov3=0.309125
+        ENDIF 
+
+        IF( p(0) .GE. 164.219) THEN 
+          prov3 = 0.829803
+        ENDIF 
+
+        prov4=(#77+#78*p(0)+#79*p(0)**2+#80*p(0)**3+#81*dsqrt(p(0)))
+        IF( p(0) .LE. 75.625) THEN 
+          prov4=-22.7976
+        ENDIF 
+
+        IF( p(0) .GE. 164.219) THEN 
+          prov4 = -14.1474
+        ENDIF 
+
+        prov5=(#82+#83*dsqrt(p(0))+#84*p(0))
+        IF( p(0) .LE. 75.625) THEN 
+          prov5=3.5959
+        ENDIF 
+
+        IF( p(0) .GE. 164.219) THEN 
+          prov5 = 13.0671
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+    </tf> 
+    <width>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
+        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov2=(#27+#28*dsqrt(pexp(0))+#29*pexp(0))
+        prov5=(#40+#41*dsqrt(pexp(0))+#42*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov2=(#48+#49*dsqrt(pexp(0))+#50*pexp(0))
+        prov5=(#61+#62*dsqrt(pexp(0))+#63*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov2=(#69+#70*dsqrt(pexp(0))+#71*pexp(0))
+        prov5=(#82+#83*dsqrt(pexp(0))+#84*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+    </width> 
+  </variable>
+</block>
+##**********************************************************************##
+##             TF for muon                                      
+##**********************************************************************##
+<block name='muon'>   #name can be anything
+  <info> double gaussian with parameter depending on the energy </info>
+  <particles> mu </particles>
+  <width_type> thin </width_type>
+  #width type should be thin or large (thin is for energy accurate up to 5-10%)
+  <variable name='E'>
+    <tf>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov1=(#1+#2*p(0)+#3*p(0)**2+#4*p(0)**3+#5*dsqrt(p(0)))
+        IF( p(0) .LE. 25) THEN 
+          prov1=15.6054
+        ENDIF 
+
+        IF( p(0) .GE. 100) THEN 
+          prov1 = 35.752
+        ENDIF 
+
+        prov2=(#6+#7*dsqrt(p(0))+#8*p(0))
+        IF( p(0) .LE. 25) THEN 
+          prov2=6.4922
+        ENDIF 
+
+        IF( p(0) .GE. 100) THEN 
+          prov2 = 14.4353
+        ENDIF 
+
+        prov3=(#9+#10*p(0)+#11*p(0)**2+#12*p(0)**3+#13*dsqrt(p(0)))
+        IF( p(0) .LE. 25) THEN 
+          prov3=0.998072
+        ENDIF 
+
+        IF( p(0) .GE. 100) THEN 
+          prov3 = 0.407171
+        ENDIF 
+
+        prov4=(#14+#15*p(0)+#16*p(0)**2+#17*p(0)**3+#18*dsqrt(p(0)))
+        IF( p(0) .LE. 25) THEN 
+          prov4=0.0102601
+        ENDIF 
+
+        IF( p(0) .GE. 100) THEN 
+          prov4 = 0.727868
+        ENDIF 
+
+        prov5=(#19+#20*dsqrt(p(0))+#21*p(0))
+        IF( p(0) .LE. 25) THEN 
+          prov5=0.295419
+        ENDIF 
+
+        IF( p(0) .GE. 100) THEN 
+          prov5 = 1.75549
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov1=(#22+#23*p(0)+#24*p(0)**2+#25*p(0)**3+#26*dsqrt(p(0)))
+        IF( p(0) .LE. 35) THEN 
+          prov1=22.4325
+        ENDIF 
+
+        IF( p(0) .GE. 130) THEN 
+          prov1 = 81.9244
+        ENDIF 
+
+        prov2=(#27+#28*dsqrt(p(0))+#29*p(0))
+        IF( p(0) .LE. 35) THEN 
+          prov2=9.53604
+        ENDIF 
+
+        IF( p(0) .GE. 130) THEN 
+          prov2 = 27.9422
+        ENDIF 
+
+        prov3=(#30+#31*p(0)+#32*p(0)**2+#33*p(0)**3+#34*dsqrt(p(0)))
+        IF( p(0) .LE. 35) THEN 
+          prov3=1.04271
+        ENDIF 
+
+        IF( p(0) .GE. 130) THEN 
+          prov3 = 0.699314
+        ENDIF 
+
+        prov4=(#35+#36*p(0)+#37*p(0)**2+#38*p(0)**3+#39*dsqrt(p(0)))
+        IF( p(0) .LE. 35) THEN 
+          prov4=0.064835
+        ENDIF 
+
+        IF( p(0) .GE. 130) THEN 
+          prov4 = 1.19231
+        ENDIF 
+
+        prov5=(#40+#41*dsqrt(p(0))+#42*p(0))
+        IF( p(0) .LE. 35) THEN 
+          prov5=0.437457
+        ENDIF 
+
+        IF( p(0) .GE. 130) THEN 
+          prov5 = 2.3298
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov1=(#43+#44*p(0)+#45*p(0)**2+#46*p(0)**3+#47*dsqrt(p(0)))
+        IF( p(0) .LE. 40) THEN 
+          prov1=27.0246
+        ENDIF 
+
+        IF( p(0) .GE. 165) THEN 
+          prov1 = 41.3068
+        ENDIF 
+
+        prov2=(#48+#49*dsqrt(p(0))+#50*p(0))
+        IF( p(0) .LE. 40) THEN 
+          prov2=10.8325
+        ENDIF 
+
+        IF( p(0) .GE. 165) THEN 
+          prov2 = 18.2282
+        ENDIF 
+
+        prov3=(#51+#52*p(0)+#53*p(0)**2+#54*p(0)**3+#55*dsqrt(p(0)))
+        IF( p(0) .LE. 40) THEN 
+          prov3=1.00003
+        ENDIF 
+
+        IF( p(0) .GE. 165) THEN 
+          prov3 = 0.351485
+        ENDIF 
+
+        prov4=(#56+#57*p(0)+#58*p(0)**2+#59*p(0)**3+#60*dsqrt(p(0)))
+        IF( p(0) .LE. 40) THEN 
+          prov4=0.0914085
+        ENDIF 
+
+        IF( p(0) .GE. 165) THEN 
+          prov4 = 1.42694
+        ENDIF 
+
+        prov5=(#61+#62*dsqrt(p(0))+#63*p(0))
+        IF( p(0) .LE. 40) THEN 
+          prov5=0.704138
+        ENDIF 
+
+        IF( p(0) .GE. 165) THEN 
+          prov5 = 3.63876
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov1=(#64+#65*p(0)+#66*p(0)**2+#67*p(0)**3+#68*dsqrt(p(0)))
+        IF( p(0) .LE. 70) THEN 
+          prov1=41.035
+        ENDIF 
+
+        IF( p(0) .GE. 150) THEN 
+          prov1 = 35.8232
+        ENDIF 
+
+        prov2=(#69+#70*dsqrt(p(0))+#71*p(0))
+        IF( p(0) .LE. 70) THEN 
+          prov2=13.8703
+        ENDIF 
+
+        IF( p(0) .GE. 150) THEN 
+          prov2 = 12.7506
+        ENDIF 
+
+        prov3=(#72+#73*p(0)+#74*p(0)**2+#75*p(0)**3+#76*dsqrt(p(0)))
+        IF( p(0) .LE. 70) THEN 
+          prov3=0.950619
+        ENDIF 
+
+        IF( p(0) .GE. 150) THEN 
+          prov3 = 0.414074
+        ENDIF 
+
+        prov4=(#77+#78*p(0)+#79*p(0)**2+#80*p(0)**3+#81*dsqrt(p(0)))
+        IF( p(0) .LE. 70) THEN 
+          prov4=0.303543
+        ENDIF 
+
+        IF( p(0) .GE. 150) THEN 
+          prov4 = 1.38704
+        ENDIF 
+
+        prov5=(#82+#83*dsqrt(p(0))+#84*p(0))
+        IF( p(0) .LE. 70) THEN 
+          prov5=1.51622
+        ENDIF 
+
+        IF( p(0) .GE. 150) THEN 
+          prov5 = 4.16799
+        ENDIF 
+
+
+        tf=(exp(-(p(0)-pexp(0)-prov1)**2/2d0/prov2**2))          !first gaussian
+        tf=tf+prov3*(exp(-(p(0)-pexp(0)-prov4)**2/2d0/prov5**2)) !second gaussian
+        tf=tf*((1d0/dsqrt(2d0*pi))/(dsqrt(prov2*prov2)+prov3*dsqrt(prov5*prov5)))            !normalisation
+      ENDIF 
+    </tf> 
+    <width>
+      IF( ABS(eta(pexp)) .LE. 0.375) THEN 
+        prov2=(#6+#7*dsqrt(pexp(0))+#8*pexp(0))
+        prov5=(#19+#20*dsqrt(pexp(0))+#21*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.375 .AND. ABS(eta(pexp)) .LE. 0.75) THEN 
+        prov2=(#27+#28*dsqrt(pexp(0))+#29*pexp(0))
+        prov5=(#40+#41*dsqrt(pexp(0))+#42*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 0.75 .AND. ABS(eta(pexp)) .LE. 1.45) THEN 
+        prov2=(#48+#49*dsqrt(pexp(0))+#50*pexp(0))
+        prov5=(#61+#62*dsqrt(pexp(0))+#63*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+ 
+      IF( ABS(eta(pexp)) .GT. 1.45 .AND. ABS(eta(pexp)) .LE. 2.5) THEN 
+        prov2=(#69+#70*dsqrt(pexp(0))+#71*pexp(0))
+        prov5=(#82+#83*dsqrt(pexp(0))+#84*pexp(0))
+ 
+        width = max(prov2, prov5) 
+      ENDIF 
+    </width> 
+  </variable>
+</block>
+</file>
