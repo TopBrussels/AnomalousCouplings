@@ -1039,7 +1039,7 @@ class PBSCluster(Cluster):
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,
-		   '-l walltime=05:00:00',
+		   '-l walltime=02:30:00',
                    '-V']
 
         if self.cluster_queue and self.cluster_queue != 'None':
