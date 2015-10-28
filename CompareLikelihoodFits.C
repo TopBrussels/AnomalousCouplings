@@ -4,7 +4,6 @@
 //               ./CompareLikelihoodFits                                                                                       //
 //-----------------------------------------------------------------------------------------------------------------------------//
 
-
 #include <iostream>
 #include "TCanvas.h"
 #include "TF1.h"
@@ -13,6 +12,7 @@
 #include "TAxis.h"
 #include <sstream>
 #include <iomanip>
+#include "TH1F.h"
 
 using namespace std;
 
@@ -102,16 +102,17 @@ int main(int argc, char *argv[]){
 
     //Legend to keep track of what is being compared:
     TLegend *leg = new TLegend(0.3,0.7,0.9,0.9);
-    std::string whichFit[2] = {"all points","best points"};
+    std::string whichFit[3] = {"summed hist","all points","best points"};
 
     //Color and line style
-    int lineStyle[2] = {2,1};
+    int lineStyle[3] = {9,2,1};
 
     //Now get the TF1's from this ROOT file:
-    TF1 *fit[(argc-1)*2];
-    for( int iFile = 0; iFile < (argc-1)*2; iFile++){
-      if(iFile % 2 == 0) fit[iFile] = (TF1*) file_ROOT[(int)(iFile/2)]->Get("FitSums/SummedFit_FirstFit_Acc");
-      else               fit[iFile] = (TF1*) file_ROOT[(int)(iFile/2)]->Get("FitSums/SummedFit_SecondFit_Acc");
+    TF1 *fit[(argc-1)*3];
+    for( int iFile = 0; iFile < (argc-1)*3; iFile++){
+      if(iFile % 3 == 0)           fit[iFile] = (TF1*) ((TH1F*)file_ROOT[(int)(iFile/3)]->Get("FitSums/SummedHist_Acc"))->GetFunction("polFit_Acc_SummedHist");
+      else if( (iFile-1) % 3 == 0) fit[iFile] = (TF1*) file_ROOT[(int)(iFile/3)]->Get("FitSums/SummedFit_FirstFit_Acc");
+      else                         fit[iFile] = (TF1*) file_ROOT[(int)(iFile/3)]->Get("FitSums/SummedFit_SecondFit_Acc");
 
       //Shift the fits down such that their minimum equals 0!
       fit[iFile]->SetParameter(0, (fit[iFile]->GetParameter(0)-fit[iFile]->GetMinimum()));
@@ -121,8 +122,8 @@ int main(int argc, char *argv[]){
       fit[iFile]->SetParameter(1, 2*fit[iFile]->GetParameter(1));
       fit[iFile]->SetParameter(2, 2*fit[iFile]->GetParameter(2));
     
-      fit[iFile]->SetLineColor((int)(iFile/2)+1);
-      fit[iFile]->SetLineStyle(lineStyle[iFile%2]);
+      fit[iFile]->SetLineColor((int)(iFile/3)+1);
+      fit[iFile]->SetLineStyle(lineStyle[iFile%3]);
       if(iFile ==0){        
         fit[iFile]->Draw(); //First histogram should be drawn without "same" option
         fit[iFile]->GetXaxis()->SetTitle("gR coefficient");
@@ -136,28 +137,34 @@ int main(int argc, char *argv[]){
       //Set the title of the legend entry!
       std::string extraInfoTitle = "";
       for(int iWeight = 0; iWeight < sizeof(whichWeightFile)/sizeof(whichWeightFile[0]); iWeight++){
-        if( weightInfo[(int)(iFile/2)] == whichWeightFile[iWeight] )
+        if( weightInfo[(int)(iFile/3)] == whichWeightFile[iWeight] )
           extraInfoTitle += weightTitle[iWeight];
       }
 
-      if( string(argv[(int)((iFile/2)+1)]).find("_CosTheta_") <= string(argv[(int)((iFile/2)+1)]).find(".root") ){
+      if( string(argv[(int)((iFile/3)+1)]).find("_CosTheta_") <= string(argv[(int)((iFile/3)+1)]).find(".root") ){
         extraInfoTitle += ", cos theta applied";
+        if(iFile % 3 == 0) CanvTitle += "_CosTheta";
       }
-      if( extraInfoTitle != "" && dirDiff[(int)(iFile/2)] != "") extraInfoTitle += ", ";
+      if( extraInfoTitle != "" && dirDiff[(int)(iFile/3)] != "") extraInfoTitle += ", ";
 
       //Now convert the fit information such that it can be stored in the legend!
       double fitSigma = fit[iFile]->GetX(fit[iFile]->GetMinimum()+0.5, fit[iFile]->GetMinimumX(), 0.2) - fit[iFile]->GetX(fit[iFile]->GetMinimum()+0.5, -0.2, fit[iFile]->GetMinimumX());
       std::ostringstream ssFitMin; ssFitMin << std::fixed << setprecision(5) << fit[iFile]->GetMinimumX(); std::string sFitMin = ssFitMin.str();
       std::ostringstream ssFitSig; ssFitSig << std::fixed << setprecision(5) << fitSigma; std::string sFitSigma = ssFitSig.str();
       std::string gRMin = sFitMin+" #pm "+sFitSigma;
-      leg->AddEntry(fit[iFile],("Fit on "+whichFit[iFile%2]+" ("+extraInfoTitle+""+dirDiff[(int)(iFile/2)]+") -- gR = "+gRMin).c_str(),"l");
+      leg->AddEntry(fit[iFile],("Fit on "+whichFit[iFile%3]+" ("+extraInfoTitle+""+dirDiff[(int)(iFile/3)]+") -- gR = "+gRMin).c_str(),"l");
 
     }
 
     fit[0]->SetMaximum(500);
     fit[0]->SetMinimum(-5);
+    if(argc == 2){
+      fit[0]->SetMaximum(25);
+      fit[0]->GetXaxis()->SetRangeUser(-0.10, 0.10);
+      fit[0]->SetMinimum(-1);
+    }
     leg->Draw();
-    if(argc == 2) CanvTitle += "_FirstVSSecondFit";
+    if(argc == 2) CanvTitle += "_FitTypes";
     canv->SaveAs((CanvTitle+".pdf").c_str());
   }
   else

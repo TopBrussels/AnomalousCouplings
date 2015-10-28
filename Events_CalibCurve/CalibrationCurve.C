@@ -87,6 +87,27 @@ int main(int argc, char *argv[]){
     Err_HistSum[iDir] = pol_Sum->GetX(pol_Sum->GetMinimum()+0.5, pol_Sum->GetMinimumX(), 0.4) - pol_Sum->GetX(pol_Sum->GetMinimum()+0.5, -0.4, pol_Sum->GetMinimumX());
     Err_FstFit[iDir] = pol_FstFit->GetX(pol_FstFit->GetMinimum()+0.5, pol_FstFit->GetMinimumX(), 0.4) - pol_FstFit->GetX(pol_FstFit->GetMinimum()+0.5, -0.4, pol_FstFit->GetMinimumX());
     Err_ScdFit[iDir] = pol_FstFit->GetX(pol_FstFit->GetMinimum()+0.5, pol_FstFit->GetMinimumX(), 0.4) - pol_FstFit->GetX(pol_FstFit->GetMinimum()+0.5, -0.4, pol_FstFit->GetMinimumX());
+
+    //Draw the chi-sq histogram for the desired parameter
+    if(ConsPars[iDir] == "SM"){
+      double yVal[13];
+      double xVal[13] = {-0.4, -0.3, -0.2, -0.15, -0.1, -0.05, 0.0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4};
+      int fillBin = 0;
+      for(int iBin = 0; iBin <= h_SummedWeights->GetNbinsX(); iBin++){        
+        if(h_SummedWeights->GetBinContent(iBin) != 0){ yVal[fillBin] = h_SummedWeights->GetBinContent(iBin)-pol_Sum->GetMinimum(); fillBin++;}
+      }
+      pol_Sum->SetParameter(0, (pol_Sum->GetParameter(1)*pol_Sum->GetParameter(1))/(4*pol_Sum->GetParameter(2)));
+      TGraph* gr_ChiSq = new TGraph(13, xVal, yVal);
+      TCanvas* canvChiSq = new TCanvas("canvChiSq","canvChiSq");
+      canvChiSq->cd();
+      gr_ChiSq->Draw("AP*");
+      pol_Sum->Draw("same");
+      gr_ChiSq->GetXaxis()->SetTitle("Re(g_{R}) coefficient");
+      gr_ChiSq->GetYaxis()->SetTitle("#chi^{2}");
+      gr_ChiSq->GetYaxis()->SetTitleOffset(1.2);
+      gr_ChiSq->SetTitle("");
+      canvChiSq->SaveAs("SMPlot.pdf");
+    }
   }
 
   //Now store everything into a TGraphError

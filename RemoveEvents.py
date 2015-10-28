@@ -57,10 +57,10 @@ print "\nNumber of configs is : ", NrConfigs
 print "Number of events is : ", NrEvts
 
 # ---------------------------------------------------------------------------#
-#  Step 2: Identify the different types of events which have to be removed  #
+#  Step 2: Identify the different types of events which have to be removed   #
 # ---------------------------------------------------------------------------#
 IncomplEventsToDelete, NrConfigsPerEvent, ZeroEventsToDelete, CutEventsToKeep = [], [], [], []
-for ii in range(NrEvts*3): NrConfigsPerEvent.append(0)
+for ii in range(NrEvts*3000): NrConfigsPerEvent.append(0)
 
 # Loop over all lines in original weights.out file, count the number of configs for each event and identify the zero and non-selected events
 weightFile = open(os.path.join(whichDir+'weights.out'),'r')
@@ -103,6 +103,36 @@ print "\n --> Number of events with incomplete weights : ", len(IncomplEventsToD
 print " --> Number of events with a weight equal to 0 : ", len(ZeroEventsToDelete)
 if applyExtraCuts:
   print " --> Number of events surviving the extra cuts : ", len(CutEventsToKeep)
+
+# In order to check the influence of the TF's, remove the events which have a jet/lepton in the endcap
+lhcoFile = open(os.path.join(whichDir+'TTbarSemiLepton_CorrectReco_Muon.lhco'))
+EtaBarrelJetsToKeep, EtaBarrelLeptonToKeep = [], []
+for lhcoLine in lhcoFile:
+  lhcoWord = lhcoLine.split()
+  if not str(lhcoWord[0]) == "#":
+    if len(lhcoWord) == 3:
+      if not int(lhcoWord[1]) == 1 and etaBarrelJetEvt:
+        EtaBarrelJetsToKeep.append(int(Event))
+      if not int(lhcoWord[1]) == 1 and etaBarrelLeptEvt:
+        EtaBarrelLeptonToKeep.append(int(Event))
+      # if not int(lhcoWord[1]) == 1 and etaEndCap[0] == etaEndCap[1] == etaEndCap[2] == etaEndCap[3] == 1:
+      #   EtaEndCapToKeep.append(int(Event))
+      Event = lhcoWord[1]
+      etaBarrelJetEvt, etaBarrelLeptEvt = True, True
+      # etaEndCap = [0,0,0,0]
+      # ECIndex = 0
+    if len(lhcoWord) == 11:
+      if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 4:
+        etaBarrelJetEvt = False
+      if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 2:
+        etaBarrelLeptEvt = False
+      # if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 4:
+      #   etaEndCap[ECIndex] = 1
+      #   ECIndex += 1
+lhcoFile.close()
+print " Number of events with no jet in the endcap : ", len(EtaBarrelJetsToKeep)
+print " Number of events with no lepton in the EC  : ", len(EtaBarrelLeptonToKeep)
+# print " Number of events with only jets in the endcap : ", len(EtaEndCapToKeep)
 
 # ------------------------------------------------------------------#
 #  Step 3: Save the cos theta weight from the MadAnalysis directory #
@@ -245,15 +275,40 @@ if len(CutEventsToKeep) != 0 and applyExtraCuts:
         DeletedEvtsFile_CosTh.write(checkedWord[0]+' '+checkedWord[1]+' '+checkedWord[2]+' '+checkedWord[3]+' '+checkedWord[4]+' ')
         if applyCosTheta:
           DeletedEvtsFile_CosTh.write(str(float(CosTheta[int(checkedWord[0])-1])*float(CosTh_Norm_CheckedEvts))+'\n')
+      if int(checkedWord[0]) in EtaEvtsToKeep:
+        EtaSelectedFile.write(checkedLine)
     else:
       NoCutsEvtsFile.write(checkedLine)
       NoCutsEvtsFile_CosTh.write(checkedLine)
       DeletedEvtsFile.write(checkedLine)
       DeletedEvtsFile_CosTh.write(checkedLine)
+      EtaSelectedFile.write(checkedLine)
   print "Done, closing all files ! "
   NoCutsEvtsFile.close(), NoCutsEvtsFile_CosTh.close()
   DeletedEvtsFile.close(), DeletedEvtsFile_CosTh.close()
+  EtaSelectedFile.close()
   if not applyCosTheta:
     os.system('mv '+NoCutsEvtsFile_CosTh.name+' '+whichDir+'test_Keep.out')
     os.system('mv '+DeletedEvtsFile_CosTh.name+' '+whichDir+'test_Delete.out')
+
+# Step 5a: Remove the events with at least one jet in the endcap:
+doEtaSplit = False
+if len(EtaBarrelJetsToKeep) != 0 and len(EtaBarrelLeptonToKeep) != 0 and doEtaSplit == True:
+  print "Looking at file : ", allCheckedWeightFile.name
+  BarrelJetFile = open(os.path.join(whichDir+'weights_NoEndCapJets.out'), 'w')
+  BarrelLeptonFile = open(os.path.join(whichDir+'weights_NoEndCapLepton.out'), 'w')
+  for etaLine in allCheckedWeightFile:
+    etaWord = etaLine.split()
+    # Only interested in files starting with a number
+    if str(etaWord[0]) != "#":
+      if int(etaWord[0]) in EtaBarrelJetsToKeep:
+        BarrelJetFile.write(etaLine)
+      if int(etaWord[0]) in EtaBarrelLeptonToKeep:
+        BarrelLeptonFile.write(etaLine)
+    else:
+      BarrelJetFile.write(etaLine)
+      BarrelLeptonFile.write(etaLine)
+  print "Done, closing all files ! "
+  BarrelJetFile.close()
+
 allCheckedWeightFile.close()
