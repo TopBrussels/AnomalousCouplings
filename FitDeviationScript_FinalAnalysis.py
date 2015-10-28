@@ -21,6 +21,8 @@ import re
 import shutil
 from array import array
 
+LikCut = 62
+
 # Get all the input from the command line:
 if len(sys.argv) <= 1:
     print "Need to give the directory of interest, the type of sample and the number of events in command line !"
@@ -79,6 +81,12 @@ if len(sys.argv) > 8:
     if sys.argv[8] == "y" or sys.argv[8] == "yes" or sys.argv[8] == "Y" or sys.argv[8] == "YES":
         CreateTexFile = True
 
+# Use this boolean to calculate the acceptance XS by scaling the MadGraph XS with the SM-acceptance ratio
+UseScaledXS = False
+if len(sys.argv) > 9:
+    if sys.argv[9] == "y" or sys.argv[9] == "Y":
+        UseScaledXS = True
+
 # --------------------------------------------------------------#
 #  Now continue by selecting the desired configs form the range #
 # --------------------------------------------------------------#
@@ -109,12 +117,16 @@ elif VarWindow == "3":
 
 OnlyXSPossible = True
 if MGorRECO == "MG":
-    MGXS = array('d',
-                 [1.97357, 3.36424, 4.92909, 6.02588, 7.34593, 8.94878, 9.88333, 10.89487, 11.92922, 13.1987, 15.9457,19.1623, 22.9185, 32.2975, 38.8312])
-    MGXSCut = array('d', [0.465328, 0.639413, 0.912292, 1.098184, 1.32024, 1.58727, 1.73857, 1.90447, 2.0856, 2.28471,2.71983, 3.2418, 3.838581, 5.31357, 7.23931])  # Also MET cuts!
+    MGXS = array('d',      [3.95248, 5.5612,  8.24066,  10.09161, 12.39876, 15.16567, 0.0, 18.54042, 0.0, 22.52782, 27.3093, 32.9283, 39.4799, 55.9507,  77.7365])
+    MGXSCut = array('d',   [0.93159, 1.27966, 1.825208, 2.194079, 2.6393,   3.17698,  0.0, 3.80921,  0.0, 4.5645,   5.45665, 6.47791, 7.66805, 10.63243, 14.46786])  # Also MET cuts!
+    # MGXSScale = array('d', [0.93159, 1.14257, 1.69308, 2.07337, 2.54738,   3.11585,  0.0, 3.80921,  0.0, 4.62844,   5.61081, 6.76526, 8.11132, 11.49531, 14.46786])
+    # MGXSScale = array('d', [0.81205, 1.14257, 1.69308,  2.07337,  2.54738,  3.11585,  0.0, 3.80921,  0.0, 4.62844,  5.61081, 6.76526, 8.11132, 11.49531, 15.97130])
 elif MGorRECO == "RECO":
     MGXS = array('d', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-    MGXSCut = array('d',[0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203, 3.3578,3.97995, 5.50855, 0.0])
+    #MGXSCut = array('d',[0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203,  3.3578,  3.97995, 5.50855, 0.0])  # Up to 1 additional jet
+    MGXSCut = array('d',[0.0, 0.65669,  0.947244, 1.13624, 1.36448, 1.63952, 0.0, 1.96892, 0.0, 2.36027, 2.82111, 3.35903, 3.98157, 5.51083, 0.0])  # Up to 2 additional jets
+    #MGXSCut = array('d', [1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892])
+    #MGXSCut = array('d',[0.0, 2.339,    3.34036,  4.01717, 4.84056, 5.82329, 0.0, 6.98981, 0.0, 8.37733, 10.0153, 11.9024, 14.0873, 19.5525, 0.0]) #Summ of XS (up to 2 jets)
     OnlyXSPossible = False
 
 else:
@@ -125,6 +137,7 @@ else:
 for iVar in range(len(ValuesToDelete)):
     MGXS.pop(int(Var.index(ValuesToDelete[iVar])))
     MGXSCut.pop(Var.index(ValuesToDelete[iVar]))
+    if UseScaledXS: MGXSScale.pop(Var.index(ValuesToDelete[iVar]))
     Var.pop(Var.index(ValuesToDelete[iVar]))
 
 # Set all the parameters accordingly
@@ -186,6 +199,8 @@ else:
                     len(whichDir) >= whichDir.find("GEN") > 0):
         print " \n ************************* ERROR **************************** "
         print " -----> Applying Acceptance normalisation to generator-level events .... \n"
+if UseScaledXS and MGorRECO =="MG":
+    MGXSCut = MGXSScale
 
 # ---------------------------#
 #   Setting output title     #
@@ -215,6 +230,10 @@ if len(whichDir) >= whichDir.find("ChangingXS") > 0:
 # *** Indicating that Pt-cuts have been applied!
 if len(WeightsFileName) >= WeightsFileName.find("NoLowPt") >= 0:
     title = title + "_" + "NoLowPtEvts" + WeightsFileName[WeightsFileName.find("_Cut"):-4]
+
+# *** Indicating that scaled acceptance XS have been used
+if UseScaledXS and MGorRECO =="MG":
+    title = title + "_" + "XSScaledWithSMAcc"
 
 # -------------------------------------------------#
 # --  Pass on all variables to the ROOT macro !  --#
@@ -275,6 +294,8 @@ for RootLine in RootAnalyzer:
         NewRootAnalyzer.write('float xHigh = ' + str(xHigh) + '; \n')
     elif re.search(r"int xMin", RootLine):
         NewRootAnalyzer.write('int xMin = ' + str(xMin) + '; \n')
+    elif re.search(r"double LikCut", RootLine):
+        NewRootAnalyzer.write('double LikCut = ' + str(LikCut) + '; \n')
     elif re.search(r"string KinVar", RootLine):
         NewRootAnalyzer.write('std::string KinVar = "' + str(KinVar) + '"; \n')
     elif re.search(r"std::string NormTypeName", RootLine):
@@ -309,7 +330,7 @@ for RootLine in RootAnalyzer:
         else:
             NewRootAnalyzer.write(RootLine)
     elif re.search(r"new TFile", RootLine) and re.search(r"file_FitDist", RootLine):
-        NewRootAnalyzer.write('TFile* file_FitDist = new TFile("' + str(whichDir) + 'FitDistributions_' + str(title) + '_' + str(nEvts) + 'Evts.root","RECREATE"); \n')
+        NewRootAnalyzer.write('TFile* file_FitDist = new TFile("' + str(whichDir) + 'FitDistributions_' + str(title) + '_' + str(nEvts) + 'Evts_LikelihoodCut' + str(LikCut) + '.root","RECREATE"); \n')
     else:
         NewRootAnalyzer.write(RootLine)
 NewRootAnalyzer.close(), RootAnalyzer.close()
@@ -352,6 +373,9 @@ if CreateTexFile:
         CanvasOutputFile.write('\\begin{document} \n')
 
         CanvasOutputFile.write('\\section{Distributions of -ln(L) when ' + NormType[iNormType] + ' normalisation is applied} \n')
+        CanvasOutputFile.write('\\begin{abstract} \n')
+        CanvasOutputFile.write('  Looking at directory : $'+ whichDir +'$')
+        CanvasOutputFile.write('\\end{abstract} \n')
         CanvasOutputFile.write('\n \\centering \n')
 
         # Include the overall likelihood and secondPol distribution (together one 1 page!):

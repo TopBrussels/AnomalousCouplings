@@ -16,30 +16,31 @@
 /////////////////////////////////////////////////////////////
 // Specify whether the stacked canvasses have to be stored //
 bool storeSplittedCanvas = false; 
-std::string SplittedDir = "Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg03_20000Evts_CutsAlsoOnMET/SplittedCanvasses"; 
+std::string SplittedDir = "Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_LargeWidth_SelectedEvts_23Oct/SplittedCanvasses"; 
 /////////////////////////////////////////////////////////////
 
 //std::string VarValues[] = {"Re(g_{R}) = -0.3","Re(g_{R}) = -0.2","Re(g_{R}) = -0.1","Re(g_{R}) = -0.05","Re(g_{R}) = 0.0","Re(g_{R}) = 0.05","Re(g_{R}) = 0.1","Re(g_{R}) = 0.2","Re(g_{R}) = 0.3"};
-double Var[] = {-0.4,-0.3,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.3,0.4};
-double MGXS[] = {1.97357,3.36424,4.92909,6.02588,7.34593,8.94878,10.89487,13.1987,15.9457,19.1623,22.9185,32.2975,38.8312};
-double MGXSCut[] = {0.465328,0.639413,0.912292,1.098184,1.32024,1.58727,1.90447,2.28471,2.71983,3.2418,3.838581,5.31357,7.23931};
-int xBin = 17; 
-float xLow = -0.425; 
-float xHigh = 0.425; 
+double Var[] = {-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2};
+double MGXS[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double MGXSCut[] = {0.947244,1.13624,1.36448,1.63952,1.96892,2.36027,2.82111,3.35903,3.98157};
+int xBin = 9; 
+float xLow = -0.225; 
+float xHigh = 0.225; 
 std::string KinVar = "Re(g_{R})"; 
-int xMin = 6; 
-std::string title = "CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg03_20000Evts_CutsAlsoOnMET_CosTheta"; 
-std::string NormTypeName[3] = {"","_XS","_Acc"}; 
-std::string NormType[3] = {"no","XS","acceptance"}; 
+int xMin = 4; 
+double LikCut = 62; 
+std::string title = "Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_LargeWidth_SelectedEvts_23Oct"; 
+std::string NormTypeName[2] = {"","_Acc"}; 
+std::string NormType[2] = {"no","acceptance"}; 
 const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg03_20000Evts_CutsAlsoOnMET/FitDistributions_CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg03_20000Evts_CutsAlsoOnMET_CosTheta_20000Evts.root","RECREATE"); 
+TFile* file_FitDist = new TFile("Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_LargeWidth_SelectedEvts_23Oct/FitDistributions_Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_LargeWidth_SelectedEvts_23Oct_30000Evts_LikelihoodCut62.root","RECREATE"); 
 TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
-const int NrConfigs = 13; 
-const int nEvts = 20000; 
-const unsigned int NrToDel = 4; 
+const int NrConfigs = 9; 
+const int nEvts = 30000; 
+const unsigned int NrToDel = 2; 
 int NrRemaining = NrConfigs-NrToDel;
 std::string sNrCanvas ="0";
 std::string sNrRemaining = ""; std::stringstream ssNrRemaining; 
@@ -56,6 +57,8 @@ TH1F *h_ChiSquaredFirstFit[3], *h_ChiSquaredSecondFit[3];
 TH2F* h_TotalFitDevVSChiSq = new TH2F("TotalFitDevVSChiSq","Total fit deviation versus chi-squared",200,0,0.000005, 200, 0, 0.0005);
 TH1F* h_TotalRelFitDeviationReduced = new TH1F("TotalRelFitDeviationReduced","TotalRelFitDeviationReduced",200,0,0.001);
 TH1F* h_TotalRelFitDeviation = new TH1F("TotalRelFitDeviation","TotalRelFitDeviation",200,0,0.01);
+TH1F* h_SMLikelihoodValue = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
+TH2F* h_SMLikelihoodValue_vs_DeltaLikelihood = new TH2F("SMLikelihoodValue_vs_DeltaLikelihood","Likelihood value at gR = 0 versus difference in likelihood",500,30,90,100,0,5);
 
 //Store all the fit parameters into a vector of doubles
 vector<double> FitParams_FirstFit[nrNorms];
@@ -286,7 +289,7 @@ void doublePolFitMacro(){
   double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
-  std::ifstream ifs ("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg03_20000Evts_CutsAlsoOnMET/weights_CosTheta.out", std::ifstream::in); 
+  std::ifstream ifs ("Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_LargeWidth_SelectedEvts_23Oct/weights.out", std::ifstream::in); 
   std::cout << " Value of ifs : " << ifs.eof() << std::endl;
   std::string line;
   int evt,config,tf;
@@ -294,7 +297,7 @@ void doublePolFitMacro(){
   double CosThetaCorr = 1;
   while( std::getline(ifs,line) && consEvts < nEvts){
     std::istringstream iss(line);
-    if( iss >> evt >> config >> tf >> weight >> weightUnc >> CosThetaCorr ){ 
+    if( iss >> evt >> config >> tf >> weight >> weightUnc){ 
       if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
       stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
       stringstream ssConfig; ssConfig << config; string sConfig = ssConfig.str();
@@ -307,8 +310,10 @@ void doublePolFitMacro(){
 
       //--- Initialize the event-per-event variables! ---//
       // --    Loop over the different allowed normalisations
+      int SMConfig = 0; 
       for(int iNorm = 0; iNorm < nrNorms; iNorm++){
-  
+          
+        double MaxLik = 0, MinLik = 9999;
         if( config == 1){
           //std::cout << " \n Looking at event : " << sEvt << " with cos theta* weight = " << CosThetaCorr  << std::endl;
           h_LnLik[iNorm] = new TH1F(("LnLik"+NormTypeName[iNorm]+"_Evt"+sEvt).c_str(),("LnLik"+NormTypeName[iNorm]+" distribution for event "+sEvt+" -- "+title+" evts").c_str(),xBin,xLow,xHigh);
@@ -318,13 +323,24 @@ void doublePolFitMacro(){
         else if(iNorm == 1 && nrNorms == 3)                                   LnLik[iNorm][config-1] = (-log(weight)+log(MGXS[config-1]))*CosThetaCorr;
         else if((nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1)) LnLik[iNorm][config-1] = (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr;
 
+        //Get the maximum and minimum likelihood value
+        if(LnLik[iNorm][config-1] > MaxLik) MaxLik = LnLik[iNorm][config-1];
+        if(LnLik[iNorm][config-1] < MinLik) MinLik = LnLik[iNorm][config-1]; 
+
+        if( ( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) && Var[config-1] == 0.0){ h_SMLikelihoodValue->Fill((-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr); SMConfig = config-1;}
+
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]);
 
         //---  Only perform the fit after all configurations are considered!  ---//
         if( config == NrConfigs){
-          histSum[iNorm]->Add( h_LnLik[iNorm] );
           if(iNorm == 0) consEvts++;   //Count the number of full events!
+          
+          if( LnLik[iNorm][SMConfig] > LikCut) continue;
+
+          histSum[iNorm]->Add( h_LnLik[iNorm] );
+
+          h_SMLikelihoodValue_vs_DeltaLikelihood->Fill((-log(weight)+log(MGXSCut[SMConfig]))*CosThetaCorr, MaxLik-MinLik);
 
           //Save xDivide*yDivide of these histograms in one TCanvas!
           if( storeSplittedCanvas == true){
@@ -369,6 +385,9 @@ void doublePolFitMacro(){
   h_TotalFitDevVSChiSq->Write();
   h_TotalRelFitDeviationReduced->Write();
   h_TotalRelFitDeviation->Write();
+  h_SMLikelihoodValue->GetXaxis()->SetTitle("Likelihood value at gR = 0.0"); h_SMLikelihoodValue->GetYaxis()->SetTitle("# events");
+  h_SMLikelihoodValue->Write();
+  h_SMLikelihoodValue_vs_DeltaLikelihood->Write();
 
   TDirectory *dir_FitDevDelete = dir_FitResults->GetDirectory("PointsDeletedByFitDev");
   if(!dir_FitDevDelete) dir_FitDevDelete = dir_FitResults->mkdir("PointsDeletedByFitDev");
