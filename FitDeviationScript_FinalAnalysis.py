@@ -21,8 +21,6 @@ import re
 import shutil
 from array import array
 
-LikCut = 62
-
 # Get all the input from the command line:
 if len(sys.argv) <= 1:
     print "Need to give the directory of interest, the type of sample and the number of events in command line !"
@@ -86,6 +84,11 @@ UseScaledXS = False
 if len(sys.argv) > 9:
     if sys.argv[9] == "y" or sys.argv[9] == "Y":
         UseScaledXS = True
+
+if len(sys.argv) > 10:
+    LikCut = sys.argv[10]
+else:
+    LikCut = 100
 
 # --------------------------------------------------------------#
 #  Now continue by selecting the desired configs form the range #
