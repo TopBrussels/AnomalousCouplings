@@ -34,6 +34,8 @@ elif len(sys.argv) == 2:
 whichDir = sys.argv[1]
 MGorRECO = sys.argv[2]
 
+YesOptions = ['y', 'yes', 'Y', 'YES', 'Yes']
+
 # -----------------------------------------#
 #  Set all the optional parameters correct #
 # -----------------------------------------#
@@ -85,10 +87,17 @@ if len(sys.argv) > 9:
     if sys.argv[9] == "y" or sys.argv[9] == "Y":
         UseScaledXS = True
 
+# Give the cut-value on the -ln(Likelihood) as an input
 if len(sys.argv) > 10:
     LikCut = sys.argv[10]
 else:
     LikCut = 100
+
+# Specify whether the cuts should exclude the two outer bins!
+excludeOuterBinsFit = False
+if len(sys.argv) > 11:
+    if sys.argv[11] in YesOptions:
+        excludeOuterBinsFit = True
 
 # --------------------------------------------------------------#
 #  Now continue by selecting the desired configs form the range #
@@ -103,35 +112,30 @@ if not VarWindowGiven:
 Var = array('d', [-0.4, -0.3, -0.2, -0.15, -0.1, -0.05, -0.025, 0.0, 0.025, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4])
 
 xMinValue = [4, 6, 5]
-KinVar, FitType = "Re(g_{R})", "pol2"
+KinVar = "Re(g_{R})"
 NrPointsToRemove = [2, 4, 2]
 
 if VarWindow == "1":
     ValuesToDelete = [-0.4, -0.3, -0.025, 0.025, 0.3, 0.4]
-    xBin, xLow, xHigh = 9, -0.225, 0.225
+    NrBins = 8
 
 elif VarWindow == "2":
     ValuesToDelete = [-0.025, 0.025]
-    xBin, xLow, xHigh = 17, -0.425, 0.425
+    NrBins = 16
 
 elif VarWindow == "3":
     ValuesToDelete = [-0.4, -0.025, 0.025, 0.4]
-    xBin, xLow, xHigh = 13, -0.325, 0.325
+    NrBins = 12
 
 OnlyXSPossible = True
 if MGorRECO == "MG":
     MGXS = array('d',      [3.95248, 5.5612,  8.24066,  10.09161, 12.39876, 15.16567, 0.0, 18.54042, 0.0, 22.52782, 27.3093, 32.9283, 39.4799, 55.9507,  77.7365])
     MGXSCut = array('d',   [0.93159, 1.27966, 1.825208, 2.194079, 2.6393,   3.17698,  0.0, 3.80921,  0.0, 4.5645,   5.45665, 6.47791, 7.66805, 10.63243, 14.46786])  # Also MET cuts!
-    # MGXSScale = array('d', [0.93159, 1.14257, 1.69308, 2.07337, 2.54738,   3.11585,  0.0, 3.80921,  0.0, 4.62844,   5.61081, 6.76526, 8.11132, 11.49531, 14.46786])
-    # MGXSScale = array('d', [0.81205, 1.14257, 1.69308,  2.07337,  2.54738,  3.11585,  0.0, 3.80921,  0.0, 4.62844,  5.61081, 6.76526, 8.11132, 11.49531, 15.97130])
 elif MGorRECO == "RECO":
     MGXS = array('d', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     #MGXSCut = array('d',[0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203,  3.3578,  3.97995, 5.50855, 0.0])  # Up to 1 additional jet
     MGXSCut = array('d',[0.0, 0.65669,  0.947244, 1.13624, 1.36448, 1.63952, 0.0, 1.96892, 0.0, 2.36027, 2.82111, 3.35903, 3.98157, 5.51083, 0.0])  # Up to 2 additional jets
-    #MGXSCut = array('d', [1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892, 1.96892])
-    #MGXSCut = array('d',[0.0, 2.339,    3.34036,  4.01717, 4.84056, 5.82329, 0.0, 6.98981, 0.0, 8.37733, 10.0153, 11.9024, 14.0873, 19.5525, 0.0]) #Summ of XS (up to 2 jets)
     OnlyXSPossible = False
-
 else:
     print "\n Should specify whether MG or RECO is desired! "
     sys.exit()
@@ -147,6 +151,9 @@ for iVar in range(len(ValuesToDelete)):
 NrConfigs = len(Var)
 xMin = xMinValue[int(VarWindow) - 1]
 NumberOfPointsToRemove = NrPointsToRemove[int(VarWindow) - 1]
+FitMin, FitMax = Var[0], Var[NrConfigs - 1]
+if excludeOuterBinsFit:
+    FitMin, FitMax = Var[1], Var[NrConfigs - 2]
 
 # ---------------------------------------#
 #  Open the correct weight file          #
@@ -185,7 +192,14 @@ maxNrEvts = os.popen('grep " 1 1 " ' + str(WeightsFileName) + ' | wc -l').read()
 if nEvts == "-1" or int(maxNrEvts) < int(nEvts):
     nEvts = int(maxNrEvts)
 
-print "\n ----- Summary ------ \n Will be using file : ", WeightsFileName, "\n Will consider ", nEvts, " events ! \n Will study range between ", xLow, " and ", xHigh
+print "\n----- Summary ------ "
+print " Will be using file : ", WeightsFileName
+print " Will consider ", nEvts, " events ! "
+if str(LikCut) != '100':
+    print " Will apply cut on -ln(Likelihood) of ", str(LikCut)
+else:
+    print ' Will apply no cut on -ln(Likelihood) '
+print " Will fit between ", FitMin, " and ", FitMax, " (full range = [", Var[0], ",", Var[NrConfigs-1], "] ) "
 
 # --------------------------------------------------------------------------------------#
 #   Set the MGXSCut values based on whether acceptance normalisation should be applied  #
@@ -197,7 +211,7 @@ if applyAccNorm == "n" or applyAccNorm == "no" or applyAccNorm == "No":
         print " \n ************************* ERROR **************************** "
         print " -----> Applying no Acceptance normalisation for reco-level events .... \n"
 else:
-    print " Acceptance normalisation will be applied! "
+    print " Will apply acceptance normalisation! "
     if (len(whichDir) >= whichDir.find("MGSample") > 0 > whichDir.find("Cut")) or (
                     len(whichDir) >= whichDir.find("GEN") > 0):
         print " \n ************************* ERROR **************************** "
@@ -218,6 +232,14 @@ if applyCosTheta == "y" or applyCosTheta == "yes" or applyCosTheta == "Y":
             print " --> Will now be using ", nEvts
         else:
             sys.exit()
+
+# *** Indicating whether cut on Likelihood is applied!
+if str(LikCut) != '100':
+    title = title + '_LikelihoodCut' + str(LikCut)
+
+# *** Indicating whether fit range has been reduced!
+if excludeOuterBinsFit:
+    title += '_OuterBinsExclForFit'
 
 # *** Indicating that XS-values are changed!
 if len(whichDir) >= whichDir.find("ChangingXS") > 0:
@@ -289,18 +311,16 @@ for RootLine in RootAnalyzer:
         NewRootAnalyzer.write(MGXSCutLine)
     elif re.search(r"double MGXS", RootLine):
         NewRootAnalyzer.write(MGXSLine)
-    elif re.search(r"int xBin", RootLine):
-        NewRootAnalyzer.write('int xBin = ' + str(xBin) + '; \n')
-    elif re.search(r"float xLow", RootLine):
-        NewRootAnalyzer.write('float xLow = ' + str(xLow) + '; \n')
-    elif re.search(r"float xHigh", RootLine):
-        NewRootAnalyzer.write('float xHigh = ' + str(xHigh) + '; \n')
-    elif re.search(r"int xMin", RootLine):
-        NewRootAnalyzer.write('int xMin = ' + str(xMin) + '; \n')
+    elif re.search(r"int NrBins", RootLine):
+        NewRootAnalyzer.write('int NrBins = ' + str(NrBins) + '; \n')
+    elif re.search(r"double FitMin", RootLine):
+        NewRootAnalyzer.write('double FitMin = ' + str(FitMin) + ', FitMax = ' + str(FitMax) + '; \n')
     elif re.search(r"double LikCut", RootLine):
         NewRootAnalyzer.write('double LikCut = ' + str(LikCut) + '; \n')
     elif re.search(r"string KinVar", RootLine):
         NewRootAnalyzer.write('std::string KinVar = "' + str(KinVar) + '"; \n')
+    elif re.search(r"int NrToDel", RootLine):
+        NewRootAnalyzer.write('const unsigned int NrToDel = ' + str(NumberOfPointsToRemove) + '; \n')
     elif re.search(r"std::string NormTypeName", RootLine):
         NewRootAnalyzer.write(NormTypeNameC)
     elif re.search(r"std::string NormType", RootLine):
@@ -322,18 +342,8 @@ for RootLine in RootAnalyzer:
             NewRootAnalyzer.write('bool storeSplittedCanvas = true; \n')
         else:
             NewRootAnalyzer.write('bool storeSplittedCanvas = false; \n')
-    elif re.search(r"int NrToDel", RootLine):
-        NewRootAnalyzer.write('const unsigned int NrToDel = ' + str(NumberOfPointsToRemove) + '; \n')
-    elif re.search(r"new TF1", RootLine):
-        if re.search(r"AllPoints", RootLine):
-            print " ---> Polynomial fits will go between ", Var[0], " and ", Var[NrConfigs - 1], "\n"
-            NewRootAnalyzer.write('  polFit_AllPoints = new TF1(("polFit"+NormTypeName[normType]+"_AllPoints_Evt"+EvtNumber).c_str(),"' + str(FitType) + '",Var[0],Var[NrConfigs-1]); \n')
-        elif re.search(r"ReducedPoints", RootLine):
-            NewRootAnalyzer.write('  polFit_ReducedPoints = new TF1(("polFit"+NormTypeName[normType]+"_"+sNrRemaining+"ReducedPoints_Evt"+EvtNumber).c_str(),"' + str(FitType) + '",Var[0],Var[NrConfigs-1]); \n')
-        else:
-            NewRootAnalyzer.write(RootLine)
     elif re.search(r"new TFile", RootLine) and re.search(r"file_FitDist", RootLine):
-        NewRootAnalyzer.write('TFile* file_FitDist = new TFile("' + str(whichDir) + 'FitDistributions_' + str(title) + '_' + str(nEvts) + 'Evts_LikelihoodCut' + str(LikCut) + '.root","RECREATE"); \n')
+            NewRootAnalyzer.write('TFile* file_FitDist = new TFile("' + str(whichDir) + 'FitDistributions_' + str(title) + '_' + str(nEvts) + 'Evts.root","RECREATE"); \n')
     else:
         NewRootAnalyzer.write(RootLine)
 NewRootAnalyzer.close(), RootAnalyzer.close()
