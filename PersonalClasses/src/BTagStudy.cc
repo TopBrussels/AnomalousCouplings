@@ -1,26 +1,20 @@
 #include "../interface/BTagStudy.h"
 
-BTagStudy::BTagStudy(int outputVerbose, vector<Dataset*> datasets){
-  BTagStudy::InitializeBegin(datasets);
+BTagStudy::BTagStudy(int outputVerbose, vector<Dataset*> datasets, bool oneWP, int whichCombi, float Masslb, float sMasslb, float Massqqb, float sMassqqb){
+
   verbose = outputVerbose;
-  nrDatasets_ = datasets.size();  
-    //evtSelOutput[0].open("/user/aolbrech/GitTopTree_Feb2014/TopBrussels/AnomalousCouplings/EventSelectionResults/AnalyzerOutput/eventSelectionChoiceTables4JetCase.tex");
-    //evtSelOutput[1].open("/user/aolbrech/GitTopTree_Feb2014/TopBrussels/AnomalousCouplings/EventSelectionResults/AnalyzerOutput/eventSelectionChoiceTables5JetCase.tex");
-}
+  singleWP_ = oneWP;
+  chosenBTag_ = whichCombi;
+  use5Jets_ = true;
+  nrDatasets_ = datasets.size();
 
-BTagStudy::~BTagStudy(){
-    evtSelOutput[0].close();
-    evtSelOutput[1].close();
-}
-
-void BTagStudy::InitializeBegin(vector<Dataset*> datasets){
-
-  for(int ii = 0; ii < 6; ii++){
-    for(int jj = 0; jj < 2; jj++){
+  //Start to initialize all variables!!
+  for(int ii = 0; ii < 2; ii++){
+    for(int jj = 0; jj < 6; jj++){
       NotReconstructedEvent[ii][jj]=0;
-      for(int kk = 0; kk < 2; kk++){
-        CorrectlyMatched[kk][ii][jj]=0;
-        atLeastOneWrongMatch[kk][ii][jj] = 0;
+      for(int kk = 0; kk < 3; kk++){
+        CorrectlyMatched[ii][kk][jj]=0;
+        atLeastOneWrongMatch[ii][kk][jj] = 0;
       }
     }
   }
@@ -31,37 +25,54 @@ void BTagStudy::InitializeBegin(vector<Dataset*> datasets){
   string optionName[6] = {"  2 L b-tags             ","  2 M b-tags             ","  2 M b-tags, light L-veto","  2 T b-tags             ","  2 T b-tags, light M-veto","  2 T b-tags, light L-veto"};
   string bName[6] = {"(2 L b-tags)","(2 M b-tags)","(2 M b-tags, light L-veto)","(2 T b-tags)","(2 T b-tags, light M-veto)","(2 T b-tags, light L-veto)"};
   string bTitle[6] = {"LooseTags","MediumTags","MediumTagsLVeto","TightTags","TightTagsMVeto","TightTagsLVeto"};
-  for(int ii = 0; ii < 6; ii++){
-    BJetWP[ii] = bjetWP[ii];
-    LightJetWP[ii] = lightjetWP[ii];
-    OptionName[ii] = optionName[ii];
-    BName[ii] = bName[ii];
-    BTitle[ii] = bTitle[ii];
+
+  if(singleWP_) nrBTags_ = 1;
+  else          nrBTags_ = 6;
+  for(int itBTag = 0; itBTag < nrBTags_; itBTag++){
+
+    //In case only one b-tag option should be considered, only the first element should be filled!
+    if(singleWP_){BJetWP[0] = bjetWP[chosenBTag_]; LightJetWP[0] = lightjetWP[chosenBTag_]; OptionName[0] = optionName[chosenBTag_]; BName[0] = bName[chosenBTag_]; BTitle[0] = bTitle[chosenBTag_];}
+    else         {BJetWP[itBTag] = bjetWP[itBTag]; LightJetWP[itBTag] = lightjetWP[itBTag]; OptionName[itBTag] = optionName[itBTag]; BName[itBTag] = bName[itBTag]; BTitle[itBTag] = bTitle[itBTag];}
+
+    //---  Create the MSPlots (general for all datasets)  ---//
+    //MSPlot["Mlb_MassDistribution_"+BTitle[itBTag]] =new MultiSamplePlot(datasets,("Mlb_MassDistribution_"+BTitle[itBTag]).c_str(),150,50,180,("Mass of lepton and leptonic b-jet "+BName[itBTag]).c_str());
+    //MSPlot["Mlb_ChiSqDistribution_"+BTitle[itBTag]] = new MultiSamplePlot(datasets,("Mlb_ChiSqDistribution_"+BTitle[itBTag]).c_str(),150,0,10,("#chi^{2}_{mlb} for b-jet choice "+BName[itBTag]).c_str());
   }
 
   //---  ChiSq Mlb and Mqqb information ---//
-  Mlb = 103.286;
-  SigmaMlb = 26.7764;
-  Mqqb = 178.722;
-  SigmaMqqb = 18.1385;
-
-  //---  Create the histograms  ---//
-  for(int itBTag = 0; itBTag < 6; itBTag++){
-    MSPlot["Mlb_MassDistribution_"+BTitle[itBTag]] = new MultiSamplePlot(datasets,("Mlb_MassDistribution_"+BTitle[itBTag]).c_str(),150,50,180, ("Mass of lepton and leptonic b-jet "+BName[itBTag]).c_str());
-    MSPlot["Mlb_ChiSqDistribution_"+BTitle[itBTag]] = new MultiSamplePlot(datasets,("Mlb_ChiSqDistribution_"+BTitle[itBTag]).c_str(),150, 0, 10, ("#chi^{2}_{mlb} for b-jet choice "+BName[itBTag]).c_str());
-    histo1D["Mlb_CorrectCombiChiSq_"+BTitle[itBTag]] = new TH1F(("Mlb_CorrectCombiChiSq_"+BTitle[itBTag]).c_str(),("#chi^{2}_{mlb} for correct b-jet choice "+BName[itBTag]).c_str(),150,0,10);
-    histo1D["Mlb_WrongCombiChiSq_"+BTitle[itBTag]]   = new TH1F(("Mlb_WrongCombiChiSq_"+BTitle[itBTag]).c_str(),("#chi^{2}_{mlb} for wrong b-jet choice "+BName[itBTag]).c_str(),150,0,10);
-  }
+  Mlb  = Masslb; S_Mlb  = sMasslb;
+  Mqqb = Massqqb; S_Mqqb = sMassqqb;
 }
+
+BTagStudy::~BTagStudy(){
+    evtSelOutput[0].close();
+    evtSelOutput[1].close();
+}
+
+void BTagStudy::InitializeDataSet(std::string datasetName){
+
+  //In case a histogram specific for each dataset should be created it should be initialized here!!
+  dataSetName_ = datasetName;
+
+  for(int itBTag = 0; itBTag < nrBTags_; itBTag++){
+
+    //---  Create the histograms  ---//
+    std::string TitleInfo = BTitle[itBTag]+"_"+dataSetName_;
+    histo1D["Mlb_CorrectCombiChiSq_"+TitleInfo] = new TH1F(("Mlb_CorrectCombiChiSq_"+TitleInfo).c_str(),("#chi^{2}_{mlb} for correct b-jet choice -- "+TitleInfo).c_str(),150,0,10);
+    histo1D["Mlb_WrongCombiChiSq_"+TitleInfo]   = new TH1F(("Mlb_WrongCombiChiSq_"+TitleInfo).c_str(),("#chi^{2}_{mlb} for wrong b-jet choice -- "+TitleInfo).c_str(),150,0,10);
+
+    histo1D["LowestChiSq_"+TitleInfo] = new TH1F(("LowestChiSq_"+TitleInfo).c_str(), ("#chi^{2} distribution for chosen jet-combination -- "+TitleInfo).c_str(), 150,0,80);
+    histo1D["WrongChiSq_"+TitleInfo] = new TH1F(("WrongChiSq_"+TitleInfo).c_str(), ("#chi^{2} distribution for the non-chosen jet combination -- "+TitleInfo).c_str(), 150,0,80);
+  }
+}   
 
 void BTagStudy::ResetEventArrays(){
 
   for(int ii = 0; ii < 6; ii++){
-    bTaggedJetNr[ii].clear();
-    NonbTaggedJetNr[ii].clear();
+    bTagJetNr[ii].clear();
+    NonbTagJetNr[ii].clear();
     LightJetNr[ii].clear();
-    ChiSquaredMlb[ii].clear();
-    ChiSquaredMqqb[ii].clear();
+    jetIndices[ii].clear();
   }
 }
 
@@ -69,137 +80,154 @@ void BTagStudy::CalculateJets(vector<TLorentzVector> Jets, vector<float> CSVbTag
 
   ResetEventArrays();
 
-  for (unsigned int bTagOption = 0; bTagOption < 6; bTagOption++){
+  for (int bTagOption = 0; bTagOption < nrBTags_; bTagOption++){
+
     for(unsigned int iJet = 0; iJet<Jets.size();iJet++){
       if(CSVbTagValues[iJet] >= BJetWP[bTagOption])
-        bTaggedJetNr[bTagOption].push_back(iJet);            
+        bTagJetNr[bTagOption].push_back(iJet);            
       else
-        NonbTaggedJetNr[bTagOption].push_back(iJet);            
+        NonbTagJetNr[bTagOption].push_back(iJet);            
 
       //Calculate the light jets when an additional working point is required for these:
       if(BJetWP[bTagOption] != LightJetWP[bTagOption] && CSVbTagValues[iJet] < LightJetWP[bTagOption])
 	LightJetNr[bTagOption].push_back(iJet);
     }
-
+  
     //Copy the Nonbtagged vector into the light one in case the two b-tags are the same!	
     if(BJetWP[bTagOption] == LightJetWP[bTagOption])
-      LightJetNr[bTagOption] = NonbTaggedJetNr[bTagOption];     
+      LightJetNr[bTagOption] = NonbTagJetNr[bTagOption];     
 
     /*//Count how often an event has three or two light jets (for comparison of 4- and 5-jet case)    --> Maybe move this 4/5 jet comparison to a separate function!
     if(LightJetNr[bTagOption].size() >1 ){
       EventWithTwoLightJets[bTagOption]++;
-      if(bTaggedJetNr[bTagOption].size() >1)
+      if(bTagJetNr[bTagOption].size() >1)
 	EventWithTwoLightJetsAndBTagged[bTagOption]++;
     }
     if(LightJetNr[bTagOption].size() >2 ){
       EventWithThreeLightJets[bTagOption]++;
-      if(bTaggedJetNr[bTagOption].size() >1)
+      if(bTagJetNr[bTagOption].size() >1)
 	EventWithThreeLightJetsAndBTagged[bTagOption]++;
     } 
     */
 
-    if(bTaggedJetNr[bTagOption].size() >= 2 && LightJetNr[bTagOption].size() >=2 ){
+    if(bTagJetNr[bTagOption].size() >= 2 && LightJetNr[bTagOption].size() >=2 ){
 
-      //--- Use Mlb chi-sq to select the b-jets ---//
-      CalculateMlbChiSq(bTagOption, lepton, Jets, jetCombi, dataset, weight);
+      //--- General case where Mqqb-Mlb is calculated simultaneously ---//
+      //--   --> Lowest chi-sq is correct configuration!              --//
+      int chosenCombi = getLowestMlbMqqbChiSquared( bTagOption, Jets, lepton);
+      if(chosenCombi%2 == 0){ bLeptIndex[bTagOption] = (bTagJetNr[bTagOption])[0]; bHadrIndex[bTagOption] = (bTagJetNr[bTagOption])[1]; }
+      else                  { bLeptIndex[bTagOption] = (bTagJetNr[bTagOption])[1]; bHadrIndex[bTagOption] = (bTagJetNr[bTagOption])[0]; }
 
-      //--- For 4-jet case jet combi numbers can be calculated directly ---//
-      light1Index4Jets[bTagOption] = (LightJetNr[bTagOption])[0];
-      light2Index4Jets[bTagOption] = (LightJetNr[bTagOption])[1];
-      CompareJetCombi(jetCombi, bTagOption, 0, light1Index4Jets[bTagOption], light2Index4Jets[bTagOption]);      //4-jet case
-
-      //--- In case of 5 jets, select the two correct light ones ---//
-      light1Index5Jets[bTagOption] = (LightJetNr[bTagOption])[0];
-      light2Index5Jets[bTagOption] = (LightJetNr[bTagOption])[1];
-      if(LightJetNr[bTagOption].size() > 2){ 
-        vector<int> lightMqqbIndex = CalculateMqqbChiSq(bTagOption, Jets);
-        light1Index5Jets[bTagOption] = lightMqqbIndex[0];
-        light2Index5Jets[bTagOption] = lightMqqbIndex[1];
+      //Now decide on the light jets (depends whether more than 4 jets should be considered)
+      light1Index[bTagOption] = (LightJetNr[bTagOption])[0]; light2Index[bTagOption] = (LightJetNr[bTagOption])[1];
+      if( use5Jets_ == true && LightJetNr[bTagOption].size() > 2 && chosenCombi > 1){
+        if(chosenCombi < 4){ light1Index[bTagOption] = (LightJetNr[bTagOption])[0]; light2Index[bTagOption] = (LightJetNr[bTagOption])[2];}
+        else               { light1Index[bTagOption] = (LightJetNr[bTagOption])[1]; light2Index[bTagOption] = (LightJetNr[bTagOption])[2];}
       }
 
       //--- Now use the two chosen light jets and go to CorrectJetCombi calculation! ---//
-      CompareJetCombi(jetCombi, bTagOption, 1, light1Index5Jets[bTagOption], light2Index5Jets[bTagOption]); //4+5-jet case
+      if(dataset->Name().find("TTbarJets_SemiLept") == 0) CompareJetCombi(jetCombi, bTagOption, use5Jets_, light1Index[bTagOption], light2Index[bTagOption]); 
     }
     else{
       if(verbose > 3) std::cout << " Event doesn't have two b-tagged jets and/or two light jets ! " << std::endl;
       bHadrIndex[bTagOption] = 999;
       bLeptIndex[bTagOption] = 999;
-      LowestChiSqMlb[bTagOption] = 999;
-      LowestChiSqMqqb[bTagOption] = 999;
-      for(int ii = 0; ii < 2; ii++) 
-        ChiSquaredMlb[bTagOption].push_back(999);  //Also something similar for ChiSquaredMqqb?
     }
+
+    jetIndices[bTagOption].push_back(bLeptIndex[bTagOption]);
+    jetIndices[bTagOption].push_back(bHadrIndex[bTagOption]);
+    jetIndices[bTagOption].push_back(light1Index[bTagOption]);
+    jetIndices[bTagOption].push_back(light2Index[bTagOption]);
       
     //--- Additional output for debugging --//
     if(verbose > 3)
-      cout<<"(BTagStudy class) -- Size of bTaggedJets: "<<bTaggedJetNr[bTagOption].size()<<", of NonbTaggedJets: "<<NonbTaggedJetNr[bTagOption].size()<<" & of lightJets: "<<LightJetNr[bTagOption].size()<<endl;
+      cout<<"(BTagStudy class) -- Size of bTaggedJets: "<<bTagJetNr[bTagOption].size()<<", of NonbTaggedJets: "<<NonbTagJetNr[bTagOption].size()<<" & of lightJets: "<<LightJetNr[bTagOption].size()<<endl;
   }//Loop over all btag options!
 }
 
-void BTagStudy::CalculateMlbChiSq(int bTagNr, TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int> correctJetCombi, Dataset* dataSet, float msPlotScale){
+int BTagStudy::getLowestMlbMqqbChiSquared(int bTagNr, vector<TLorentzVector> Jets, TLorentzVector lept){
 
-  //---  This will distinguish the leptonic and hadronic b-jets  ---//
-  //---     ==> Identical for 4- and 5-jet case                  ---//
-  float MlbValues[2]  = {(lepton+Jets[(bTaggedJetNr[bTagNr])[0]]).M(), (lepton+Jets[(bTaggedJetNr[bTagNr])[1]]).M()};
- 
-  LowestChiSqMlb[bTagNr] = 0;
-  bHadrIndex[bTagNr] = (bTaggedJetNr[bTagNr])[1];
-  for(int ii = 0; ii<2; ii++){
-    ChiSquaredMlb[bTagNr].push_back((float)(((Mlb-(float)(MlbValues[ii]))/SigmaMlb)*((Mlb-(float)(MlbValues[ii]))/SigmaMlb))); 
-    if((ChiSquaredMlb[bTagNr])[ii] < (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]]){
-      LowestChiSqMlb[bTagNr] = ii;
-      bHadrIndex[bTagNr] = (bTaggedJetNr[bTagNr])[0];
-    }
-  }
-  bLeptIndex[bTagNr] = (bTaggedJetNr[bTagNr])[LowestChiSqMlb[bTagNr]];
-  MSPlot["Mlb_MassDistribution_"+BTitle[bTagNr]]->Fill( (lepton+Jets[bLeptIndex[bTagNr]]).M(), dataSet, true, msPlotScale);
-  MSPlot["Mlb_ChiSqDistribution_"+BTitle[bTagNr]]->Fill( (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]], dataSet, true, msPlotScale );
+  //Call this vector for every b-tag combination
+  // --> The distinction between the different b-tag options will be made in the main class where the combiNr is stored!
+  // ==> Only the lowest combiNr is stored, so in case distributions for other combi's are wanted they should be created here!!
+  std::vector< std::pair<int,double> > ChiSq;
+  ChiSq.clear();
 
-  //--- Save information in histograms ---//
-  //jet combi order is : 0 = BLeptonic & 1 = BHadronic
-  if(correctJetCombi[0] != 9999 && correctJetCombi[1] != 9999){
-    if(bLeptIndex[bTagNr] == correctJetCombi[0] && bHadrIndex[bTagNr] == correctJetCombi[1]) histo1D["Mlb_CorrectCombiChiSq_"+BTitle[bTagNr]]->Fill( (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]]);
-    if(bLeptIndex[bTagNr] != correctJetCombi[0] || bHadrIndex[bTagNr] != correctJetCombi[1]) histo1D["Mlb_WrongCombiChiSq_"+BTitle[bTagNr]]->Fill( (ChiSquaredMlb[bTagNr])[LowestChiSqMlb[bTagNr]]);
+  ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[0]]).M())/S_Mlb,2) + pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[1]]+Jets[(LightJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[1]]).M())/S_Mqqb,2)));
+  ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[1]]).M())/S_Mlb,2) + pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[1]]).M())/S_Mqqb,2)));
+
+  //Continue adding elements in the case more than 4 jets should be considered (and they are actually present!)
+  if(use5Jets_ && LightJetNr[bTagNr].size() > 2){
+    ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[0]]).M())/S_Mlb,2) + pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[1]]+Jets[(LightJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[2]]).M())/S_Mqqb,2)));
+    ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[1]]).M())/S_Mlb,2) + pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[2]]).M())/S_Mqqb,2)));
+    ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[0]]).M())/S_Mlb,2) + pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[1]]+Jets[(LightJetNr[bTagNr])[1]]+Jets[(LightJetNr[bTagNr])[2]]).M())/S_Mqqb,2)));
+    ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[1]]).M())/S_Mlb,2) + pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[1]]+Jets[(LightJetNr[bTagNr])[2]]).M())/S_Mqqb,2)));
   }
+     
+  //Sort the elements of the pair on ascending order (using the second value)!
+  //--> This way the first value still remains the original index and is not changed!
+  std::sort(ChiSq.begin(), ChiSq.end(), sort_pred());
+
+  //Add some information in histograms
+  histo1D["LowestChiSq_"+BTitle[bTagNr]+"_"+dataSetName_]->Fill(ChiSq[0].second);
+  for(unsigned int ii = 1; ii < ChiSq.size(); ii++)
+    histo1D["WrongChiSq_"+BTitle[bTagNr]+"_"+dataSetName_]->Fill(ChiSq[ii].second);
+
+  //Store the lowest chi-sq value such that it can be passed on to main class and used for additional event selection
+  LowestChiSq[bTagNr] = ChiSq[0].second;
+
+  return ChiSq[0].first;
 }
 
-vector<int> BTagStudy::CalculateMqqbChiSq(int bTagNr, vector<TLorentzVector> Jets){
-  //---  This option chooses 2 out of three light jets  ---//
-  //---     ==> Only considered in 5-jet case           ---//
-  vector<int> lightIndices;
-  lightIndices.clear();
+void BTagStudy::CompareJetCombi(vector<int> jetCombi, int OptionNr, bool fifthJet, int lightOneIndex, int lightTwoIndex){
 
-  float MqqbValues[3] = {(Jets[bHadrIndex[bTagNr]] + Jets[(LightJetNr[bTagNr])[0]] + Jets[(LightJetNr[bTagNr])[1]]).M(), 
-                         (Jets[bHadrIndex[bTagNr]] + Jets[(LightJetNr[bTagNr])[0]] + Jets[(LightJetNr[bTagNr])[2]]).M(),
-                         (Jets[bHadrIndex[bTagNr]] + Jets[(LightJetNr[bTagNr])[1]] + Jets[(LightJetNr[bTagNr])[2]]).M()};
-  
-  LowestChiSqMqqb[bTagNr] = 0;
-  for(int ii = 0; ii<3; ii++){
-    ChiSquaredMqqb[bTagNr].push_back((float)(((Mqqb-(float)(MqqbValues[ii]))/SigmaMqqb)*((Mqqb-(float)(MqqbValues[ii]))/SigmaMqqb))); 
-    if((ChiSquaredMqqb[bTagNr])[ii] < (ChiSquaredMqqb[bTagNr])[LowestChiSqMqqb[bTagNr]]){
-      LowestChiSqMqqb[bTagNr] = ii;
+  int nrOptions = 2;
+  if(fifthJet == false){nrOptions = 1;}
+
+  for(int iOpt = 0; iOpt < nrOptions; iOpt++){
+    int lightOne = lightOneIndex, lightTwo = lightTwoIndex;
+    if(iOpt == 0){ lightOne = (LightJetNr[OptionNr])[0]; lightTwo = (LightJetNr[OptionNr])[1];}  //In case only 4 jets are considered the two light jets have index 0 & 1!
+    
+    //jet combi order is : (0 = BLeptonic, 1 = BHadronic, 2 = Quark1 & 3 =  Quark2)
+    if(jetCombi[1] == 9999 || jetCombi[0] == 9999 || jetCombi[2] == 9999 || jetCombi[3] == 9999){
+      NotReconstructedEvent[iOpt][OptionNr]++;
     }
-  }
-  
-  //Set the light jet indices:
-  if(     LowestChiSqMqqb[bTagNr] == 0){ lightIndices.push_back( (LightJetNr[bTagNr])[0]); lightIndices.push_back((LightJetNr[bTagNr])[1]);}
-  else if(LowestChiSqMqqb[bTagNr] == 1){ lightIndices.push_back( (LightJetNr[bTagNr])[0]); lightIndices.push_back((LightJetNr[bTagNr])[2]);}
-  else if(LowestChiSqMqqb[bTagNr] == 2){ lightIndices.push_back( (LightJetNr[bTagNr])[1]); lightIndices.push_back((LightJetNr[bTagNr])[2]);} 
+    else{
+      if( jetCombi[0] == bLeptIndex[OptionNr]  && jetCombi[1] == bHadrIndex[OptionNr]   &&
+         (jetCombi[2] == lightOne || jetCombi[2] == lightTwo) &&
+        (jetCombi[3] == lightOne || jetCombi[3] == lightTwo) ){
+          CorrectlyMatched[iOpt][0][OptionNr]++;
+      }
+      if( jetCombi[0] != bLeptIndex[OptionNr]  || jetCombi[1] != bHadrIndex[OptionNr]   ||
+        (jetCombi[2] != lightOne && jetCombi[2] != lightTwo) ||
+        (jetCombi[3] != lightOne && jetCombi[3] != lightTwo) ){
+	  atLeastOneWrongMatch[iOpt][0][OptionNr]++;
+      }
+      if(jetCombi[0] == bLeptIndex[OptionNr] && jetCombi[1] == bHadrIndex[OptionNr])
+        CorrectlyMatched[iOpt][1][OptionNr]++;
 
-  return lightIndices;
+      if(jetCombi[0] != bLeptIndex[OptionNr] || jetCombi[1] != bHadrIndex[OptionNr] )
+        atLeastOneWrongMatch[iOpt][1][OptionNr]++;
+
+      if((jetCombi[2] == lightOne || jetCombi[2] == lightTwo) &&
+        (jetCombi[3] == lightOne || jetCombi[3] == lightTwo) )
+	  CorrectlyMatched[iOpt][2][OptionNr]++;
+	
+      if( (jetCombi[2] != lightOne && jetCombi[2] != lightTwo) ||
+          (jetCombi[3] != lightOne && jetCombi[3] != lightTwo) )
+	    atLeastOneWrongMatch[iOpt][2][OptionNr]++;	
+    }
+  }//If 5-jet case is considered, this loop is done twice!!
 }
 
-void BTagStudy::CreateHistograms(TFile* outfile, bool savePDF, std::string pathPNG, int datasetNr){
+void BTagStudy::CreateHistograms(TFile* outfile, bool savePDF, std::string pathPNG, int dataSetNr){
   //--- Use this function to create ChiSq histograms ---//
   outfile->cd();
   if(verbose > 3) std::cout << " Inside CreateHistograms function of BTagStudy class ! \n  Histograms will be filled in file : " << outfile->GetName() << " ********************************" << std::endl;
 
-  //Only write out the MSPlots if the datasetNr == nrDatasets_-1!
-  std::cout << " Does MSPlots directory exist ?? --> " << outfile->GetDirectory("MSPlots") << std::endl;
-  if(datasetNr == nrDatasets_-1 && MSPlot.size() > 0){
+  if(dataSetNr == nrDatasets_-1 && MSPlot.size() > 0){
     TDirectory* msdir = outfile->GetDirectory("MSPlots_BTagStudy");
     if(!msdir) msdir = outfile->mkdir("MSPlots_BTagStudy");
-    std::cout << " Number of MultiSamplePlots is : " <<MSPlot.size() << std::endl; 
     msdir->cd(); 
     for(map<string,MultiSamplePlot*>::const_iterator it = MSPlot.begin(); it != MSPlot.end(); it++){    
       MultiSamplePlot *temp = it->second;
@@ -207,7 +235,6 @@ void BTagStudy::CreateHistograms(TFile* outfile, bool savePDF, std::string pathP
       temp->Draw(name, 0, false, false, false, 1);     //string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSSignal 
       temp->Write(outfile, name, savePDF, (pathPNG+"/MSPlots_BTagStudy/").c_str(), "pdf", "MSPlots_BTagStudy");
     }
-    std::cout << " Does MSPlots directory exists after saving the bTag MSPlots ?? --> " << outfile->GetDirectory("MSPlots") << std::endl;
   }
 
   //Histo1D's
@@ -223,6 +250,7 @@ void BTagStudy::CreateHistograms(TFile* outfile, bool savePDF, std::string pathP
       temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
       temp->Write();
     }
+    histo1D.clear();  //Clear the map such that it can be filled with only the histograms of the considered dataset!!
   }
 
   //Histo2D's
@@ -234,47 +262,17 @@ void BTagStudy::CreateHistograms(TFile* outfile, bool savePDF, std::string pathP
       TH2F *temp = it->second;
       temp->Write();
     }
+    histo2D.clear(); 
   }
   outfile->cd(); 
 }
 
-void BTagStudy::CompareJetCombi(vector<int> jetCombi, int OptionNr, int NrJets, int lightOne, int lightTwo){
+void BTagStudy::ReturnBTagTable(){ 
 
-  //jet combi order is : (0 = BLeptonic, 1 = BHadronic, 2 = Quark1 & 3 =  Quark2)
-  if(jetCombi[1] == 9999 || jetCombi[0] == 9999 || jetCombi[2] == 9999 || jetCombi[3] == 9999){
-    NotReconstructedEvent[NrJets][OptionNr]++;
-  }
-  else{
-    if( jetCombi[0] == bLeptIndex[OptionNr]  && jetCombi[1] == bHadrIndex[OptionNr]   &&
-       (jetCombi[2] == lightOne || jetCombi[2] == lightTwo) &&
-       (jetCombi[3] == lightOne || jetCombi[3] == lightTwo) ){
-        CorrectlyMatched[NrJets][0][OptionNr]++;
-    }
-    if( jetCombi[0] != bLeptIndex[OptionNr]  || jetCombi[1] != bHadrIndex[OptionNr]   ||
-       (jetCombi[2] != lightOne && jetCombi[2] != lightTwo) ||
-       (jetCombi[3] != lightOne && jetCombi[3] != lightTwo) ){
-	atLeastOneWrongMatch[NrJets][0][OptionNr]++;
-    }
-    if(jetCombi[0] == bLeptIndex[OptionNr] && jetCombi[1] == bHadrIndex[OptionNr])
-      CorrectlyMatched[NrJets][1][OptionNr]++;
-
-    if(jetCombi[0] != bLeptIndex[OptionNr] || jetCombi[1] != bHadrIndex[OptionNr] )
-      atLeastOneWrongMatch[NrJets][1][OptionNr]++;
-
-    if((jetCombi[2] == lightOne || jetCombi[2] == lightTwo) &&
-       (jetCombi[3] == lightOne || jetCombi[3] == lightTwo) )
-	CorrectlyMatched[NrJets][2][OptionNr]++;
-	
-    if( (jetCombi[2] != lightOne && jetCombi[2] != lightTwo) ||
-        (jetCombi[3] != lightOne && jetCombi[3] != lightTwo) )
-	atLeastOneWrongMatch[NrJets][2][OptionNr]++;	
-  }
-}
-
-void BTagStudy::ReturnBTagTable(std::string dataSetName){ 
-
-  evtSelOutput[0].open(("EventSelectionResults/AnalyzerOutput/evtSelChoice_4JetCase_"+dataSetName+".tex").c_str());
-  evtSelOutput[1].open(("EventSelectionResults/AnalyzerOutput/evtSelChoice_5JetCase_"+dataSetName+".tex").c_str());
+  std::string TexFileTitle = "AllBTags";
+  if(nrBTags_ == 1) TexFileTitle = BTitle[0];	
+  evtSelOutput[0].open(("EventSelectionResults/AnalyzerOutput/evtSelChoice_4JetCase_"+TexFileTitle+".tex").c_str());
+  evtSelOutput[1].open(("EventSelectionResults/AnalyzerOutput/evtSelChoice_5JetCase_"+TexFileTitle+".tex").c_str());
 
   string Title[3]= {"  \\textbf{Option} & all 4 correct & $\\geq$ 1 wrong       & correct ($\\%$)       & $\\frac{s}{b}$ & non-matched \\\\", 
 		    "  \\textbf{Option} & 2 b's correct & $\\geq$ 1 b wrong     & b's correct ($\\%$)   & $\\frac{s}{b}$ & non-matched \\\\", 
@@ -293,9 +291,9 @@ void BTagStudy::ReturnBTagTable(std::string dataSetName){
       else if(itJetCase == 1){ CaptionNrJets = Caption[itWhichJets]+", 5 jets considered)}"; }
       evtSelOutput[itJetCase] << "\\begin{table}[!h] \n \\begin{tabular}{c|c|c|c|c|c} \n" << Title[itWhichJets] << " \\hline " << endl;
          
-      for(int itBTag = 0; itBTag < 6; itBTag++){
+      for(int itBTag = 0; itBTag < nrBTags_; itBTag++){
 
-	float SOverSqrtB =  (float)(CorrectlyMatched[itJetCase][itWhichJets][itBTag])/(float)(sqrt(atLeastOneWrongMatch[itJetCase][itWhichJets][itBTag]));
+	//float SOverSqrtB =  (float)(CorrectlyMatched[itJetCase][itWhichJets][itBTag])/(float)(sqrt(atLeastOneWrongMatch[itJetCase][itWhichJets][itBTag]));
         float SOverB =      (float)(CorrectlyMatched[itJetCase][itWhichJets][itBTag])/(float)(atLeastOneWrongMatch[itJetCase][itWhichJets][itBTag]);
         float CorrectPerc = (float)(CorrectlyMatched[itJetCase][itWhichJets][itBTag]*100.0)/(float)(CorrectlyMatched[itJetCase][itWhichJets][itBTag]+atLeastOneWrongMatch[itJetCase][itWhichJets][itBTag]);
 	
@@ -313,9 +311,9 @@ void BTagStudy::ReturnBTagTable(std::string dataSetName){
   }//itJetCase
 }
 
-void BTagStudy::ReturnThirdJetTable(){
+/*void BTagStudy::ReturnThirdJetTable(){
   //--- Create a separate output file for 3rd jet efficiencies! ---//
 	//ThirdJetPercentage[jj] = (float)(Correct3rdJet[jj]*100.0)/(float)(CorrectOnes5Jets[jj]);
         //" & " << Correct3rdJet[itWhichJets]          << 
         //" & " << ThirdJetPercentage[itWhichJets]     << 
-}
+}*/

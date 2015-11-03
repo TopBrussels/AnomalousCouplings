@@ -18,3 +18,6 @@ g++ -m64 -g -L $HOME/lib -I ../ -l TopTreeAnaContent53 -l TopTreeAna53 -l AnomCo
 g++ -m64 -g -L $HOME/lib -I ../ -l TopTreeAnaContent53 -l TopTreeAna53 -l AnomCoupAnalysis53 -l MLP -l TreePlayer -l TMVA -l XMLIO -I `root-config --incdir` `root-config --libs` TFFit.cc -o TFFit
 ./TFFit
 
+#     --    Light analyzer   --
+g++ -m64 -g -L $HOME/lib -I ../ -l TopTreeAnaContent53 -l TopTreeAna53 -l AnomCoupAnalysis53 -l MLP -l TreePlayer -l TMVA -l XMLIO -I `root-config --incdir` `root-config --libs` LightAnomCoupAnalyzer.cc -o LightAnomCoupAnalyzer
+./LightAnomCoupAnalyzer

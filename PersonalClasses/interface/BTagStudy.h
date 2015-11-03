@@ -18,48 +18,60 @@
 using namespace std;
 using namespace TopTree;
 
+struct sort_pred {
+  bool operator()(const std::pair<int,double> &left, const std::pair<int,double> &right) {
+    return left.second < right.second;
+  }
+};
+
 class BTagStudy{
 
   public:
-    BTagStudy(int, vector<Dataset*>);
+    BTagStudy(int, vector<Dataset*>, bool, int, float, float, float, float);
     ~BTagStudy();
 
+    void InitializeDataSet(std::string);
     void CalculateJets(vector<TLorentzVector>, vector<float> bTagValues, vector<int> jetCombi, TLorentzVector lepton, Dataset*, float);
-    void ReturnBTagTable(std::string);
-    void ReturnThirdJetTable();    //Still to fill
-    void CreateHistograms(TFile*, bool, std::string, int); 
- 
+    void ReturnBTagTable();
+    //void ReturnThirdJetTable();    //Still to fill
+    void CreateHistograms(TFile*, bool, std::string, int iDS); 
+
+    vector<int> getIndices(int bTagNr) {return jetIndices[bTagNr];}; 
     int getBHadrIndex(int bTagNr)  {return bHadrIndex[bTagNr];};
     int getBLeptIndex(int bTagNr)  {return bLeptIndex[bTagNr];};
-    int getLight1Index4Jets(int bTagNr) {return light1Index4Jets[bTagNr];};   //Need to think how to return the light jets ... (not possible to differentiate between 4 and 5 jet case)
-    int getLight2Index4Jets(int bTagNr) {return light2Index4Jets[bTagNr];};
-    int getLight1Index5Jets(int bTagNr) {return light1Index5Jets[bTagNr];};  
-    int getLight2Index5Jets(int bTagNr) {return light2Index5Jets[bTagNr];};
+    int getLight1Index(int bTagNr) {return light1Index[bTagNr];};
+    int getLight2Index(int bTagNr) {return light2Index[bTagNr];};
 
-    float Mlb, Mqqb, SigmaMlb, SigmaMqqb;
+    int getNrBTaggedJets(int OptionNr)   {return bTagJetNr[OptionNr].size();};
+    int getNrNonbTaggedJets(int OptionNr){return NonbTagJetNr[OptionNr].size();};
+    int getNrLightJets(int OptionNr)     {return LightJetNr[OptionNr].size();};
 
-    //Functions to ask everything inside the analyzer code!                          -->Is this getter still necessary?
-    vector<int> getbTaggedJets(int OptionNr)   {return bTaggedJetNr[OptionNr];};
-    vector<int> getNonbTaggedJets(int OptionNr){return NonbTaggedJetNr[OptionNr];};
-    vector<int> getLightJets(int OptionNr)     {return LightJetNr[OptionNr];};
+    float getMlbMqqbChiSq(int bTagNr) {return LowestChiSq[bTagNr];};
 
   private:
-    void CompareJetCombi(vector<int> jetCombi, int bTagNr, int jetCase, int lightJetOne, int lightJetTwo);
-    void InitializeBegin(vector<Dataset*>);
+    void CompareJetCombi(vector<int> jetCombi, int bTagNr, bool jetCase, int lightJetOne, int lightJetTwo);
     void ResetEventArrays();
-    void CalculateMlbChiSq( int bTagNr, TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int>, Dataset*, float); 
-    vector<int> CalculateMqqbChiSq( int bTagNr, vector<TLorentzVector> Jets); 
+    int getLowestMlbMqqbChiSquared( int bTagNr, vector<TLorentzVector> Jets, TLorentzVector lepton);
 
-    int LowestChiSqMlb[6], LowestChiSqMqqb[6];
-    int bHadrIndex[6], bLeptIndex[6], light1Index4Jets[6], light2Index4Jets[6], light1Index5Jets[6], light2Index5Jets[6], light1IndexMqqb[6], light2IndexMqqb[6];
-    vector<float> ChiSquaredMlb[6], ChiSquaredMqqb[6];
+    int bHadrIndex[6], bLeptIndex[6], light1Index[6], light2Index[6];
+    vector<int> jetIndices[6];
     int NotReconstructedEvent[2][6], CorrectlyMatched[2][3][6], atLeastOneWrongMatch[2][3][6];
+    float LowestChiSq[6];
 
     int verbose;
     float BJetWP[6], LightJetWP[6];  
     std::string OptionName[6], BTitle[6], BName[6];
     ofstream evtSelOutput[2];
-    vector<int> bTaggedJetNr[6], NonbTaggedJetNr[6], LightJetNr[6];
+    vector<int> bTagJetNr[6], NonbTagJetNr[6], LightJetNr[6];
+
+    float Mlb, Mqqb, S_Mlb, S_Mqqb;
+    int chosenBTag_, nrBTags_, nrDatasets_;
+    bool singleWP_, use5Jets_;  
+    std::string dataSetName_;
+
+    map<std::string,TH1F*> histo1D;
+    map<string,TH2F*> histo2D;
+    map<string,MultiSamplePlot*> MSPlot;
 
     //4- and 5-jet case comparison
     //int EventWithTwoLightJets[6];
@@ -69,12 +81,6 @@ class BTagStudy{
     //int thirdJetIsActualQuark[6][2], secondJetIsActualQuark[6][2], firstJetIsActualQuark[6][2];
     //int thirdJetIsCorrectQuark[6];
     //int thirdJetIsGoodQuark[6];    //3rd quark is one of the quarks when the two b-jets are correctly matched!
-
-    map<std::string,TH1F*> histo1D;
-    map<string,TH2F*> histo2D;
-    map<string,MultiSamplePlot*> MSPlot;
-    int nrDatasets_;
-
 };
 
 #endif

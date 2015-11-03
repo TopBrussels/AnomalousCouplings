@@ -20,9 +20,9 @@ public:
   LHCOOutput(int, bool, bool, bool);
   ~LHCOOutput();
 
-  void Initialize(std::string);
+  void Initialize(std::string, std::string dataSetName = "");
   void StoreGenInfo(vector<TRootMCParticle*> mcParticles);
-  void StoreRecoInfo(TLorentzVector lepton, vector<TLorentzVector> Jets,int bLept, int bHadr, int light1, int light2, int decayChannelEnum, float leptonCharge, vector<int> jetCombi); 
+  void StoreRecoInfo(TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int> selJetCombi, int decayChannelEnum, float leptonCharge, ofstream &EvtNrInfo, int CWUIndex); 
   void WriteLHCOPlots(TFile*);
 
   bool GenEventContentCorrect()    {return CorrectGenEvtContent;};
@@ -35,16 +35,17 @@ public:
   //TLorentzVector* getGenHadrW()    {return GenHadronicW;}; 
 
 private:
-  void LHCOEventOutput(int LHCOIndex, ostream &outputFile, unsigned int EventNumber, std::vector<TLorentzVector*> vector, std::vector<int> MGId, std::vector<float> MGBtag);
+  void LHCOEventOutput(float leptCharge, ostream &outputFile, unsigned int EventNumber, std::vector<TLorentzVector*> vector, std::vector<int> MGId, std::vector<float> MGBtag);
 
   TRootMCParticle *Top,*TopBar,*Bottom, *BottomBar,*Lepton,*NeutrinoMC,*WPlus,*WMinus,*Light,*LightBar;
   TLorentzVector *GenLeptonicTop, *GenLeptonicW, *GenLepton, *GenNeutrino;
   //TLorentzVector *GenHadronicTop, *GenHadronicW;
   unsigned int NumberNegativeElectrons, NumberNegativeMuons, NumberPositiveElectrons, NumberPositiveMuons, WrongEvtCounter;
-  unsigned int NumberNegRecoEl, NumberNegRecoMu, NumberPosRecoEl, NumberPosRecoMu, NrPosRecoMuCorrect, NrPosRecoMuWrong, NrPosRecoMuUnmatched;
+  unsigned int NumberNegRecoEl, NumberNegRecoMu, NumberPosRecoEl, NumberPosRecoMu;
+  unsigned int CWUEvtNr[3];
   bool CorrectGenEvtContent;
-  ofstream GenOutFile[4], RecoOutFile[4], WrongGenFile, CorrectRecoMuPosFile, WrongRecoMuPosFile, UnmatchedRecoMuPosFile;
-  int verbose_, LeptonCharge;
+  ofstream MWOutFile[4], WrongGenFile, CWURecoFile[3];
+  int verbose_;
   bool writeOutput_, splitLeptCharge_, splitCorrectWrong_;
   std::string GenOrReco_;
 

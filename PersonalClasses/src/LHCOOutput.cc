@@ -20,50 +20,33 @@ LHCOOutput::~LHCOOutput(){
 
   //Close the output files:
   for(int ii = 0; ii < 4; ii++){
-    if(GenOrReco_ == "Gen" && writeOutput_) GenOutFile[ii].close();
-    if(GenOrReco_ == "Reco" && writeOutput_) RecoOutFile[ii].close();
+    if(writeOutput_) MWOutFile[ii].close();
+    if(GenOrReco_ == "Reco" && writeOutput_ && ii < 3) CWURecoFile[ii].close();
   }
-  if(GenOrReco_ == "Reco" && writeOutput_){ WrongRecoMuPosFile.close(); CorrectRecoMuPosFile.close();UnmatchedRecoMuPosFile.close();}
-
 }
 
-void LHCOOutput::Initialize(string GenOrReco){
+void LHCOOutput::Initialize(string GenOrReco, std::string dataSetName){
   if(verbose_ > 3) std::cout << " In Initialize function of LHCOOutput ... " << std::endl;    
 
   GenOrReco_ = GenOrReco; //Will be updated if the sample is TTbarJets and then the destructor will actually do something (for all other samples nothing will be executed in destructor)
   NumberNegativeElectrons = 0; NumberNegativeMuons = 0; NumberPositiveElectrons = 0; NumberPositiveMuons = 0;
-  WrongEvtCounter = 0;
   NumberNegRecoEl = 0;    NumberNegRecoMu = 0;  NumberPosRecoEl = 0;  NumberPosRecoMu = 0; 
-  NrPosRecoMuCorrect = 0; NrPosRecoMuWrong = 0; NrPosRecoMuUnmatched = 0; 
+  
+  CWUEvtNr[0] = 0; CWUEvtNr[1] = 0; CWUEvtNr[2] = 0;
 
-  if(GenOrReco == "Gen" && writeOutput_ == true){
-    if(splitLeptCharge_){
-      GenOutFile[0].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_PositiveMuon.lhco");
-      GenOutFile[1].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_NegativeMuon.lhco");
-      GenOutFile[2].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_PositiveElectron.lhco");
-      GenOutFile[3].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_NegativeElectron.lhco");
-    }
-    else{
-      GenOutFile[0].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_Muon.lhco");
-      GenOutFile[1].open("MadWeightInput/AnalyzerOutput/TTbarLHCO_Electron.lhco");
-    }
-  }
-  else if(GenOrReco == "Reco" && writeOutput_ == true){
-    if(splitLeptCharge_){
-      RecoOutFile[0].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_PositiveMuon.lhco");
-      RecoOutFile[1].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_NegativeMuon.lhco");
-      RecoOutFile[2].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_PositiveElec.lhco");
-      RecoOutFile[3].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_NegativeElec.lhco");
-    }
-    else{
-      RecoOutFile[0].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_Muon.lhco");
-      RecoOutFile[1].open("MadWeightInput/AnalyzerOutput/TTbarSemiLepton_Reco_Electron.lhco");
-    }
+  int nrTypes = 4;
+  std::string whichType[4] = {"PositiveMuon","NegativeMuon","PositiveElectron","NegativeElectron"};
+  if(!splitLeptCharge_){ whichType[0] = "Muon"; whichType[1] = "Electron"; nrTypes = 2;}
 
-    if(splitCorrectWrong_){
-      WrongRecoMuPosFile.open("MadWeightInput/AnalyzerOutput/WrongRecoEvents_PositiveMuon.lhco");
-      UnmatchedRecoMuPosFile.open("MadWeightInput/AnalyzerOutput/UnmatchedRecoEvents_PositiveMuon.lhco");
-      CorrectRecoMuPosFile.open("MadWeightInput/AnalyzerOutput/CorrectRecoEvents_PositiveMuon.lhco");
+  if(writeOutput_){
+  
+    for(int iType = 0; iType < nrTypes; iType++)
+      MWOutFile[iType].open(("MadWeightInput/AnalyzerOutput/"+dataSetName+"_"+GenOrReco+"_"+whichType[iType]+".lhco").c_str());
+      
+    if(splitCorrectWrong_ && dataSetName.find("TTbarJets_SemiLept") == 0 && GenOrReco == "Reco"){
+      CWURecoFile[0].open(("MadWeightInput/AnalyzerOutput/"+dataSetName+"_Correct"+GenOrReco+"_"+whichType[0]+".lhco").c_str());
+      CWURecoFile[1].open(("MadWeightInput/AnalyzerOutput/"+dataSetName+"_Wrong"+GenOrReco+"_"+whichType[0]+".lhco").c_str());
+      CWURecoFile[2].open(("MadWeightInput/AnalyzerOutput/"+dataSetName+"_Unmatched"+GenOrReco+"_"+whichType[0]+".lhco").c_str());
     }
   }
 
@@ -224,8 +207,8 @@ void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
 	if(writeOutput_){
 	  NumberNegativeElectrons++;
           leptonType = elMinus;      //Enum information	  --> Used anywhere??
-	  if(splitLeptCharge_) LHCOEventOutput(3, GenOutFile[3], NumberNegativeElectrons,LHCOVector,MadGraphId, MGBtag);
-          else                 LHCOEventOutput(3, GenOutFile[1], NumberNegativeElectrons+NumberPositiveElectrons,LHCOVector,MadGraphId, MGBtag);
+	  if(splitLeptCharge_) LHCOEventOutput(3, MWOutFile[3], NumberNegativeElectrons,LHCOVector,MadGraphId, MGBtag);
+          else                 LHCOEventOutput(3, MWOutFile[1], NumberNegativeElectrons+NumberPositiveElectrons,LHCOVector,MadGraphId, MGBtag);
 	}
       }//Negative electron
       else if(Lepton->type() == 13){       //Looking at negative muon events (index 1 for LHCO file)
@@ -233,8 +216,8 @@ void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
 	if(writeOutput_){
 	  NumberNegativeMuons++;
           leptonType = muMinus;      //Enum information
-	  if(splitLeptCharge_) LHCOEventOutput(1, GenOutFile[1], NumberNegativeMuons,LHCOVector,MadGraphId, MGBtag);
-          else                 LHCOEventOutput(1, GenOutFile[0], NumberNegativeMuons+NumberPositiveMuons,LHCOVector,MadGraphId, MGBtag);
+	  if(splitLeptCharge_) LHCOEventOutput(1, MWOutFile[1], NumberNegativeMuons,LHCOVector,MadGraphId, MGBtag);
+          else                 LHCOEventOutput(1, MWOutFile[0], NumberNegativeMuons+NumberPositiveMuons,LHCOVector,MadGraphId, MGBtag);
 	}
       }//Negative muon
 
@@ -258,8 +241,8 @@ void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
 	if(writeOutput_){
 	  NumberPositiveElectrons++;
           leptonType = elPlus;      //Enum information
-	  if(splitLeptCharge_) LHCOEventOutput(2, GenOutFile[2], NumberPositiveElectrons,LHCOVector,MadGraphId, MGBtag);
-          else                 LHCOEventOutput(2, GenOutFile[1], NumberPositiveElectrons+NumberNegativeElectrons,LHCOVector,MadGraphId, MGBtag);
+	  if(splitLeptCharge_) LHCOEventOutput(2, MWOutFile[2], NumberPositiveElectrons,LHCOVector,MadGraphId, MGBtag);
+          else                 LHCOEventOutput(2, MWOutFile[1], NumberPositiveElectrons+NumberNegativeElectrons,LHCOVector,MadGraphId, MGBtag);
 	}
       }//Positive electron
       else if(Lepton->type() == -13){             //Looking at positive muon events (index 0 for LHCO file)
@@ -267,8 +250,8 @@ void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
 	if(writeOutput_){
 	  NumberPositiveMuons++;
           leptonType = muPlus;      //Enum information
-	  if(splitLeptCharge_) LHCOEventOutput(0, GenOutFile[0], NumberPositiveMuons,LHCOVector,MadGraphId, MGBtag);
-          else                 LHCOEventOutput(0, GenOutFile[0], NumberPositiveMuons+NumberNegativeElectrons,LHCOVector,MadGraphId, MGBtag);
+	  if(splitLeptCharge_) LHCOEventOutput(0, MWOutFile[0], NumberPositiveMuons,LHCOVector,MadGraphId, MGBtag);
+          else                 LHCOEventOutput(0, MWOutFile[0], NumberPositiveMuons+NumberNegativeElectrons,LHCOVector,MadGraphId, MGBtag);
 	}
       }//Positive muon
 	  
@@ -282,7 +265,6 @@ void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
   }//Correct event content found
   else{
     CorrectGenEvtContent = false;
-    WrongEvtCounter++;
 
     //Output in case wrong event content needs to be double-checked
     if(verbose_>4){
@@ -295,14 +277,14 @@ void LHCOOutput::StoreGenInfo(vector<TRootMCParticle*> mcParticles){
   }			    
 }//End of class StoreGenInfo
 
-void LHCOOutput::StoreRecoInfo(TLorentzVector lepton, vector<TLorentzVector> Jets, int bLeptIndex, int bHadrIndex, int light1Index, int light2Index, int decayChannel, float leptonCharge, vector<int> jetCombi){
+void LHCOOutput::StoreRecoInfo(TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int> selJetCombi, int decayChannel, float leptCharge, ofstream &EvtNrInfo, int CWUIndex){
 
   //--- Reconstruct neutrino partially ---//
   //---   (Neutrino Pt and M needed)   ---//
   if(verbose_ > 3) std::cout << " Inside StoreRecoInfo class " << std::endl;
   TLorentzVector Neutrino;
-  float NeutrinoPx = -(lepton+Jets[bLeptIndex]+Jets[bHadrIndex]+Jets[light1Index]+Jets[light2Index]).Px();
-  float NeutrinoPy = -(lepton+Jets[bLeptIndex]+Jets[bHadrIndex]+Jets[light1Index]+Jets[light2Index]).Py();
+  float NeutrinoPx = -(lepton+Jets[selJetCombi[0]]+Jets[selJetCombi[1]]+Jets[selJetCombi[2]]+Jets[selJetCombi[3]]).Px();
+  float NeutrinoPy = -(lepton+Jets[selJetCombi[0]]+Jets[selJetCombi[1]]+Jets[selJetCombi[2]]+Jets[selJetCombi[3]]).Py();
   Neutrino.SetPxPyPzE(NeutrinoPx, NeutrinoPy, 0.0, sqrt(NeutrinoPx*NeutrinoPx + NeutrinoPy*NeutrinoPy));
   Neutrino.SetPxPyPzE(NeutrinoPx, NeutrinoPy, 0.0, Neutrino.Pt());                        //Reset the Neutrino Energy to get the correct precision
   if(verbose_ > 3) std::cout << " Mass value for the neutrino : " << Neutrino.M() << " \n" << std::endl;
@@ -313,51 +295,49 @@ void LHCOOutput::StoreRecoInfo(TLorentzVector lepton, vector<TLorentzVector> Jet
   vector<float> MGRecoBtagId(6,0.0);
   MGRecoBtagId[0] = 1; MGRecoBtagId[3] = 1;   //Event selection is already performed and b-jets are always at the same position!!
 
-  //--- Check whether the event is correctly reconstructed  ---// 
-  //---  (jetCombi is initialized to 9999 for all dataSets) ---//
-  bool jetCombiFound = false;
-  bool EventCorrectlyMatched = false;
-  if(jetCombi[0] != 9999 && jetCombi[1] != 9999 && jetCombi[2] != 9999 && jetCombi[3] != 9999){
-    jetCombiFound = true;
-    if( bLeptIndex == jetCombi[0] && bHadrIndex == jetCombi[1]    &&
-       (light1Index == jetCombi[2] || light1Index == jetCombi[3]) &&
-       (light2Index == jetCombi[3] || light2Index == jetCombi[3]) )
-      EventCorrectlyMatched = true;
-  }
+  //Naming file for storing in the EvtNrInfo output file
+  std::string MainFile[4] = {"SemiMuPlus","SemiMuMinus","SemiElPlus","SemiElMinus"};
+  std::string CWUFile[3] = {"Correct  ","Wrong    ","Unmatched"};
+  if(splitLeptCharge_ == false){ MainFile[0] = "SemiMu"; MainFile[1] = "SemiEl";}
    
   //--- Plot the generator-level distributions for Pt, eta and dR ---//
   //---   --> Will be used for MG cuts comparison                 ---//
-  histo1D["Pt_Reco_LightJets"]->Fill(Jets[light1Index].Pt()); histo1D["Pt_Reco_LightJets"]->Fill(Jets[light2Index].Pt());
-  histo1D["Pt_Reco_BJets"]->Fill(Jets[bHadrIndex].Pt());      histo1D["Pt_Reco_BJets"]->Fill(Jets[bLeptIndex].Pt()); 
+  histo1D["Pt_Reco_LightJets"]->Fill(Jets[selJetCombi[2]].Pt()); histo1D["Pt_Reco_LightJets"]->Fill(Jets[selJetCombi[3]].Pt());
+  histo1D["Pt_Reco_BJets"]->Fill(Jets[selJetCombi[1]].Pt());      histo1D["Pt_Reco_BJets"]->Fill(Jets[selJetCombi[0]].Pt()); 
   if(decayChannel == 0) histo1D["Pt_Reco_Muon"]->Fill(lepton.Pt());
   if(decayChannel == 1) histo1D["Pt_Reco_Electron"]->Fill(lepton.Pt());
   histo1D["Pt_Reco_MET"]->Fill(Neutrino.Pt());
 
-  histo1D["Eta_Reco_LightJets"]->Fill(Jets[light1Index].Eta()); histo1D["Eta_Reco_LightJets"]->Fill(Jets[light2Index].Eta());
-  histo1D["Eta_Reco_BJets"]->Fill(Jets[bHadrIndex].Eta());      histo1D["Eta_Reco_BJets"]->Fill(Jets[bLeptIndex].Eta());
+  histo1D["Eta_Reco_LightJets"]->Fill(Jets[selJetCombi[2]].Eta()); histo1D["Eta_Reco_LightJets"]->Fill(Jets[selJetCombi[3]].Eta());
+  histo1D["Eta_Reco_BJets"]->Fill(Jets[selJetCombi[1]].Eta());      histo1D["Eta_Reco_BJets"]->Fill(Jets[selJetCombi[0]].Eta());
   if(decayChannel == 0) histo1D["Eta_Reco_Muon"]->Fill(lepton.Eta());
   if(decayChannel == 1) histo1D["Eta_Reco_Electron"]->Fill(lepton.Eta());
   histo1D["Eta_Reco_MET"]->Fill(Neutrino.Eta());
 
-  histo1D["deltaR_Reco_LightJets"]->Fill(Jets[light1Index].DeltaR(Jets[light2Index]));
-  histo1D["deltaR_Reco_BJets"]->Fill(Jets[bHadrIndex].DeltaR(Jets[bLeptIndex]));
-  histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[light1Index].DeltaR(Jets[bHadrIndex])); histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[light1Index].DeltaR(Jets[bLeptIndex])); 
-  histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[light2Index].DeltaR(Jets[bHadrIndex])); histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[light2Index].DeltaR(Jets[bLeptIndex]));
+  histo1D["deltaR_Reco_LightJets"]->Fill(Jets[selJetCombi[2]].DeltaR(Jets[selJetCombi[3]]));
+  histo1D["deltaR_Reco_BJets"]->Fill(Jets[selJetCombi[1]].DeltaR(Jets[selJetCombi[0]]));
+  histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[selJetCombi[2]].DeltaR(Jets[selJetCombi[1]])); histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[selJetCombi[2]].DeltaR(Jets[selJetCombi[0]])); 
+  histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[selJetCombi[3]].DeltaR(Jets[selJetCombi[1]])); histo1D["deltaR_Reco_LightWithB"]->Fill(Jets[selJetCombi[3]].DeltaR(Jets[selJetCombi[0]]));
   if(decayChannel == 0){
-    histo1D["deltaR_Reco_MuonWithJet"]->Fill(lepton.DeltaR(Jets[light1Index])); histo1D["deltaR_Reco_MuonWithJet"]->Fill(lepton.DeltaR(Jets[light2Index]));
-    histo1D["deltaR_Reco_MuonWithB"]->Fill(lepton.DeltaR(Jets[bHadrIndex]));    histo1D["deltaR_Reco_MuonWithB"]->Fill(lepton.DeltaR(Jets[bLeptIndex]));
+    histo1D["deltaR_Reco_MuonWithJet"]->Fill(lepton.DeltaR(Jets[selJetCombi[2]])); histo1D["deltaR_Reco_MuonWithJet"]->Fill(lepton.DeltaR(Jets[selJetCombi[3]]));
+    histo1D["deltaR_Reco_MuonWithB"]->Fill(lepton.DeltaR(Jets[selJetCombi[1]]));    histo1D["deltaR_Reco_MuonWithB"]->Fill(lepton.DeltaR(Jets[selJetCombi[0]]));
   }
   if(decayChannel == 1){
-    histo1D["deltaR_Reco_ElectronWithJet"]->Fill(lepton.DeltaR(Jets[light1Index])); histo1D["deltaR_Reco_ElectronWithJet"]->Fill(lepton.DeltaR(Jets[light2Index]));
-    histo1D["deltaR_Reco_ElectronWithB"]->Fill(lepton.DeltaR(Jets[bHadrIndex]));    histo1D["deltaR_Reco_ElectronWithB"]->Fill(lepton.DeltaR(Jets[bLeptIndex]));
+    histo1D["deltaR_Reco_ElectronWithJet"]->Fill(lepton.DeltaR(Jets[selJetCombi[2]])); histo1D["deltaR_Reco_ElectronWithJet"]->Fill(lepton.DeltaR(Jets[selJetCombi[3]]));
+    histo1D["deltaR_Reco_ElectronWithB"]->Fill(lepton.DeltaR(Jets[selJetCombi[1]]));    histo1D["deltaR_Reco_ElectronWithB"]->Fill(lepton.DeltaR(Jets[selJetCombi[0]]));
   }
 
   //---  Filling of LHCO files for reco events  ---//
-  if(leptonCharge < 0.0 ){ //Negative lepton events
-    LHCORecoVector[0] = &Jets[bHadrIndex]; 
-    LHCORecoVector[1] = &Jets[light1Index];
-    LHCORecoVector[2] = &Jets[light2Index];
-    LHCORecoVector[3] = &Jets[bLeptIndex];
+  int MWEvtNr = 999, fileIndex = 999;
+  float leptonCharge = 999;
+
+  if(leptCharge < 0.0 ){ //Negative lepton events
+    leptonCharge = -1;
+
+    LHCORecoVector[0] = &Jets[selJetCombi[1]]; 
+    LHCORecoVector[1] = &Jets[selJetCombi[2]];
+    LHCORecoVector[2] = &Jets[selJetCombi[3]];
+    LHCORecoVector[3] = &Jets[selJetCombi[0]];
     LHCORecoVector[4] = &lepton;
     LHCORecoVector[5] = &Neutrino;
 
@@ -365,59 +345,61 @@ void LHCOOutput::StoreRecoInfo(TLorentzVector lepton, vector<TLorentzVector> Jet
     if(decayChannel == 1){//Negative electron
       MadGraphRecoId[4] = 1;
       NumberNegRecoEl++;  
-      if(splitLeptCharge_) LHCOEventOutput(3,RecoOutFile[3], NumberNegRecoEl, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
-      else                 LHCOEventOutput(3,RecoOutFile[1], NumberNegRecoEl+NumberPosRecoEl, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
+      if(splitLeptCharge_){ fileIndex = 3; MWEvtNr = NumberNegRecoEl;}
+      else                { fileIndex = 1; MWEvtNr = NumberNegRecoEl+NumberPosRecoEl;}
     }
     if(decayChannel == 0){//Negative muon
       MadGraphRecoId[4] = 2;
       NumberNegRecoMu++;
-      if(splitLeptCharge_) LHCOEventOutput(1, RecoOutFile[1], NumberNegRecoMu, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
-      else                 LHCOEventOutput(1, RecoOutFile[0], NumberNegRecoMu+NumberPosRecoMu, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
+      if(splitLeptCharge_){ fileIndex = 1; MWEvtNr = NumberNegRecoMu;}
+      else                { fileIndex = 0; MWEvtNr = NumberNegRecoMu+NumberPosRecoMu;}
     }
   }//End of negative lepton
-  else if(leptonCharge > 0.0 ){ //Positive lepton events
-    LHCORecoVector[0] = &Jets[bLeptIndex];
+  else if(leptCharge > 0.0 ){ //Positive lepton events
+    leptonCharge = 1;
+
+    LHCORecoVector[0] = &Jets[selJetCombi[0]];
     LHCORecoVector[1] = &lepton;
     LHCORecoVector[2] = &Neutrino;
-    LHCORecoVector[3] = &Jets[bHadrIndex];
-    LHCORecoVector[4] = &Jets[light1Index];
-    LHCORecoVector[5] = &Jets[light2Index];
+    LHCORecoVector[3] = &Jets[selJetCombi[1]];
+    LHCORecoVector[4] = &Jets[selJetCombi[2]];
+    LHCORecoVector[5] = &Jets[selJetCombi[3]];
 
     MadGraphRecoId[2] = 6;
     if(decayChannel == 1){//Positive electron
       MadGraphRecoId[1] = 1;
       NumberPosRecoEl++;
-      if(splitLeptCharge_) LHCOEventOutput(2,RecoOutFile[2], NumberPosRecoEl, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);	 
-      else                 LHCOEventOutput(2,RecoOutFile[1], NumberPosRecoEl+NumberNegRecoEl, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);	 
+      if(splitLeptCharge_){ fileIndex = 2; MWEvtNr = NumberPosRecoEl;}
+      else                { fileIndex = 1; MWEvtNr = NumberPosRecoEl+NumberNegRecoEl;}
     }
     if(decayChannel == 0){//Positive muon
       MadGraphRecoId[1] = 2;
       NumberPosRecoMu++;
-      if(splitLeptCharge_) LHCOEventOutput(0, RecoOutFile[0], NumberPosRecoMu, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
-      else                 LHCOEventOutput(0, RecoOutFile[0], NumberPosRecoMu+NumberNegRecoMu, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
-      if(EventCorrectlyMatched == true && jetCombiFound == true && splitCorrectWrong_){
-        NrPosRecoMuCorrect++; 
-        LHCOEventOutput(0, CorrectRecoMuPosFile, NrPosRecoMuCorrect, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
-      }
-      else if(EventCorrectlyMatched == false && jetCombiFound == true && splitCorrectWrong_){ 
-        NrPosRecoMuWrong++;   
-        LHCOEventOutput(0, WrongRecoMuPosFile, NrPosRecoMuWrong, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
-      }
-      else if(jetCombiFound == false && splitCorrectWrong_){
-        NrPosRecoMuUnmatched++;
-        LHCOEventOutput(0, UnmatchedRecoMuPosFile, NrPosRecoMuUnmatched, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
-      }
+      if(splitLeptCharge_){ fileIndex = 0; MWEvtNr = NumberPosRecoMu;}
+      else                { fileIndex = 0; MWEvtNr = NumberPosRecoMu+NumberNegRecoMu;}
     }
   }//End of positive lepton
 
+  LHCOEventOutput(leptonCharge, MWOutFile[fileIndex], MWEvtNr, LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
+  EvtNrInfo << "            " << MainFile[fileIndex] << "                " << MWEvtNr;
+  if( MWEvtNr < 10) EvtNrInfo << " "; if( MWEvtNr < 100) EvtNrInfo << " "; if( MWEvtNr < 1000) EvtNrInfo << " "; if( MWEvtNr < 10000) EvtNrInfo << " "; if( MWEvtNr < 100000) EvtNrInfo << " ";
+ 
+  //In case the Correct/Wrong/Unmatched lhco files should be created, do this now!
+  if(splitCorrectWrong_){
+  
+    //fileIndices of interest are: (0 -- both in case lept charge is splitted or not since this corresponds to semiMuPlus or semiMu !!)  --> in order to add SemiEl (!splitLeptCharge_ && fileIndex == 1) should be asked!
+    if(fileIndex == 0){
+    
+      CWUEvtNr[CWUIndex]++; 
+      LHCOEventOutput(leptonCharge, CWURecoFile[CWUIndex], CWUEvtNr[CWUIndex], LHCORecoVector, MadGraphRecoId, MGRecoBtagId);
+
+      EvtNrInfo << "                " << CWUFile[CWUIndex] << "                     " << CWUEvtNr[CWUIndex];
+    }
+  } 
+
 }//End of class StoreRecoInfo 
 
-void LHCOOutput::LHCOEventOutput(int LHCOIndex, ostream &outputFile, unsigned int EventNumber, std::vector<TLorentzVector*> vector, std::vector<int> MGId, std::vector<float> MGBtag){
-
-  if(LHCOIndex == 0 || LHCOIndex == 2)
-    LeptonCharge =1;
-  else if(LHCOIndex == 1 || LHCOIndex == 3)
-    LeptonCharge = -1;
+void LHCOOutput::LHCOEventOutput(float LeptonCharge, ostream &outputFile, unsigned int EventNumber, std::vector<TLorentzVector*> vector, std::vector<int> MGId, std::vector<float> MGBtag){
 
   if(EventNumber == 1){
     outputFile << "#</MGPGSCard> " << endl;
@@ -453,24 +435,28 @@ void LHCOOutput::WriteLHCOPlots(TFile* outfile){
     outfile->cd();
     if(verbose_ > 3) std::cout << " Inside WriteLHCOPlots function of LHCOOutput class ! \n Histograms will be filled in file : " << outfile->GetName() << " ********************************" << std::endl;
 
-    TDirectory* th1dir = outfile->GetDirectory("1D_histograms_LHCOOutput");   //Check whether directory already exists ..
-    if(!th1dir) th1dir = outfile->mkdir("1D_histograms_LHCOOutput");          // .. and otherwise create it!
-    th1dir->cd();
-    for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
-      TH1F *temp = it->second;
-      int N = temp->GetNbinsX();
-      temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
-      temp->SetBinContent(N+1,0);
-      temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
-      temp->Write();
+    if(histo1D.size() > 0){
+      TDirectory* th1dir = outfile->GetDirectory("1D_histograms_LHCOOutput");   //Check whether directory already exists ..
+      if(!th1dir) th1dir = outfile->mkdir("1D_histograms_LHCOOutput");          // .. and otherwise create it!
+      th1dir->cd();
+      for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
+        TH1F *temp = it->second;
+        int N = temp->GetNbinsX();
+        temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
+        temp->SetBinContent(N+1,0);
+        temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
+        temp->Write();
+      }
     }
     
-    TDirectory* th2dir = outfile->GetDirectory("2D_histograms_LHCOOutput");
-    if(!th2dir) th2dir = outfile->mkdir("2D_histograms_LHCOOutput");
-    th2dir->cd();
-    for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){    
-      TH2F *temp = it->second;
-      temp->Write();
+    if(histo2D.size() > 0){
+      TDirectory* th2dir = outfile->GetDirectory("2D_histograms_LHCOOutput");
+      if(!th2dir) th2dir = outfile->mkdir("2D_histograms_LHCOOutput");
+      th2dir->cd();
+      for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){    
+        TH2F *temp = it->second;
+        temp->Write();
+      }
     }
     outfile->cd(); 
   }
