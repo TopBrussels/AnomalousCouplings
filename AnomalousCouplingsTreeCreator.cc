@@ -291,7 +291,7 @@ int main (int argc, char *argv[]){
   // PileUp Reweighting //   --> Need this for the event selection table!
   ////////////////////////
   LumiReWeighting LumiWeights;
-  LumiWeights = LumiReWeighting("PersonalClasses/Calibrations/PUReweighting/pileup_MC_Summer12_S10.root", "PersonalClasses/Calibrations/PUReweighting/pileup_2012Data53X_UpToRun208686_Mu/nominal.root", "pileup", "pileup");
+  LumiWeights = LumiReWeighting("PersonalClasses/Calibrations/PUReweighting/pileup_MC_Summer12_S10.root", "PersonalClasses/Calibrations/PUReweighting/pileup_2012Data53X_UpToRun208686_pixelcorrv2_Mu/nominal.root", "pileup", "pileup");
   cout << " - LumiReWeighting instantiated ... " << endl;
 
   ////////////////////////////////////
