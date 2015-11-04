@@ -352,9 +352,9 @@ int main (int argc, char *argv[]){
     AnomCoupLight* anomCoupLight = 0;
 
     //Initialize LightTuple (AnomCoupTree) specific stuff:
+    TFile* LightFile = new TFile(("LightTree/AnomCoupLight_"+dataSetName+"_"+systematic+".root").c_str(),"RECREATE");  
     TTree* LightTree = new TTree("LightTree","Tree containing the AnomCoup information");
     LightTree->Branch("TheAnomCoupLight","AnomCoupLight",&anomCoupLight);
-    TFile* LightFile = new TFile(("LightTree/AnomCoupLight_"+dataSetName+"_"+systematic+".root").c_str(),"RECREATE");  
 
     /////////////////////////////////////////
     //  LHCO Output files + GeneratorInfo  //
@@ -925,6 +925,10 @@ int main (int argc, char *argv[]){
     temp->Write();
   }
 
+  fout->cd();
+  configTree->Fill();
+  configTree->Write();
+
   //Selection tables
   selecTableSemiMu.TableCalculator(false,true,true,true,true);
   string selectiontableMu = "EventSelectionResults/AnalyzerOutput/SelectionTable_BTAG_SEMIMU.tex";
@@ -936,8 +940,8 @@ int main (int argc, char *argv[]){
   fout->Close(); 
    
   delete fout;
-  //delete tcdatasets;
-  //delete tcAnaEnv;
+  delete tcdatasets;
+  delete tcAnaEnv;
   //delete configTree;
   
   cout << "It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << " to run the program" << endl;
