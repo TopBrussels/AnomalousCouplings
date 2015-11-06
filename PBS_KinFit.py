@@ -128,10 +128,7 @@ class KinFitHandler:
         global timestamp
         global userName
         
-        if self.monsterFile == "":
-            self.resultsDir = "./Results/RESULTS_KinFit_"+options.TaskName+"_"+timestamp+"/"
-        else:
-            self.resultsDir = "./Results/RESULTS_Likelihood_"+options.TaskName+"_"+timestamp+"/"
+        self.resultsDir = "./Results/RESULTS_"+options.TaskName+"_"+timestamp+"/"
             
         if not os.path.exists(self.resultsDir) and self.nJob == 0:
             os.mkdir(self.resultsDir)
@@ -160,7 +157,7 @@ class KinFitHandler:
         
         self.log.output("Creating xml config files for TopTreeAnalysis")
         
-        self.xmlCFG = options.WorkingDir+"/myJESconfig_"+str(self.nJob)+".xml"
+        self.xmlCFG = options.WorkingDir+"/myAnomCoupconfig_"+str(self.nJob)+".xml"
 				
         xmlFile = open(self.xmlCFG,"w")
         xmlFile.write("<?xml version=\"1.0\"?>\n")
@@ -211,7 +208,7 @@ class KinFitHandler:
         pbs.write("#PBS -j oe\n")
         pbs.write("#PBS -k oe\n") # dit zorgt voor realtime log uitspuwen
         if self.monsterFile == "":
-            pbs.write("#PBS -l walltime=20:00:00\n")
+            pbs.write("#PBS -l walltime=3:00:00\n")
         else:
             pbs.write("#PBS -l walltime=06:00:00\n")
         
@@ -224,14 +221,14 @@ class KinFitHandler:
         pbs.write("export ROOTSYS=/localgrid/"+userName+"/root\n")
         pbs.write("export PATH=$ROOTSYS/bin:$PATH\n")
         pbs.write("export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH\n")
-        pbs.write("export LD_LIBRARY_PATH=/scratch/$PBS_JOBID/KinFit_setup:$LD_LIBRARY_PATH\n")
+        pbs.write("export LD_LIBRARY_PATH=/scratch/$PBS_JOBID/AnomCoup_setup/lib:$LD_LIBRARY_PATH\n")
         pbs.write("echo \"Root Version: $(root-config --version)\"\n")
 
-        pbs.write("\nmv -f "+self.workingDir+" /scratch/$PBS_JOBID/KinFit_setup\n")
-        pbs.write("cd /scratch/$PBS_JOBID/KinFit_setup\n")
-        pbs.write("ls -l JECFiles/\n")
-        pbs.write("rm -rf Monsters/*\n")
-        pbs.write("rm -rf LikelihoodResults_ASCII/*\n")
+        pbs.write("\nmv -f "+self.workingDir+" /scratch/$PBS_JOBID/AnomCoup_setup\n")
+        pbs.write("cd /scratch/$PBS_JOBID/AnomCoup_setup\n")
+        pbs.write("ls -l PersonalClasses/Calibrations/JECFiles/\n")
+        #pbs.write("rm -rf Monsters/*\n")
+        #pbs.write("rm -rf LikelihoodResults_ASCII/*\n")
         pbs.write("echo \"Downloading files from "+self.inputPNFSDir+"\"\n")
         
         if self.monsterFile == "":
@@ -243,26 +240,26 @@ class KinFitHandler:
             if self.inputFileNr == -1:
                 for i in inputFiles:
                     pbs.write("echo \"Downloading file:  "+i+"\"\n")
-                    pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+i+" /scratch/$PBS_JOBID/KinFit_setup/"+str(i)+"\n")
+                    pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+i+" /scratch/$PBS_JOBID/AnomCoup_setup/"+str(i)+"\n")
             else:
                 pbs.write("echo \"Downloading file nr:  "+str(self.inputFileNr-1)+"\"\n")
                 pbs.write("echo \"Downloading file:  "+inputFiles[self.inputFileNr-1]+"\"\n")
-                pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+inputFiles[self.inputFileNr-1]+" /scratch/$PBS_JOBID/KinFit_setup/TopTree_Skimmed_"+str(self.inputFileNr)+".root\n")
+                pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+inputFiles[self.inputFileNr-1]+" /scratch/$PBS_JOBID/AnomCoup_setup/TopTree_Skimmed_"+str(self.inputFileNr)+".root\n")
             
-        pbs.write("ls -ltr /scratch/$PBS_JOBID/KinFit_setup\n\n")
+        pbs.write("ls -ltr /scratch/$PBS_JOBID/AnomCoup_setup\n\n")
         
         if self.monsterFile == "":
-            pbs.write("./TTbarJES "+self.systematicOption+" myJESconfig_"+str(self.nJob)+".xml\n")
+            pbs.write("./AnomalousCouplingsTreeCreator -1 myAnomCoupconfig_"+str(self.nJob)+".xml\n")
             pbs.write("rm -f TopTree_Skimmed_*.root\n")
-            pbs.write("ls -l Monsters/\n")
-        else:
-            pbs.write("./MTopDiff_Analysis "+self.monsterFileName+"\n")
-            pbs.write("rm -rf *.root Monsters "+self.monsterFileName+"\n")
-            pbs.write("ls -lah LikelihoodResults_ASCII/\n")
+            pbs.write("ls -l LightTree/\n")
+        #else:
+        #    pbs.write("./MTopDiff_Analysis "+self.monsterFileName+"\n")
+        #    pbs.write("rm -rf *.root Monsters "+self.monsterFileName+"\n")
+        #    pbs.write("ls -lah LikelihoodResults_ASCII/\n")
         
-        pbs.write("rm -rf resolutions *.so FitResults_ASCII PileUpReweighting Plots* weights JECFiles\n")
-        pbs.write("rm -rf TTbarJES MTopDiff_Analysis\n")
-        pbs.write("mv -fv /scratch/$PBS_JOBID/KinFit_setup "+self.workingDir+"\n")
+        #pbs.write("rm -rf resolutions *.so FitResults_ASCII PileUpReweighting Plots* weights JECFiles\n")
+        #pbs.write("rm -rf TTbarJES MTopDiff_Analysis\n")
+        pbs.write("mv -fv /scratch/$PBS_JOBID/AnomCoup_setup "+self.workingDir+"\n")
         pbs.write("echo \"THIS IS THE END\"\n")
         pbs.close()
 
@@ -328,7 +325,7 @@ class KinFitHandler:
                 
                 if not self.inputFileNr == -1:
             
-                    outRootFile = Popen("ls "+self.workingDir+"/Monsters/*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("/Monsters/")[1].split("\n")[0]
+                    outRootFile = Popen("ls "+self.workingDir+"/LightTree/*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("/LightTree/")[1].split("\n")[0]
                     
                     if self.inputFileNr == 1:
                     
@@ -336,16 +333,16 @@ class KinFitHandler:
                     
                     newOutRootFile = outRootFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
 
-                    self.log.output(Popen("cp -f "+self.workingDir+"/Monsters/"+outRootFile+" "+self.resultsDir+newOutRootFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+                    self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/"+outRootFile+" "+self.resultsDir+newOutRootFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
 #                    self.log.output(Popen("cp -f "+self.workingDir+"/Monsters/"+outRootFile+" "+self.resultsDir+newOutRootFile+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
                     
                 else:
 
-                    self.log.output(Popen("cp -f "+self.workingDir+"/Monsters/*.root "+self.resultsDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+                    self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/*.root "+self.resultsDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
             
-            else:
+            #else:
                 
-                self.log.output(Popen("cp -f "+self.workingDir+"/LikelihoodResults_ASCII/*.txt* "+self.resultsDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+                #self.log.output(Popen("cp -f "+self.workingDir+"/LikelihoodResults_ASCII/*.txt* "+self.resultsDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
 #                self.log.output(Popen("cp -f "+self.workingDir+"/LikelihoodResults_ASCII/*.txt* "+self.resultsDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
                 
             # clean up
@@ -443,7 +440,7 @@ if options.WorkingDir == "":
 
 ## SETTINGS
 
-RootInstallation = "/Software/LocalSoft/root_5.32_stijn/"
+RootInstallation = "/user/aolbrech/LocalSoftWare/root_v5.34.05_James/"  # /Software/LocalSoft/root_5.32_stijn/"
 #RootInstallation = "/user/cmssoft/root_old/"
 
 SleepTime = int(120) # time to sleep between checking of job status
@@ -610,7 +607,7 @@ while notDone:
 		
 # Merge (hadd) all the output files from the same sample
 if options.monsterDir == "":
-    resultsDir = "./Results/RESULTS_KinFit_"+options.TaskName+"_"+timestamp+"/"
+    resultsDir = "./Results/RESULTS_AnomCoup_"+options.TaskName+"_"+timestamp+"/"
     for file in filesToMerge:
         log.output("Merging files:  "+file+"_*.root")
         nInFiles = int(Popen("ls -l "+resultsDir+file+"_*.root | wc -l", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
@@ -630,7 +627,7 @@ if options.monsterDir == "":
             nInFiles = len(inFiles)
             if nInFiles > 1:
                 log.output("Merging "+dataSet+" "+isoType+" files")
-                command = "export ROOTSYS="+RootInstallation+"; export PATH=$ROOTSYS/bin:$PATH; export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH; cd "+resultsDir+"; hadd KinFit_LightMonsters_TopMassDiff_Data_"+dataSet+"_"+isoType+"_MERGED.root"
+                command = "export ROOTSYS="+RootInstallation+"; export PATH=$ROOTSYS/bin:$PATH; export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH; cd "+resultsDir+"; hadd AnomCoup_LightMonsters_TopMassDiff_Data_"+dataSet+"_"+isoType+"_MERGED.root"
                 for i in range(0,nInFiles):
                     command += " "+inFiles[i]
                 command += "; mkdir backup"
