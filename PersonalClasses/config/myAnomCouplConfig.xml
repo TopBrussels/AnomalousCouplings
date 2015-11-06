@@ -13,28 +13,20 @@ beta_QCD = 2.09
 
 <!-- Simulation samples : -->
 <!-- TTbarJets samples were created without HLT trigger HENCE can be used for both applied triggers !! -->
-<d name="TTbarJets_SemiLept" title="t#bar{t}+jets (semi-lept)" add="0" color="4" ls="1" lw="2" normf="1" xsection="110.61" EqLumi="220488.346" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/TopTree_Skimmed_*.root"/>
-<d name="TTbarJets_SemiLept" title="t#bar{t}+jets (semi-lept, few evts)" add="1" color="4" ls="1" lw="2" normf="1" xsection="110.61" EqLumi="1549.317" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/TopTree_Skimmed_1.root"/>
+<!-- Branching ratio correction has been applied, so no additional scaleFactor part needed anymore! -->
+<d name="TTbarJets_SemiLept" title="t#bar{t}+jets (semi-lept)" add="0" color="4" ls="1" lw="2" normf="1" xsection="107.67" EqLumi="220488.346" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/TopTree_Skimmed_*.root"/>
 
-<!-- QCD Samples were created without HLT trigger HENCE can be used for both applied triggers !! -->
-<!-- QCD for muon channel HENCE MuEnriched DataDriven -->
-<d name="QCD_Mu15" title="QCD" add="0" color="15" ls="1" lw="2" normf="1" xsection="84679.3" EqLumi="296.1567" filenames="/user/aolbrech/Samples/Summer11_v2/Mu3JetsSkim_QCD_MuEnriched_Id802/TopTree_Skimmed_*.root"/>
+<d name="TTbarJets_SemiLept" title="t#bar{t}+jets (semi-lept, few evts)" add="0" color="4" ls="1" lw="2" normf="1" xsection="107.67" EqLumi="1549.317" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/TopTree_Skimmed_2.root"/>
 
-<!-- QCD for electron channel -->
-<d name="QCD_Pt-20to30_BCtoE" title="QCD" add="0" color="15" ls="1" lw="2" normf="1" xsection="139299" EqLumi="14.9048" filenames="/user/aolbrech/Samples/Summer11_v2/Elec3JetsSkim_QCD/Elec3JetsSkim_QCD_Pt-20to30_BCtoE_TuneZ2_7TeV-pythia6_Summer11-PU_S3_START42_V11-v2/TopTree_Skimmed_*.root"/>
+<d name="TTbarJets_FullLept" title="t#bar{t}+jets (full-lept)" add="0" color="4" ls="1" lw="2" normf="1" xsection="25.80" EqLumi="488666.029" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v2_TopTreeId3413/27082015_214141/TopTree_Skimmed_*.root"/>
 
-<d name="QCD_Pt-30to80_BCtoE" title="QCD" add="0" color="15" ls="1" lw="2" normf="1" xsection="143844.8" EqLumi="14.1125" filenames="/user/aolbrech/Samples/Summer11_v2/Elec3JetsSkim_QCD/Elec3JetsSkim_QCD_Pt-30to80_BCtoE_TuneZ2_7TeV-pythia6_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_*.root"/>
+<d name="TTbarJets_FullHadr" title="t#bar{t}+jets (full-hadr)" add="0" color="4" ls="1" lw="2" normf="1" xsection="112.32" EqLumi="281744.526" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1_TopTreeId3426/28082015_115655/TopTree_Skimmed_*.root"/>
 
-<d name="QCD_Pt-80to170_BCtoE" title="QCD" add="0" color="15" ls="1" lw="2" normf="1" xsection="9431.1" EqLumi="114.7998" filenames="/user/aolbrech/Samples/Summer11_v2/Elec3JetsSkim_QCD/Elec3JetsSkim_QCD_Pt-80to170_BCtoE_TuneZ2_7TeV-pythia_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_1.root"/>
-
-<d name="QCD_Pt-20to30_EMEnriched" title="QCD" add="0" color="15" ls="1" lw="2" normf="1" xsection="2502660" EqLumi="14.2200" filenames="/user/aolbrech/Samples/Summer11_v2/Elec3JetsSkim_QCD/Elec3JetsSkim_QCD_Pt-20to30_EMEnriched_TuneZ2_7TeV-pythia6_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_*.root"/>
-
-<d name="QCD_Pt-30to80_EMEnriched" title="QCD" add="0" color="15" ls="1" lw="2" normf="1" xsection="3625840" EqLumi="19.2050" filenames="/user/aolbrech/Samples/Summer11_v2/Elec3JetsSkim_QCD/Elec3JetsSkim_QCD_Pt-30to80_EMEnriched_TuneZ2_7TeV-pythia_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_*.root"/>
-
-<d name="QCD_Pt-80to170_EMEnriched" title="QCD" add="0" color="15" ls="1" lw="2" normf="1" xsection="142813.8" EqLumi="57.0139" filenames="/user/aolbrech/Samples/Summer11_v2/Elec3JetsSkim_QCD/Elec3JetsSkim_QCD_Pt-80to170_EMEnriched_TuneZ2_7TeV-pythia6_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_*.root"/>
-
-<!-- Monte Carlo Samples for IsoMu17/20/24 trigger -->
-<d name="WJets" title="WJets" add="0" color="2" ls="1" lw="2" normf="1" xsection="31314" EqLumi="2483.6457" filenames="/user/aolbrech/Samples/Summer11_v2/TriJetSkim_HLT_OR/TriJetSkim_HLT_OR_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_MERGED.root"/>
+<!-- Monte Carlo Samples for IsoMu24_eta2p1 or HLT_Ele27_WP80_v10 trigger -->
+<d name="WJets_1Jets" title="Wlnu (1j)" add="1" color="2" ls="1" lw="2" normf="1" xsection="6662.7829" EqLumi="3470.2566" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W1JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3425/02092015_105850/TopTree_Skimmed_*.root"/>
+<d name="WJets_2Jets" title="Wlnu (2j)" add="1" color="2" ls="1" lw="2" normf="1" xsection="2159.2352" EqLumi="15767.0961" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W2JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3417/02092015_095349/TopTree_Skimmed_*.root"/>
+<d name="WJets_3Jets" title="Wlnu (3j)" add="1" color="2" ls="1" lw="2" normf="1" xsection="640.3675" EqLumi="24153.1043" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W3JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3412/31082015_101803/TopTree_Skimmed_*.root"/>
+<d name="WJets_4Jets" title="Wlnu (4j)" add="1" color="2" ls="1" lw="2" normf="1" xsection="264.0436" EqLumi="50684.0007" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W4JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1/30082015_124242/TopTree_Skimmed_*.root"/>
 
 <d name="ST_SingleTop_tChannel_t" title="SingleTop_t_Channel_t" add="0" color="7" ls="1" lw="2" normf="1" xsection="41.92" EqLumi="89696.1116" filenames="/user/aolbrech/Samples/Summer11_v2/TriJetSkim_HLT_OR/TriJetSkim_HLT_OR_T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/TopTree_Skimmed_*.root"/>
 
@@ -61,15 +53,19 @@ beta_QCD = 2.09
 
 <!-- Data samples : -->
 <!-- Data samples with IsoMu24 trigger-->
-<d name="Data_Mu" title="Data (19.6 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="874.840" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3427/30042013_234038/*.root"/>
-<d name="Data_Mu" title="Data (19.6 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="874.840" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/blyweert/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3446/14052013_155527/*_1.root"/>
+<d name="Data_Mu" title="Data (19.6 fb^{-1})" add="1" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="19646.840" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012A_22Jan2013_Prod_53X_v5_TopTreeId3427/22082015_155321/*.root,dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012B_22Jan2013_Prod_53X_v5_TopTreeId3429/25082015_103219/*.root,dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012C_22Jan2013_Prod_53X_v5_TopTreeId3446/22082015_103755/*.root,dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012D_22Jan2013_Prod_53X_v5_TopTreeId3444/02092015_182940/*.root"/>
+<d name="Data_Mu_2012A" title="Data Run2012A (0.874840 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="874.840" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012A_22Jan2013_Prod_53X_v5_TopTreeId3427/22082015_155321/TopTree_Skimmed_*.root"/>
+<d name="Data_Mu_2012B" title="Data Run2012B (4.401 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="4401" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012B_22Jan2013_Prod_53X_v5_TopTreeId3429/25082015_103219/TopTree_Skimmed_*.root"/>
+<d name="Data_Mu_2012C" title="Data Run2012C (7.125 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="7125" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012C_22Jan2013_Prod_53X_v5_TopTreeId3446/22082015_103755/TopTree_Skimmed_*.root"/>
+<d name="Data_Mu_2012D" title="Data Run2012D (7.246 fb^{-1})" add="0" color="1" ls="1" lw="2" normf="1" xsection="1" EqLumi="7246" filenames="dcap://maite.iihe.ac.be//pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012D_22Jan2013_Prod_53X_v5_TopTreeId3444/02092015_182940/TopTree_Skimmed_*.root"/>
+
 
 </datasets>
 
 <!-- All parameters needed for the selection and the bkg estimation methods -->
 <analysis>
 <!-- JetType: 0=TRootJet - 1=TRootCaloJet - 2=TRootPFJet -->
-<a type="Collections" PVCollection="PrimaryVertex" JetType="2" JetCollection="PFJets_selectedPatJetsPF2PAT" METType="2" METCollection="PFMET_patType1CorrectedPFMetPF2PAT" MuonCollection="Muons_selectedPatMuonsPF2PAT" ElectronCollection="Electrons_selectedPatElectronsPF2PAT" loadGenJetCollection="1" GenJetCollection="GenJets_ak5GenJetsNoNu" loadGenEventCollection="1" GenEventCollection="GenEvent" loadNPGenEventCollection="0" NPGenEventCollection="NPGenEvent" loadMCParticles="1" MCParticlesCollection="MCParticles" TrackMETCollection="" loadTrackMET="0"/>
+<a type="Collections" PVCollection="PrimaryVertex" JetType="2" JetCollection="PFJets_selectedPatJetsPF2PAT" METType="2" METCollection="PFMET_patType1CorrectedPFMetPF2PAT" MuonCollection="Muons_selectedPatMuonsPF2PAT" ElectronCollection="Electrons_selectedPatElectronsPF2PAT" loadGenJetCollection="0" GenJetCollection="GenJets_ak5GenJetsNoNu" loadGenEventCollection="0" GenEventCollection="GenEvent" loadNPGenEventCollection="0" NPGenEventCollection="NPGenEvent" loadMCParticles="1" MCParticlesCollection="MCParticles" TrackMETCollection="" loadTrackMET="0"/>
 <a type="Selection" PVertexNdofCut="4" PVertexZCut="24." PVertexRhoCut="2." MuonPtCutSR="20." MuonEtaCutSR="2.1" MuonRelIsoCutSR="0.05" MuonNHitsCutSR="10" MuonD0CutSR="0.02" MuonDRJetsCut="0.3" MuonPtCutVetoSR="10." MuonEtaCutVetoSR="2.5" MuonRelIsoCutVetoSR="0.2" ElectronPtCut="15." ElectronEtaCut="2.5" ElectronRelIsoCut="0.2" JetsPtCutSR="30." JetsEtaCutSR="2.4" applyJetID="1" JetEMFCut="0.01" n90HitsCut="1" fHPDCut="0.98" NofJets="4" NofJetBins="2"/>
 
 <a type="Conditions" isMC="1" MCRound="0" Vars_ByFile="0" VarsFile="m0_100_m12_100" IntToCut="4" Verbose="2" Luminosity="99999" JES="1." nPseudoExp="0" nPseudoSession="0" runonTTrees="0" doABCD="1" doVJEstim="1" doVJEstPE="1" doTtJEstim="1" doTemplComp="0" doSystematics="0"/><!-- Luminosity in pb-1 -->

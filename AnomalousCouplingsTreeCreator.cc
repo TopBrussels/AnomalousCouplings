@@ -23,6 +23,7 @@
 #include "TopTreeAnalysisBase/MCInformation/interface/ResolutionFit.h"
 #include "TopTreeAnalysisBase/MCInformation/interface/JetPartonMatching.h"
 #include "TopTreeAnalysisBase/Reconstruction/interface/JetCorrectorParameters.h"
+#include "TopTreeAnalysisBase/Reconstruction/interface/JetCorrectionUncertainty.h"
 #include "PersonalClasses/Style.C"                                                 //CHECK if this works!
 #include "TopTreeAnalysisBase/MCInformation/interface/LumiReWeighting.h"
 #include "TopTreeAnalysisBase/Tools/interface/LeptonTools.h"
@@ -55,10 +56,10 @@ int main (int argc, char *argv[]){
   /////////////////////
 
   //Nr events
-  int NrEvtsToRunOver = -1;
+  int NrEvts = -1;
   if(argc >= 2 && string(argv[1]) != "-1"){
-    NrEvtsToRunOver = atoi(argv[1]);
-    cout << " ** Will only look at " << NrEvtsToRunOver << " events ! " << endl;
+    NrEvts = atoi(argv[1]);
+    cout << " ** Will only look at " << NrEvts << " events ! " << endl;
   }
 
   //xml file
@@ -319,9 +320,8 @@ int main (int argc, char *argv[]){
     /// Initialize JEC factors            --> Updated on 3/11/2015 (Recommendations from: https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC)
     /////////////////////////////////////
     vector<JetCorrectorParameters> vCorrParam;
-    
     if( isData ){// Data!
-      JetCorrectorParameters *L1JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Summer13__V4_DATA_L1FastJet_AK5PFchs.txt");
+      JetCorrectorParameters *L1JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Summer13_V4_DATA_L1FastJet_AK5PFchs.txt");
       vCorrParam.push_back(*L1JetCorPar);
       JetCorrectorParameters *L2JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Summer13_V4_DATA_L2Relative_AK5PFchs.txt");
       vCorrParam.push_back(*L2JetCorPar);
@@ -371,7 +371,9 @@ int main (int argc, char *argv[]){
     ////////////////////////////////////
     int itriggerSemiMu = -1,itriggerSemiEl = -1, previousRun = -1;
 
-    if(NrEvtsToRunOver == -1) NrEvtsToRunOver = datasets[d]->NofEvtsToRunOver();
+    unsigned int NrEvtsToRunOver = NrEvts;
+    if(NrEvts == -1) NrEvtsToRunOver = datasets[d]->NofEvtsToRunOver();
+    std::cout << "  ---> Will process " << NrEvtsToRunOver << " events for this dataset ! " << std::endl;
     for (unsigned int ievt = 0; ievt < NrEvtsToRunOver; ievt++){
       
       if(verbosity > 3) std::cout << " Looking at event : " << ievt << std::endl;    
@@ -406,6 +408,7 @@ int main (int argc, char *argv[]){
 
       // check with genEvent which ttbar channel it is
       if(dataSetName.find("TTbarJets") == 0)  {
+        std::cout << " In this if loop for WJets ? --> " << dataSetName << std::endl;
 	TRootGenEvent* genEvt = treeLoader.LoadGenEvent(ievt,false);
 	if( genEvt->isSemiLeptonic(TRootGenEvent::kMuon) ) {
           histo1D["Mass_genEvtMuon"]->Fill(genEvt->lepton().M());
@@ -427,12 +430,13 @@ int main (int argc, char *argv[]){
       float scaleFactor = 1.;
       
       // Load the GenEvent and calculate the branching ratio correction
-      if(dataSetName.find("TTbarJets") == 0){
+      /*if(dataSetName.find("TTbarJets") == 0){
+        std::cout << " In this if loop for WJets ? --> " << dataSetName << std::endl;
 	TRootGenEvent* genEvt = treeLoader.LoadGenEvent(ievt,false);
-	if( genEvt->isSemiLeptonic() )      scaleFactor *= (0.108*9.)*(0.676*1.5);
+	if( genEvt->isSemiLeptonic() )      scaleFactor *= (0.108*9.)*(0.676*1.5);   --> Added this in given XS!
 	else if( genEvt->isFullHadronic() ) scaleFactor *= (0.676*1.5)*(0.676*1.5);
 	else if( genEvt->isFullLeptonic() ) scaleFactor *= (0.108*9.)*(0.108*9.); 
-      }
+      }*/
 
       //------------------------//
       // Start with corrections //
@@ -540,9 +544,11 @@ int main (int argc, char *argv[]){
       // Access particle information before event selection //
       // Write this information to LHCO Output for MW       //
       ////////////////////////////////////////////////////////
-      lhcoOutput.StoreGenInfo(mcParticles);
-      if(lhcoOutput.GenEventContentCorrect())
-        histo1D["StCosTheta"]->Fill(kinFunctions.CosTheta(lhcoOutput.getGenLeptTop(), lhcoOutput.getGenLeptW(), lhcoOutput.getGenLepton()));
+      if(dataSetName.find("TTbarJets") == 0){
+        lhcoOutput.StoreGenInfo(mcParticles);
+        if(lhcoOutput.GenEventContentCorrect())
+          histo1D["StCosTheta"]->Fill(kinFunctions.CosTheta(lhcoOutput.getGenLeptTop(), lhcoOutput.getGenLeptW(), lhcoOutput.getGenLepton()));
+      }
 
       //Accessing information and store in EventInfoFile    
       std::string leptonTypeString[5] = {"muPlus","muMinus","elPlus","elMinus","notIdentified"};      //Not possible to define this in header file of LHCOOutput ...
@@ -852,6 +858,7 @@ int main (int argc, char *argv[]){
       cout << "\n -> " << nSelectedMuPos << " mu+ and " << nSelectedMuNeg << " mu- events are selected on " << NrEvtsToRunOver << " ==> " << (float)(nSelectedMuPos+nSelectedMuNeg)/(float)NrEvtsToRunOver << endl;
       cout <<   " -> " << nSelectedElPos << " el+ and " << nSelectedElNeg << " el- events are selected on " << NrEvtsToRunOver << " ==> " << (float)(nSelectedElPos+nSelectedElNeg)/(float)NrEvtsToRunOver << endl;
     }
+    std::cout << " " << std::endl;
 
     //--------------------------------//
     // Store the gen-level LHCO plots //
