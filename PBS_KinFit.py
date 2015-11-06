@@ -515,6 +515,11 @@ for file in filesToMerge:
 log.output("Removing *.xml files from directory:  "+options.WorkingDir)
 log.output(Popen("rm "+options.WorkingDir+"*.xml", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
 
+# Clean up /localgrid/aolbrech directory !
+log.output("Cleaning up /localgrid/aolbrech/ directory by moving all directories to /localgrid/"+userName+"/LightTree_PBSScript/"+options.TaskName+"_"+timestamp)
+log.output(Popen("mv /localgrid/"+userName+"/"+options.TaskName+"_"+timestamp+"_job_* /localgrid/"+userName+"/LightTree_PBSScript/"+options.TaskName+"_"+timestamp+"/" , shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+# --> Maybe possible to add a hadd of the AnomCouplings.root file which is stored in each of these directories!!
+
 # send mail when finished
 if not options.Mail == "":
     log.output("Sending announcement to:  "+options.Mail)
