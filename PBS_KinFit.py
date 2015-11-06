@@ -39,17 +39,13 @@ class logHandler:
         if not self.logFile == "":
 
             f = open(self.logFile,"a")
-
             f.write("\n["+datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"] "+string)
-
             f.write("\n")
-
 	    f.close()
 
 	else:
 
-      			print "\n["+datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"] "+string
-
+      	    print "\n["+datetime.now().strftime("%Y-%m-%d %H:%M:%S")+"] "+string
 
 ###################
 ### MailHandler ###
@@ -63,29 +59,21 @@ class MailHandler:
     def __init__(self,recepient):
 
         self.smtpServer = "mach.vub.ac.be"
-        #self.smtpServer = "localhost"
-
         self.senderAddress = "PBSKinFitter@mtop.iihe.ac.be"
-
         #+Popen('hostname', shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().strip()
-
         #self.toAnnounce = [ "top-brussels-datasets@cern.ch" ]
-
         self.toAnnounce = recepient.split(',')
             
     def sendMail(self,subject,msg):
 
         toAddrs = ""
-        
         for to in range(0,len(self.toAnnounce)):
             toAddrs = toAddrs+self.toAnnounce[to]+", "
-
         m = "From: %s\r\nTo: %s\r\nSubject: %s\r\nX-Mailer: My-Mail\r\n\r\n" % (self.senderAddress, toAddrs, subject)
         
         server = smtplib.SMTP(self.smtpServer)
         server.sendmail(self.senderAddress, toAddrs.split(), m+msg)
         server.quit()
-
 
 ###################
 ## KinFitHandler ##
@@ -93,7 +81,7 @@ class MailHandler:
 
 class KinFitHandler:
 
-    def __init__(self, nJob, name, systematic, crossSection, intLumi, pathPNFS, inputFileNr, monsterFile):
+    def __init__(self, nJob, name, systematic, crossSection, intLumi, pathPNFS, inputFileNr):
 
         self.nJob = nJob
         self.pbsFile = ""
@@ -107,11 +95,6 @@ class KinFitHandler:
         self.inputLumi = intLumi
         self.inputPNFSDir = pathPNFS
         self.inputFileNr = inputFileNr
-        self.monsterFile = monsterFile # if empty, run kinFits, otherwise run on the monster
-        self.monsterFileName = ""
-        if not self.monsterFile == "":
-            splitted = self.monsterFile.split("/")
-            self.monsterFileName = splitted[len(splitted)-1]
         
         self.xmlCFG = ""
         self.workingDir=""
@@ -140,21 +123,11 @@ class KinFitHandler:
             sys.exit(1)
 
         cmd = "cp -vfr "+options.WorkingDir+" "+self.workingDir
-        
         Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read()
-        
-        self.log.output("monsterFile:  |"+self.monsterFile+"|  monsterFileName:  |"+self.monsterFileName+"|")
-        
-        if not self.monsterFile == "":
-            
-            self.log.output("Copying file:  "+self.monsterFile+"  to  "+self.workingDir)
-            
-            self.log.output("  --> Output of command:  "+Popen("cp -vfr "+self.monsterFile+" "+self.workingDir+"/", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
 
     def createXMLCFG(self):
         
         self.log.output("Applying command line option:  "+self.systematicOption)
-        
         self.log.output("Creating xml config files for TopTreeAnalysis")
         
         self.xmlCFG = options.WorkingDir+"/myAnomCoupconfig_"+str(self.nJob)+".xml"
@@ -207,10 +180,7 @@ class KinFitHandler:
         pbs.write("#PBS -N "+self.taskName+"\n")
         pbs.write("#PBS -j oe\n")
         pbs.write("#PBS -k oe\n") # dit zorgt voor realtime log uitspuwen
-        if self.monsterFile == "":
-            pbs.write("#PBS -l walltime=3:00:00\n")
-        else:
-            pbs.write("#PBS -l walltime=06:00:00\n")
+        pbs.write("#PBS -l walltime=1:30:00\n")
         
         pbs.write("echo \"dumping some info off the worker node\"\n")
         pbs.write("hostname\n")
@@ -227,39 +197,29 @@ class KinFitHandler:
         pbs.write("\nmv -f "+self.workingDir+" /scratch/$PBS_JOBID/AnomCoup_setup\n")
         pbs.write("cd /scratch/$PBS_JOBID/AnomCoup_setup\n")
         pbs.write("ls -l PersonalClasses/Calibrations/JECFiles/\n")
-        #pbs.write("rm -rf Monsters/*\n")
-        #pbs.write("rm -rf LikelihoodResults_ASCII/*\n")
         pbs.write("echo \"Downloading files from "+self.inputPNFSDir+"\"\n")
         
-        if self.monsterFile == "":
-            cmd = "ls "+self.inputPNFSDir+" | grep TopTree_Skimmed | grep root"
-            inputFiles = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("\n")
-            del inputFiles[-1]
-            pbs.write("inputFiles:  "+str(inputFiles)+"\n")
+        cmd = "ls "+self.inputPNFSDir+" | grep TopTree_Skimmed | grep root"
+        inputFiles = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("\n")
+        del inputFiles[-1]
+        pbs.write("inputFiles:  "+str(inputFiles)+"\n")
         
-            if self.inputFileNr == -1:
-                for i in inputFiles:
-                    pbs.write("echo \"Downloading file:  "+i+"\"\n")
-                    pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+i+" /scratch/$PBS_JOBID/AnomCoup_setup/"+str(i)+"\n")
-            else:
-                pbs.write("echo \"Downloading file nr:  "+str(self.inputFileNr-1)+"\"\n")
-                pbs.write("echo \"Downloading file:  "+inputFiles[self.inputFileNr-1]+"\"\n")
-                pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+inputFiles[self.inputFileNr-1]+" /scratch/$PBS_JOBID/AnomCoup_setup/TopTree_Skimmed_"+str(self.inputFileNr)+".root\n")
+        if self.inputFileNr == -1:
+            for i in inputFiles:
+                pbs.write("echo \"Downloading file:  "+i+"\"\n")
+                pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+i+" /scratch/$PBS_JOBID/AnomCoup_setup/"+str(i)+"\n")
+        else:
+            pbs.write("echo \"Downloading file nr:  "+str(self.inputFileNr-1)+"\"\n")
+            pbs.write("echo \"Downloading file:  "+inputFiles[self.inputFileNr-1]+"\"\n")
+            pbs.write("dccp dcap://maite.iihe.ac.be"+self.inputPNFSDir+inputFiles[self.inputFileNr-1]+" /scratch/$PBS_JOBID/AnomCoup_setup/TopTree_Skimmed_"+str(self.inputFileNr)+".root\n")
             
         pbs.write("ls -ltr /scratch/$PBS_JOBID/AnomCoup_setup\n\n")
         
-        if self.monsterFile == "":
-            pbs.write("./AnomalousCouplingsTreeCreator -1 myAnomCoupconfig_"+str(self.nJob)+".xml\n")
-            pbs.write("rm -f TopTree_Skimmed_*.root\n")
-            pbs.write("ls -l LightTree/\n")
-        #else:
-        #    pbs.write("./MTopDiff_Analysis "+self.monsterFileName+"\n")
-        #    pbs.write("rm -rf *.root Monsters "+self.monsterFileName+"\n")
-        #    pbs.write("ls -lah LikelihoodResults_ASCII/\n")
+        pbs.write("./AnomalousCouplingsTreeCreator -1 myAnomCoupconfig_" + str(self.nJob) + ".xml " + self.systematicOption + " \n")
+        pbs.write("rm -f TopTree_Skimmed_*.root\n")
+        pbs.write("ls -l LightTree/\n")
         
-        #pbs.write("rm -rf resolutions *.so FitResults_ASCII PileUpReweighting Plots* weights JECFiles\n")
-        #pbs.write("rm -rf TTbarJES MTopDiff_Analysis\n")
-        pbs.write("mv -fv /scratch/$PBS_JOBID/AnomCoup_setup "+self.workingDir+"\n")
+        pbs.write("mv -f /scratch/$PBS_JOBID/AnomCoup_setup "+self.workingDir+"\n")
         pbs.write("echo \"THIS IS THE END\"\n")
         pbs.close()
 
@@ -270,10 +230,7 @@ class KinFitHandler:
 
         cmd = "cd /localgrid/"+userName+"/; qsub -q localgrid@cream02.iihe.ac.be "+self.pbsFile
 
-        #print cmd
-        
         self.pbsID=Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read()
-
         self.log.output("PBS Job ID: "+self.pbsID)
         
     def checkPBSJob (self):
@@ -305,45 +262,26 @@ class KinFitHandler:
         
         if not options.local:
 						
-            if self.monsterFile == "":
-            
-                self.createXMLCFG()
-            
+            self.createXMLCFG()
             self.setupWorkingDir()
-
             self.createPBSCFG()
-            
-#            sys.exit(1)
-
             self.submitPBSJob()
-
             self.checkPBSJob()
             
-            if self.monsterFile == "":
             
-                self.log.output("self.inputFileNr = "+str(self.inputFileNr))
+            self.log.output("self.inputFileNr = "+str(self.inputFileNr))
                 
-                if not self.inputFileNr == -1:
+            if not self.inputFileNr == -1:
             
-                    outRootFile = Popen("ls "+self.workingDir+"/LightTree/*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("/LightTree/")[1].split("\n")[0]
+                outRootFile = Popen("ls "+self.workingDir+"/LightTree/*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("/LightTree/")[1].split("\n")[0]
                     
-                    if self.inputFileNr == 1:
+                if self.inputFileNr == 1:                    
+                    filesToMerge.append( outRootFile.split(".root")[0] )
                     
-                        filesToMerge.append( outRootFile.split(".root")[0] )
-                    
-                    newOutRootFile = outRootFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
-
-                    self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/"+outRootFile+" "+self.resultsDir+newOutRootFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-#                    self.log.output(Popen("cp -f "+self.workingDir+"/Monsters/"+outRootFile+" "+self.resultsDir+newOutRootFile+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-                    
-                else:
-
-                    self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/*.root "+self.resultsDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-            
-            #else:
-                
-                #self.log.output(Popen("cp -f "+self.workingDir+"/LikelihoodResults_ASCII/*.txt* "+self.resultsDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-#                self.log.output(Popen("cp -f "+self.workingDir+"/LikelihoodResults_ASCII/*.txt* "+self.resultsDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+                newOutRootFile = outRootFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
+                self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/"+outRootFile+" "+self.resultsDir+newOutRootFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+            else:
+                self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/*.root "+self.resultsDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
                 
             # clean up
             os.remove(self.pbsFile)
@@ -354,7 +292,6 @@ class KinFitHandler:
             print "NOT YET IMPLEMENTED LOCAL RUNNING"
             
         return True
-
    
 ##############
 ## WorkFlow ##
@@ -395,7 +332,6 @@ class WorkFlow (threading.Thread ):
             #print self.nThread
 
             job = jobsPool.get()
-
             job.setlog(self.log)
 
             if int(nJobs) == 1:
@@ -405,7 +341,6 @@ class WorkFlow (threading.Thread ):
 
             if (job.process()):
                 log.output("-> Thread "+str(self.nThread)+" Finished Job: "+str(job.nJob+1)+"/"+str(nJobs))
-
 
 ###############
 ### OPTIONS ###
@@ -423,8 +358,6 @@ optParser.add_option("-o","--log-stdout", action="store_true", dest="stdout",def
                      help="Write the main log file to the stdout", metavar="")
 optParser.add_option("-l","--run-local", action="store_true", dest="local",default=bool(False),
                      help="Use local CPUs", metavar="")
-optParser.add_option("-M","--Monsters", dest="monsterDir", default="",
-                     help="Directory containing the monsters (if this is set, the Likelihood ASCII files will be calculated)", metavar="")
     
 (options, args) = optParser.parse_args()
 
@@ -441,10 +374,8 @@ if options.WorkingDir == "":
 ## SETTINGS
 
 RootInstallation = "/user/aolbrech/LocalSoftWare/root_v5.34.05_James/"  # /Software/LocalSoft/root_5.32_stijn/"
-#RootInstallation = "/user/cmssoft/root_old/"
 
 SleepTime = int(120) # time to sleep between checking of job status
-#SleepTime = int(10) # time to sleep between checking of job status
 
 ## END SETTINGS
 
@@ -462,14 +393,13 @@ timestamp = strftime("%d%m%Y_%H%M%S") # need a timestamp for dirs and logfiles
 # logging
 
 if not options.stdout:
-    #log = logHandler("logs/log_"+timestamp+".txt")
     log = logHandler("logs/"+options.TaskName+"_"+timestamp+".txt")
 else:
     log = logHandler("")
 
 # start the loop
 
-log.output("*** TopTreeAnalysis KinFit Batch Job system ***")
+log.output("*** TopTreeAnalysis AnomCoup Batch Job system ***")
 
 log.output("Making a dump of the configuration used:")
 log.output("  --> TaskName:\t\t"+options.TaskName)
@@ -477,7 +407,6 @@ log.output("  --> WorkingDir:\t\t"+options.WorkingDir)
 log.output("  --> log-stdout:\t\t"+str(options.stdout))
 log.output("  --> run-local:\t\t"+str(options.local))
 log.output("  --> Mail:\t\t"+options.Mail)
-log.output("  --> Directory containing the monsters (to produce Likelihood ASCII files from):\t\t"+options.monsterDir)
 
 # get username
 userName = Popen('echo $USER', shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().strip()
@@ -487,15 +416,11 @@ if not options.local:
     if not os.path.exists("/localgrid/"+userName+"/root"):
 
         log.output("-> Copying root to localgrid") 
-        
         cmd = "cp -vfr "+RootInstallation+" /localgrid/"+userName+"/root"
-        
         Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read()
         
         ver = open("/localgrid/"+userName+"/root/ver","w")
-        
         ver.write(RootInstallation)
-        
         ver.close()
         
     else:
@@ -503,78 +428,50 @@ if not options.local:
         rootver = ""
         
         for ver in open("/localgrid/"+userName+"/root/ver","r"):
-            
             rootver = ver
             
             if not rootver == RootInstallation:
                 
                 log.output("-> RE-Copying root to localgrid") 
-
                 cmd = "mv /localgrid/"+userName+"/root /localgrid/"+userName+"/root_old_"+timestamp
                 cmd += " ;cp -vfr "+RootInstallation+" /localgrid/"+userName+"/root"
-                
                 Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read()
                 
                 ver = open("/localgrid/"+userName+"/root/ver","w")
-        
                 ver.write(RootInstallation)
-                
                 ver.close()
         
-#sys.exit(1);
-
 # Read in the inputSamples.txt file and create our Queue to store jobs:
-
 jobsPool = Queue.Queue ( 0 )
-
 nJobs = int(0)
-
 filesToMerge = []
 
-if options.monsterDir == "":
-    
-    log.output("Doing kinFits...")
-    for line in open(options.WorkingDir+"/inputSamples.txt"):
+for line in open(options.WorkingDir+"/inputSamples.txt"):
 
-        if len(line.split("#")) < 2:
+    if len(line.split("#")) < 2:
 
-            splitted = line.split(":")
+        splitted = line.split(":")
 
-            if len(splitted) > 1:
+        if len(splitted) > 1:
 
-                log.output("Process: " + splitted[0] + "  " + splitted[1])
-                pnfsPath = splitted[4].split("\n")[0]
+            log.output("Process: " + splitted[0] + "  " + splitted[1])
+            pnfsPath = splitted[4].split("\n")[0]
                 
-                if (len(splitted[0].split("TT")) > 1 and not len(splitted[0].split("Hadronic")) > 1) or (len(splitted[1].split("InvertedIso")) > 1 and len(splitted[0].split("Data")) > 1) : # or len(splitted[0].split("Data_SingleElectron_Run2012D_Prompt_1")) > 1 :
-                    # process only one inputFile per job
+            if (len(splitted[0].split("TT")) > 1 and not len(splitted[0].split("Hadronic")) > 1) or (len(splitted[1].split("InvertedIso")) > 1 and len(splitted[0].split("Data")) > 1) : 
+                # process only one inputFile per job
+                cmd = "ls -l "+pnfsPath+" | grep TopTree_Skimmed_ | grep root | wc -l"
+                nInFiles = int(Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
                 
-                    cmd = "ls -l "+pnfsPath+" | grep TopTree_Skimmed_ | grep root | wc -l"
-                    nInFiles = int(Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-                
-                    for i in range(1,nInFiles+1):
-                        log.output("  --> with inputFile: "+str(i))
-                        job = KinFitHandler(nJobs, splitted[0], splitted[1], splitted[2], splitted[3], pnfsPath, i, options.monsterDir)
-                        jobsPool.put(job)
-                        nJobs += 1
-            
-                else:
-
-                    job = KinFitHandler(nJobs, splitted[0], splitted[1], splitted[2], splitted[3], pnfsPath, -1, options.monsterDir)
+                for i in range(1,nInFiles+1):
+                    log.output("  --> with inputFile: "+str(i))
+                    job = KinFitHandler(nJobs, splitted[0], splitted[1], splitted[2], splitted[3], pnfsPath, i)
                     jobsPool.put(job)
                     nJobs += 1
-else:
-    
-    log.output("Calculating Ideogram likelihoods...")
-    inFiles = Popen("ls "+options.monsterDir+"*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("\n")
-    
-    for file in inFiles:
-        if not file == "":
-            log.output("Proceesing input monster file:  |"+file+"|")
-            job = KinFitHandler(nJobs, "", "", "", "", "", -1, file)
-            jobsPool.put(job)
-            nJobs += 1
-        
-#sys.exit(1)
+            
+            else:
+                job = KinFitHandler(nJobs, splitted[0], splitted[1], splitted[2], splitted[3], pnfsPath, -1)
+                jobsPool.put(job)
+                nJobs += 1
 
 # start our threads
 workers = []
@@ -582,8 +479,6 @@ for x in xrange ( int(nJobs) ):
    workers.append(WorkFlow(x))
    workers[x].start()
    time.sleep(20)
-   if not options.monsterDir == "":
-       time.sleep(20)
 
 # check if there is a worker that are not done
 
@@ -596,50 +491,29 @@ while notDone:
     for worker in workers:
     
         if worker.isAlive(): # If there is one worker alive, we are still not finished
-            
             notDone=bool(True)
 
     if not notDone:
-
         log.output("-> All jobs are DONE")
 
     time.sleep(10)
 		
 # Merge (hadd) all the output files from the same sample
-if options.monsterDir == "":
-    resultsDir = "./Results/RESULTS_AnomCoup_"+options.TaskName+"_"+timestamp+"/"
-    for file in filesToMerge:
-        log.output("Merging files:  "+file+"_*.root")
-        nInFiles = int(Popen("ls -l "+resultsDir+file+"_*.root | wc -l", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-        if nInFiles > 1:
-            command = "export ROOTSYS="+RootInstallation+"; export PATH=$ROOTSYS/bin:$PATH; export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH; cd "+resultsDir+"; hadd "+file+".root"
-            for i in range(1,nInFiles+1):
-                command += " "+file+"_"+str(i)+".root"
-            command += "; mkdir backup; mv "+file+"_*.root ./backup/"
-#            command += "; rm -rfv "+file+"_*.root"
-            log.output("Executing command : |"+command+"|")
-            log.output(Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+resultsDir = "./Results/RESULTS_"+options.TaskName+"_"+timestamp+"/"
+for file in filesToMerge:
+    log.output("Merging files:  "+file+"_*.root")
+    nInFiles = int(Popen("ls -l "+resultsDir+file+"_*.root | wc -l", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+    if nInFiles > 1:
+        command = "export ROOTSYS="+RootInstallation+"; export PATH=$ROOTSYS/bin:$PATH; export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH; cd "+resultsDir+"; hadd "+file+".root"
+        for i in range(1,nInFiles+1):
+            command += " "+file+"_"+str(i)+".root"
+        command += "; mkdir backup; mv "+file+"_*.root ./backup/"
+        log.output("Executing command : |"+command+"|")
+        log.output(Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
     
-    # Also merge the data stuff (nominal and invIso)
-    for dataSet in ["Mu","Electron"]:
-        for isoType in ["InvertedIso","Nominal"]:
-            inFiles = Popen("cd "+resultsDir+"; ls *Data*"+dataSet+"*"+isoType+"*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("\n")
-            nInFiles = len(inFiles)
-            if nInFiles > 1:
-                log.output("Merging "+dataSet+" "+isoType+" files")
-                command = "export ROOTSYS="+RootInstallation+"; export PATH=$ROOTSYS/bin:$PATH; export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH; cd "+resultsDir+"; hadd AnomCoup_LightMonsters_TopMassDiff_Data_"+dataSet+"_"+isoType+"_MERGED.root"
-                for i in range(0,nInFiles):
-                    command += " "+inFiles[i]
-                command += "; mkdir backup"
-#                command += "; rm -rfv "+resultsDir+"*Data*"+dataSet+"*"+isoType+"*.root"
-                log.output("Executing command : |"+command+"|")
-                log.output(Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-                for i in range(0,nInFiles):
-                    log.output(Popen("cd "+resultsDir+"; mv "+inFiles[i]+" ./backup/", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-    
-    # remove .xml files
-    log.output("Removing *.xml files from directory:  "+options.WorkingDir)
-    log.output(Popen("rm "+options.WorkingDir+"*.xml", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+# remove .xml files
+log.output("Removing *.xml files from directory:  "+options.WorkingDir)
+log.output(Popen("rm "+options.WorkingDir+"*.xml", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
 
 # send mail when finished
 if not options.Mail == "":
