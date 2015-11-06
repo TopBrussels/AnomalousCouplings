@@ -99,6 +99,7 @@ class KinFitHandler:
         self.xmlCFG = ""
         self.workingDir=""
         self.resultsDir=""
+        self.plotsMacroDir = ""
         self.log = ""
 
     def setlog(self,log):
@@ -112,9 +113,13 @@ class KinFitHandler:
         global userName
         
         self.resultsDir = "./Results/RESULTS_"+options.TaskName+"_"+timestamp+"/"
+        self.plotsMacroDir = "./Results/PLOTSMACRO_"+options.TaskName+"_"+timestamp+"/"
             
         if not os.path.exists(self.resultsDir) and self.nJob == 0:
             os.mkdir(self.resultsDir)
+
+        if not os.path.exists(self.plotsMacroDir) and self.nJob == 0:
+            os.mkdir(self.plotsMacroDir)
 
         if not options.local:
             self.workingDir = "/localgrid/"+userName+"/"+options.TaskName+"_"+timestamp+"_job_"+str(self.nJob)
@@ -280,8 +285,10 @@ class KinFitHandler:
                     
                 newOutRootFile = outRootFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
                 self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/"+outRootFile+" "+self.resultsDir+newOutRootFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+                self.log.output(Popen("cp -f "+self.workingDir+"/PlotsMacro/"+outPlotsFile+" "+self.plotsMacroDir+newOutPlotsFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
             else:
                 self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/*.root "+self.resultsDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+                self.log.output(Popen("cp -f "+self.workingDir+"/PlotsMacro/*.root "+self.plotsMacroDir+"; rm -rf "+self.workingDir, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
                 
             # clean up
             os.remove(self.pbsFile)
@@ -510,6 +517,18 @@ for file in filesToMerge:
         command += "; mkdir backup; mv "+file+"_*.root ./backup/"
         log.output("Executing command : |"+command+"|")
         log.output(Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+
+plotsMacroDir = "./Results/PLOTSMACRO_"+options.TaskName+"_"+timestamp+"/"
+for plot in plotsToMerge:
+    log.output("Merging files:  "+plot+"_*.root")
+    nInPlots = int(Popen("ls -l "+plotsMacroDir+plot+"_*.root | wc -l", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
+    if nInPlots > 1:
+        command = "export ROOTSYS="+RootInstallation+"; export PATH=$ROOTSYS/bin:$PATH; export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH; cd "+plotsMacroDir+"; hadd "+plot+".root"
+        for i in range(1,nInPlots+1):
+            command += " "+plot+"_"+str(i)+".root"
+        command += "; mkdir backup; mv "+plot+"_*.root ./backup/"
+        log.output("Executing command : |"+command+"|")
+        log.output(Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
     
 # remove .xml files
 log.output("Removing *.xml files from directory:  "+options.WorkingDir)
@@ -518,7 +537,6 @@ log.output(Popen("rm "+options.WorkingDir+"*.xml", shell=True, stdin=PIPE, stdou
 # Clean up /localgrid/aolbrech directory !
 log.output("Cleaning up /localgrid/aolbrech/ directory by moving all directories to /localgrid/"+userName+"/LightTree_PBSScript/"+options.TaskName+"_"+timestamp)
 log.output(Popen("mv /localgrid/"+userName+"/"+options.TaskName+"_"+timestamp+"_job_* /localgrid/"+userName+"/LightTree_PBSScript/"+options.TaskName+"_"+timestamp+"/" , shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
-# --> Maybe possible to add a hadd of the AnomCouplings.root file which is stored in each of these directories!!
 
 # send mail when finished
 if not options.Mail == "":
