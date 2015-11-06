@@ -1,0 +1,31 @@
+# Nominal Data samples
+#Data_SingleMu_Run2012A_22Jan2013:Nominal:1:886.108:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3427/30042013_234038/
+# newLumi:  874.840
+#Data_SingleMu_Run2012B_22Jan2013:Nominal:1:4435:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3429/30042013_231142/
+# newLumi:  4401
+#Data_SingleMu_Run2012C_22Jan2013:Nominal:1:7125:/pnfs/iihe/cms/store/user/blyweert/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3446/14052013_155527/
+# newLumi:  7028
+#Data_SingleMu_Run2012D_22Jan2013:Nominal:1:7246:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3444/11052013_162700/
+# newLumi:  7297
+
+# oldLumi = 19692.108 pb-1
+# newLumi = 19600.840 pb-1
+
+#Data_SingleElectron_Run2012A_22Jan2013:Nominal:1:875.734:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3438/30042013_233241/
+# newLumi:  864.525
+#Data_SingleElectron_Run2012B_22Jan2013:Nominal:1:4420:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3432/01052013_001325/
+# newLumi:  4386
+#Data_SingleElectron_Run2012C_22Jan2013:Nominal:1:7132:/pnfs/iihe/cms/store/user/blyweert/Skimmed-TopTrees/DATASKIM_53X_ProdV4_TopTreeID_3439/04052013_114646/
+# newLumi:  7035
+#Data_SingleElectron_Run2012D_22Jan2013:Nominal:1:7294:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3437/11052013_101704/
+# newLumi:  7344
+
+# oldLumi = 19721.734 pb-1
+# newLumi = 19629.525 pb-1
+
+# Average oldLumi = 19706.921 pb-1
+# Average newLumi = 19615.183 pb-1
+
+
+# Nominal MC Samples
+TTbarJets_SemiLept:Nominal:107.6722:226504.2973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/

@@ -279,11 +279,13 @@ class KinFitHandler:
             if not self.inputFileNr == -1:
             
                 outRootFile = Popen("ls "+self.workingDir+"/LightTree/*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("/LightTree/")[1].split("\n")[0]
+                outPlotsFile = Popen("ls "+self.workingDir+"/PlotsMacro/*.root", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read().split("/PlotsMacro/")[1].split("\n")[0]
                     
                 if self.inputFileNr == 1:                    
                     filesToMerge.append( outRootFile.split(".root")[0] )
                     
                 newOutRootFile = outRootFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
+                newOutPlotsFile = outPlotsFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
                 self.log.output(Popen("cp -f "+self.workingDir+"/LightTree/"+outRootFile+" "+self.resultsDir+newOutRootFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
                 self.log.output(Popen("cp -f "+self.workingDir+"/PlotsMacro/"+outPlotsFile+" "+self.plotsMacroDir+newOutPlotsFile, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
             else:
@@ -358,7 +360,7 @@ optParser = OptionParser()
 optParser.add_option("-t","--taskName", dest="TaskName",default="KinFitTask",
                      help="TaskName that will be used as prefix for workingdir and logs", metavar="")
 optParser.add_option("-d","--workingDir", dest="WorkingDir",default="",
-                     help="Directory containing the needed TopTreeAnalysis setup and the file containing input datasets (inputSamples.txt)", metavar="")
+                     help="Directory containing the needed TopTreeAnalysis setup", metavar="")
 optParser.add_option("-m","--mail", dest="Mail", default="",
                      help="E-mail adress to inform when the script finished", metavar="")
 optParser.add_option("-o","--log-stdout", action="store_true", dest="stdout",default=bool(False),
@@ -453,7 +455,7 @@ jobsPool = Queue.Queue ( 0 )
 nJobs = int(0)
 filesToMerge = []
 
-for line in open(options.WorkingDir+"/inputSamples.txt"):
+for line in open("./inputSamples.txt"):
 
     if len(line.split("#")) < 2:
 
@@ -542,5 +544,5 @@ log.output(Popen("mv /localgrid/"+userName+"/"+options.TaskName+"_"+timestamp+"_
 if not options.Mail == "":
     log.output("Sending announcement to:  "+options.Mail)
     mailHandler = MailHandler(options.Mail)
-    message = "The script finished ;-)\n\n"+Popen("cat "+options.WorkingDir+"/inputSamples.txt", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read()
+    message = "The script finished ;-)\n\n"+Popen("cat ./inputSamples.txt", shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read()
     mailHandler.sendMail("[PBS_KinFit.py], script finished", message)
