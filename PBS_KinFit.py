@@ -148,15 +148,10 @@ class KinFitHandler:
         
         xmlFile.write("</datasets>\n\n")
         xmlFile.write("<analysis>\n")
-        if len(options.WorkingDir.split("42X")) > 1 :
-          xmlFile.write("<a type=\"Collections\" PVCollection=\"PrimaryVertex\" JetType=\"2\" JetCollection=\"PFJets_selectedPatJetsPF2PAT\" METType=\"2\" METCollection=\"PFMET_patType1CorrectedPFMet\" MuonCollection=\"Muons_selectedPatMuonsPF2PAT\" ElectronCollection=\"Electrons_selectedPatElectronsPF2PAT\" loadGenJetCollection=\"1\" GenJetCollection=\"GenJets_ak5GenJets\" loadGenEventCollection=\"1\" GenEventCollection=\"GenEvent\" loadNPGenEventCollection=\"0\" NPGenEventCollection=\"NPGenEvent\" loadMCParticles=\"1\" MCParticlesCollection=\"MCParticles\" TrackMETCollection=\"\" loadTrackMET=\"0\"/>\n")
-#        if len(self.inputName.split("Data")) > 1 or len(self.inputName.split("data")) > 1 or len(self.inputName.split("DATA")) > 1:
-        elif self.systematicOption == "InvertedIso":
-          xmlFile.write("<a type=\"Collections\" PVCollection=\"PrimaryVertex\" JetType=\"2\" JetCollection=\"PFJets_selectedPatJetsPF2PATNoLeptonCleaning\" METType=\"2\" METCollection=\"PFMET_patType1CorrectedPFMetPF2PATNoLeptonCleaning\" MuonCollection=\"Muons_selectedPatMuonsPF2PATNoLeptonCleaning\" ElectronCollection=\"Electrons_selectedPatElectronsPF2PATNoLeptonCleaning\" loadGenJetCollection=\"1\" GenJetCollection=\"GenJets_ak5GenJetsNoNu\" loadGenEventCollection=\"1\" GenEventCollection=\"GenEvent\" loadNPGenEventCollection=\"0\" NPGenEventCollection=\"NPGenEvent\" loadMCParticles=\"1\" MCParticlesCollection=\"MCParticles\" TrackMETCollection=\"\" loadTrackMET=\"0\"/>\n")
-#          else:
-#            xmlFile.write("<a type=\"Collections\" PVCollection=\"PrimaryVertex\" JetType=\"2\" JetCollection=\"PFJets_selectedPatJetsPF2PAT\" METType=\"2\" METCollection=\"PFMET_patType1CorrectedPFMet\" MuonCollection=\"Muons_selectedPatMuonsPF2PAT\" ElectronCollection=\"Electrons_selectedPatElectronsPF2PAT\" loadGenJetCollection=\"1\" GenJetCollection=\"GenJets_ak5GenJets\" loadGenEventCollection=\"1\" GenEventCollection=\"GenEvent\" loadNPGenEventCollection=\"0\" NPGenEventCollection=\"NPGenEvent\" loadMCParticles=\"1\" MCParticlesCollection=\"MCParticles\"/>\n")
-        else:
+        if len(self.inputName.split("TTbarJets")) > 1 :
           xmlFile.write("<a type=\"Collections\" PVCollection=\"PrimaryVertex\" JetType=\"2\" JetCollection=\"PFJets_selectedPatJetsPF2PAT\" METType=\"2\" METCollection=\"PFMET_patType1CorrectedPFMetPF2PAT\" MuonCollection=\"Muons_selectedPatMuonsPF2PAT\" ElectronCollection=\"Electrons_selectedPatElectronsPF2PAT\" loadGenJetCollection=\"1\" GenJetCollection=\"GenJets_ak5GenJetsNoNu\" loadGenEventCollection=\"1\" GenEventCollection=\"GenEvent\" loadNPGenEventCollection=\"0\" NPGenEventCollection=\"NPGenEvent\" loadMCParticles=\"1\" MCParticlesCollection=\"MCParticles\" TrackMETCollection=\"\" loadTrackMET=\"0\"/>\n")
+        else:
+          xmlFile.write("<a type=\"Collections\" PVCollection=\"PrimaryVertex\" JetType=\"2\" JetCollection=\"PFJets_selectedPatJetsPF2PAT\" METType=\"2\" METCollection=\"PFMET_patType1CorrectedPFMetPF2PAT\" MuonCollection=\"Muons_selectedPatMuonsPF2PAT\" ElectronCollection=\"Electrons_selectedPatElectronsPF2PAT\" loadGenJetCollection=\"0\" GenJetCollection=\"GenJets_ak5GenJetsNoNu\" loadGenEventCollection=\"0\" GenEventCollection=\"GenEvent\" loadNPGenEventCollection=\"0\" NPGenEventCollection=\"NPGenEvent\" loadMCParticles=\"1\" MCParticlesCollection=\"MCParticles\" TrackMETCollection=\"\" loadTrackMET=\"0\"/>\n")
         
         xmlFile.write("<a type=\"Selection\" PVertexNdofCut=\"4\" PVertexZCut=\"24.\" PVertexRhoCut=\"2.\" MuonPtCutSR=\"20.\" MuonEtaCutSR=\"2.1\" MuonRelIsoCutSR=\"0.05\" MuonNHitsCutSR=\"10\" MuonD0CutSR=\"0.02\" MuonDRJetsCut=\"0.3\" MuonPtCutVetoSR=\"10.\" MuonEtaCutVetoSR=\"2.5\" MuonRelIsoCutVetoSR=\"0.2\" ElectronPtCut=\"15.\" ElectronEtaCut=\"2.5\" ElectronRelIsoCut=\"0.2\" JetsPtCutSR=\"30.\" JetsEtaCutSR=\"2.4\" applyJetID=\"1\" JetEMFCut=\"0.01\" n90HitsCut=\"1\" fHPDCut=\"0.98\" NofJets=\"4\" NofJetBins=\"2\"/>\n")
         xmlFile.write("<a type=\"Conditions\" isMC=\"1\" MCRound=\"0\" Vars_ByFile=\"0\" VarsFile=\"m0_100_m12_100\" IntToCut=\"4\" Verbose=\"2\" Luminosity=\"9999999\" JES=\"1.\" nPseudoExp=\"0\" nPseudoSession=\"0\" runonTTrees=\"0\" doABCD=\"1\" doVJEstim=\"1\" doVJEstPE=\"1\" doTtJEstim=\"1\" doTemplComp=\"0\" doSystematics=\"0\"/>\n")
@@ -263,7 +258,7 @@ class KinFitHandler:
             
     def process(self):
 
-        global filesToMerge
+        global filesToMerge, plotsToMerge
         
         if not options.local:
 						
@@ -283,6 +278,7 @@ class KinFitHandler:
                     
                 if self.inputFileNr == 1:                    
                     filesToMerge.append( outRootFile.split(".root")[0] )
+                    plotsToMerge.append(outPlotsFile.split(".root")[0])
                     
                 newOutRootFile = outRootFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
                 newOutPlotsFile = outPlotsFile.split(".root")[0] + "_" + str(self.inputFileNr) + ".root"
@@ -454,6 +450,7 @@ if not options.local:
 jobsPool = Queue.Queue ( 0 )
 nJobs = int(0)
 filesToMerge = []
+plotsToMerge = []
 
 for line in open("./inputSamples.txt"):
 
