@@ -408,7 +408,6 @@ int main (int argc, char *argv[]){
 
       // check with genEvent which ttbar channel it is
       if(dataSetName.find("TTbarJets") == 0)  {
-        std::cout << " In this if loop for WJets ? --> " << dataSetName << std::endl;
 	TRootGenEvent* genEvt = treeLoader.LoadGenEvent(ievt,false);
 	if( genEvt->isSemiLeptonic(TRootGenEvent::kMuon) ) {
           histo1D["Mass_genEvtMuon"]->Fill(genEvt->lepton().M());
