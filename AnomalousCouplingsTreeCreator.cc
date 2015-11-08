@@ -302,8 +302,6 @@ int main (int argc, char *argv[]){
   for (unsigned int d = 0; d < datasets.size (); d++) {
     if (verbose > 1) cout << "   * Dataset " << d << ": " << datasets[d]->Name () << " with " << datasets[d]->NofEvtsToRunOver() << " events." << endl;
     
-    //Create a separate ROOT file for each dataset (possible since no MSPlots can be created!)
-    TFile *fout = new TFile(("PlotsMacro/AnomCouplings_"+dataSetName+"_"+systematic+".root").c_str(), "RECREATE");  
 
     int iFile = -1;
     string previousFilename = "", dataSetName = datasets[d]->Name();
@@ -318,6 +316,9 @@ int main (int argc, char *argv[]){
     if( dataSetName.find("Data") == 0 || dataSetName.find("data") == 0 || dataSetName.find("DATA") == 0 )
       isData = true;
     
+    //Create a separate ROOT file for each dataset (possible since no MSPlots can be created!)
+    TFile *fout = new TFile(("PlotsMacro/AnomCouplings_"+dataSetName+"_"+systematic+".root").c_str(), "RECREATE");  
+
     /////////////////////////////////////
     /// Initialize JEC factors            --> Updated on 3/11/2015 (Recommendations from: https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC)
     /////////////////////////////////////
@@ -883,6 +884,41 @@ int main (int argc, char *argv[]){
     delete LightFile;
     //----  End of storing Tree  ----//
 
+    /////////////////////////
+    // Write out the plots //
+    /////////////////////////
+    string pathPNG = "PlotsMacro";
+
+    //Write away the histo1D's and the histo2D's!!
+    fout -> cd();
+
+    if(histo1D.size() > 0){
+      TDirectory* th1dir = fout->mkdir("1D_histograms");
+      th1dir->cd();
+      for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
+        TH1F *temp = it->second;
+        int N = temp->GetNbinsX();
+        temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
+        temp->SetBinContent(N+1,0);
+        temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
+        temp->Write();
+      }
+    }
+
+    if(histo2D.size() > 0){
+      TDirectory* th2dir = fout->mkdir("2D_histograms_graphs");
+      th2dir->cd();
+      for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){
+        TH2F *temp = it->second;
+        temp->Write();
+      }
+    }
+
+    fout->cd();
+    //configTree->Fill(); //configTree->Write();
+    fout->Close(); 
+    delete fout;
+
     //////////////
     // CLEANING //
     //////////////
@@ -898,45 +934,6 @@ int main (int argc, char *argv[]){
   //Once everything is filled ...
   if(verbose > 0) cout << "We ran over all the data ;-)" << endl;
   
-  /////////////////////////
-  // Write out the plots //
-  /////////////////////////
-  string pathPNG = "PlotsMacro";
-
-  //Write away the MSPlots, the histo1D's and the histo2D's!!
-  fout -> cd();
-  mkdir((pathPNG+"/MSPlots").c_str(),0777);
-
-  TDirectory* msdir = fout->mkdir("MSPlots");
-  msdir->cd(); 
-  for(map<string,MultiSamplePlot*>::const_iterator it = MSPlot.begin(); it != MSPlot.end(); it++){    
-    MultiSamplePlot *temp = it->second;
-    string name = it->first;
-    temp->Draw(name, 0, false, false, false, 1);     //string label, unsigned int RatioType, bool addRatioErrorBand, bool addErrorBand, bool ErrorBandAroundTotalInput, int scaleNPSSignal 
-    temp->Write(fout, name, saveAsPDF, (pathPNG+"/MSPlots/").c_str(), "pdf");
-  }
-
-  TDirectory* th1dir = fout->mkdir("1D_histograms");
-  th1dir->cd();
-  for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
-    TH1F *temp = it->second;
-    int N = temp->GetNbinsX();
-    temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
-    temp->SetBinContent(N+1,0);
-    temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
-    temp->Write();
-  }
-  TDirectory* th2dir = fout->mkdir("2D_histograms_graphs");
-  th2dir->cd();
-  for(std::map<std::string,TH2F*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){
-    TH2F *temp = it->second;
-    temp->Write();
-  }
-
-  fout->cd();
-  configTree->Fill();
-  configTree->Write();
-
   //Selection tables
   selecTableSemiMu.TableCalculator(false,true,true,true,true);
   string selectiontableMu = "EventSelectionResults/AnalyzerOutput/SelectionTable_BTAG_SEMIMU.tex";
@@ -944,10 +941,7 @@ int main (int argc, char *argv[]){
   selecTableSemiEl.TableCalculator(false, true, true, true, true);
   string selectiontableEl = "EventSelectionResults/AnalyzerOutput/SelectionTable_BTAG_SEMIEL.tex";
   selecTableSemiEl.Write(selectiontableEl.c_str());
-
-  fout->Close(); 
    
-  delete fout;
   delete tcdatasets;
   delete tcAnaEnv;
   //delete configTree;
