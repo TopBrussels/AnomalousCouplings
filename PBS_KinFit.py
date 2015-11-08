@@ -465,6 +465,7 @@ for line in open("./inputSamples.txt"):
                 
             if (len(splitted[0].split("TT")) > 1 and not len(splitted[0].split("Hadronic")) > 1) or (len(splitted[1].split("InvertedIso")) > 1 and len(splitted[0].split("Data")) > 1) : 
                 # process only one inputFile per job
+                log.output(" *** Process 1 inputFile per job for " + splitted[0])
                 cmd = "ls -l "+pnfsPath+" | grep TopTree_Skimmed_ | grep root | wc -l"
                 nInFiles = int(Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
                 
@@ -475,6 +476,7 @@ for line in open("./inputSamples.txt"):
                     nJobs += 1
             
             else:
+                log.output(" *** Process all inputFiles in one go for " + splitted[0])
                 job = KinFitHandler(nJobs, splitted[0], splitted[1], splitted[2], splitted[3], pnfsPath, -1)
                 jobsPool.put(job)
                 nJobs += 1
@@ -535,6 +537,7 @@ log.output(Popen("rm "+options.WorkingDir+"*.xml", shell=True, stdin=PIPE, stdou
 
 # Clean up /localgrid/aolbrech directory !
 log.output("Cleaning up /localgrid/aolbrech/ directory by moving all directories to /localgrid/"+userName+"/LightTree_PBSScript/"+options.TaskName+"_"+timestamp)
+os.mkdir("/localgrid/"+userName+"/LightTree_PBSScript/"+options.TaskName+"_"+timestamp+"/")
 log.output(Popen("mv /localgrid/"+userName+"/"+options.TaskName+"_"+timestamp+"_job_* /localgrid/"+userName+"/LightTree_PBSScript/"+options.TaskName+"_"+timestamp+"/" , shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True).stdout.read())
 
 # send mail when finished
