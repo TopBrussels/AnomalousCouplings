@@ -40,7 +40,6 @@ using namespace TopTree;
 
 int main (int argc, char *argv[]){
 
-  TFile *fout = new TFile ("PlotsMacro/AnomCouplings.root", "RECREATE");  
   clock_t start = clock();
   
   cout << "*************************************************************" << endl;
@@ -303,6 +302,9 @@ int main (int argc, char *argv[]){
   for (unsigned int d = 0; d < datasets.size (); d++) {
     if (verbose > 1) cout << "   * Dataset " << d << ": " << datasets[d]->Name () << " with " << datasets[d]->NofEvtsToRunOver() << " events." << endl;
     
+    //Create a separate ROOT file for each dataset (possible since no MSPlots can be created!)
+    TFile *fout = new TFile(("PlotsMacro/AnomCouplings_"+dataSetName+"_"+systematic+".root").c_str(), "RECREATE");  
+
     int iFile = -1;
     string previousFilename = "", dataSetName = datasets[d]->Name();
     
