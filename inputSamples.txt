@@ -1,8 +1,8 @@
-# Nominal Data samples
-Data_SingleMu_Run2012A_22Jan2013:Nominal:1:874.840:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012A_22Jan2013_Prod_53X_v5_TopTreeId3427/22082015_155321/
-Data_SingleMu_Run2012B_22Jan2013:Nominal:1:4401:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012B_22Jan2013_Prod_53X_v5_TopTreeId3429/25082015_103219/
-Data_SingleMu_Run2012C_22Jan2013:Nominal:1:7125:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012C_22Jan2013_Prod_53X_v5_TopTreeId3446/22082015_103755/
-Data_SingleMu_Run2012D_22Jan2013:Nominal:1:7246:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012D_22Jan2013_Prod_53X_v5_TopTreeId3444/02092015_182940/
+# Nominal Data samples (Need 'Data_Mu' to get correct identifications in code ....)
+Data_Mu_Run2012A_22Jan2013:Nominal:1:874.840:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012A_22Jan2013_Prod_53X_v5_TopTreeId3427/22082015_155321/
+Data_Mu_Run2012B_22Jan2013:Nominal:1:4401:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012B_22Jan2013_Prod_53X_v5_TopTreeId3429/25082015_103219/
+Data_Mu_Run2012C_22Jan2013:Nominal:1:7125:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012C_22Jan2013_Prod_53X_v5_TopTreeId3446/22082015_103755/
+Data_Mu_Run2012D_22Jan2013:Nominal:1:7246:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012D_22Jan2013_Prod_53X_v5_TopTreeId3444/02092015_182940/
 
 #Data_SingleElectron_Run2012A_22Jan2013:Nominal:1:875.734:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3438/30042013_233241/
 # newLumi:  864.525
