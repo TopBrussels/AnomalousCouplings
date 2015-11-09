@@ -21,7 +21,8 @@ doCalc = False
 if str(sys.argv[2]) == 'y':
     doCalc = True
 
-LikelihoodCuts = [52, 53, 54, 56, 58, 100]     # 100 corresponds to no cut applied!
+# LikelihoodCuts = [52, 53, 54, 56, 58, 100]     # 100 corresponds to no cut applied!
+LikelihoodCuts = [56, 58, 60, 100]     # 100 corresponds to no cut applied!
 ExclOuterBinsFit = ['y', 'n']
 cutType = ['NoCuts', 'CutsAlsoOnMET']
 
