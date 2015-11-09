@@ -160,6 +160,7 @@ int main(int argc, char *argv[]){
 
   //Now store everything into a TGraphError
   TGraphErrors *gr_HistSum = new TGraphErrors(nrFiles, gRVarList, Min_HistSum, 0, Err_HistSum);
+  gr_HistSum->SetName("graph_HistSum");
   gr_HistSum->SetTitle(("Calib curve from summed hist ("+nameInfo+")").c_str());
   gr_HistSum->SetMarkerStyle(1); gr_HistSum->SetMarkerColor(1); gr_HistSum->SetLineColor(1);
 
@@ -183,7 +184,8 @@ int main(int argc, char *argv[]){
   canv->cd();
   gr_HistSum->Draw("AP");
   polFit_Line->SetLineColor(1);  
-  gr_HistSum->Fit(polFit_Line,"Q","",-0.25,0.25);
+  //gr_HistSum->Fit(polFit_Line,"Q","",-0.25,0.25);
+  gr_HistSum->Fit(polFit_Line,"Q","",-0.17,0.17);    //Exclude the point at +- 0.2 since this is often not well reconstructed (especially when outer bins are excluded)
   stringstream slope_HistSum, slopeErr_HistSum, inter_HistSum, intErr_HistSum, chiSq_HistSum, ndf_HistSum;
   slope_HistSum << std::fixed << std::setprecision(4) << polFit_Line->GetParameter(1); slopeErr_HistSum << std::fixed << std::setprecision(4) << polFit_Line->GetParError(1);
   inter_HistSum << std::fixed << std::setprecision(4) << polFit_Line->GetParameter(0); intErr_HistSum << std::fixed << std::setprecision(4) << polFit_Line->GetParError(0);
@@ -193,12 +195,14 @@ int main(int argc, char *argv[]){
   t.DrawLatex(-0.3,0.02,(" - intercept = "+inter_HistSum.str()+" #pm "+intErr_HistSum.str()).c_str());
   t.DrawLatex(-0.3,-0.02,(" - #chi^{2}/ndf = "+chiSq_HistSum.str()+"/"+ndf_HistSum.str()).c_str());
   if(savePlots) canv->SaveAs((savePrefix+"_HistSum.pdf").c_str());
+  canv->SaveAs((savePrefix+"_HistSum.C").c_str());
   canv->Write((nameInfo+"_HistSum").c_str());
 
   canv->cd();
   gr_FstFit->Draw("AP");
   polFit_Line->SetLineColor(2);
-  gr_FstFit->Fit(polFit_Line,"Q","",-0.25,0.25); 
+  //gr_FstFit->Fit(polFit_Line,"Q","",-0.25,0.25); 
+  gr_FstFit->Fit(polFit_Line,"Q","",-0.17,0.17);    //Exclude the point at +- 0.2 since this is often not well reconstructed (especially when outer bins are excluded)
   stringstream slope_FstFit, slopeErr_FstFit, inter_FstFit, intErr_FstFit, chiSq_FstFit, ndf_FstFit;
   slope_FstFit << std::fixed << std::setprecision(4) << polFit_Line->GetParameter(1); slopeErr_FstFit << std::fixed << std::setprecision(4) << polFit_Line->GetParError(1);
   inter_FstFit << std::fixed << std::setprecision(4) << polFit_Line->GetParameter(0); intErr_FstFit << std::fixed << std::setprecision(4) << polFit_Line->GetParError(0);
@@ -213,7 +217,8 @@ int main(int argc, char *argv[]){
   canv->cd();
   gr_ScdFit->Draw("AP");
   polFit_Line->SetLineColor(4);
-  gr_ScdFit->Fit(polFit_Line,"Q","",-0.25,0.25);
+  //gr_ScdFit->Fit(polFit_Line,"Q","",-0.25,0.25);
+  gr_ScdFit->Fit(polFit_Line,"Q","",-0.17,0.17);    //Exclude the point at +- 0.2 since this is often not well reconstructed (especially when outer bins are excluded)
   stringstream slope_ScdFit, slopeErr_ScdFit, inter_ScdFit, intErr_ScdFit, chiSq_ScdFit, ndf_ScdFit;
   slope_ScdFit << std::fixed << std::setprecision(4) << polFit_Line->GetParameter(1); slopeErr_ScdFit << std::fixed << std::setprecision(4) << polFit_Line->GetParError(1);
   inter_ScdFit << std::fixed << std::setprecision(4) << polFit_Line->GetParameter(0); intErr_ScdFit << std::fixed << std::setprecision(4) << polFit_Line->GetParError(0);
