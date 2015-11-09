@@ -14,12 +14,12 @@
 #include <cstring>
 
 //Title of considered directory and number of events
-std::string title = "CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos015_20000Evts_CutsAlsoOnMET_LikelihoodCut54"; 
+std::string title = "CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg02_20000Evts_NoCuts_LikelihoodCut60"; 
 const int nEvts = 20000; 
 
 // Specify whether the stacked canvasses have to be stored 
 bool storeSplittedCanvas = false; 
-std::string SplittedDir = "Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos015_20000Evts_CutsAlsoOnMET/SplittedCanvasses"; 
+std::string SplittedDir = "Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg02_20000Evts_NoCuts/SplittedCanvasses"; 
 int NrCanvas = 0, xDivide = 4, yDivide = 4;
 
 //Considered values and corresponding XS-values
@@ -42,10 +42,10 @@ const unsigned int NrToDel = 4;
 int NrRemaining = NrConfigs-NrToDel;
 
 //Apply the following likelihood cut (100 should correspond to keeping everything!)
-double LikCut = 54; 
+double LikCut = 60; 
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos015_20000Evts_CutsAlsoOnMET/FitDistributions_CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos015_20000Evts_CutsAlsoOnMET_LikelihoodCut54_20000Evts.root","RECREATE"); 
+TFile* file_FitDist = new TFile("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg02_20000Evts_NoCuts/FitDistributions_CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg02_20000Evts_NoCuts_LikelihoodCut60_20000Evts.root","RECREATE"); 
 TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
 std::string sNrCanvas ="0";
@@ -61,6 +61,7 @@ TH2F* h_TotalFitDevVSChiSq = new TH2F("TotalFitDevVSChiSq","Total fit deviation 
 TH1F* h_TotalRelFitDeviationReduced = new TH1F("TotalRelFitDeviationReduced","TotalRelFitDeviationReduced",200,0,0.001);
 TH1F* h_TotalRelFitDeviation = new TH1F("TotalRelFitDeviation","TotalRelFitDeviation",200,0,0.01);
 TH1F* h_SMLikelihoodValue = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
+TH1F* h_SMLikValue_AfterCut = new TH1F("SMLikValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut)",500,30,90);
 TH2F* h_SMLikelihoodValue_vs_DeltaLikelihood = new TH2F("SMLikelihoodValue_vs_DeltaLikelihood","Likelihood value at gR = 0 versus difference in likelihood",500,30,90,100,0,5);
 
 //Store all the fit parameters into a vector of doubles
@@ -295,28 +296,21 @@ void doublePolFitMacro(){
   double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
-  std::ifstream ifs ("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos015_20000Evts_CutsAlsoOnMET/weights.out", std::ifstream::in); 
+  std::ifstream ifs ("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSampleNeg02_20000Evts_NoCuts/weights.out", std::ifstream::in); 
   std::cout << " Value of ifs : " << ifs.eof() << std::endl;
   std::string line;
   int evt,config,tf;
   double weight, weightUnc;
   double CosThetaCorr = 1;
+  int SMConfig = 99; 
   while( std::getline(ifs,line) && consEvts < nEvts){
     std::istringstream iss(line);
     if( iss >> evt >> config >> tf >> weight >> weightUnc){ 
       if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
       stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
-      stringstream ssConfig; ssConfig << config; string sConfig = ssConfig.str();
-
-      //Initialize the fitDeviation histograms (array of TH1F, one for each configuration ...)
-      if(consEvts == 0){
-        h_FitDeviation[config-1] = new TH1F(("FitDeviation_LowestConfig"+sConfig).c_str(),("FitDeviation histogram for "+sConfig+"st lowest value").c_str(), 200, 0, 0.1);
-        h_FitDeviationRel[config-1] = new TH1F(("FitDeviationRelative_LowestConfig"+sConfig).c_str(), ("FitDeviationRelative histogram for "+sConfig+"st lowest value").c_str(),200,0,0.005);
-      }
 
       //--- Initialize the event-per-event variables! ---//
       // --    Loop over the different allowed normalisations
-      int SMConfig = 0; 
       for(int iNorm = 0; iNorm < nrNorms; iNorm++){
           
         double MaxLik = 0, MinLik = 9999;
@@ -331,9 +325,12 @@ void doublePolFitMacro(){
 
         //Get the maximum and minimum likelihood value
         if(LnLik[iNorm][config-1] > MaxLik) MaxLik = LnLik[iNorm][config-1];
-        if(LnLik[iNorm][config-1] < MinLik) MinLik = LnLik[iNorm][config-1]; 
+        if(LnLik[iNorm][config-1] < MinLik) MinLik = LnLik[iNorm][config-1];
 
-        if( ( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) && Var[config-1] == 0.0){ h_SMLikelihoodValue->Fill((-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr); SMConfig = config-1;}
+        //Set the SMConfig:
+        if( Var[config-1] == 0.0) SMConfig = config-1;
+
+        if( ( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) && Var[config-1] == 0.0){ h_SMLikelihoodValue->Fill((-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr);}
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]);
@@ -343,11 +340,22 @@ void doublePolFitMacro(){
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
-          if( LnLik[nrNorms-1][SMConfig] > LikCut){ continue; if(LikCut == 100) std::cout << " ******************* \n ERROR: Should not reject any event when cut-value = 100 !!! \n ******************* \n " << std::endl;}
+          if( LnLik[nrNorms-1][SMConfig] > LikCut){ if(LikCut == 100) std::cout << " ******** \n ERROR: Should not reject any event when cut-value = 100 !!! \n ******** \n " << std::endl; delete h_LnLik[iNorm]; continue; }
           if(iNorm == 0) consEvts++;   //Count the number of full events!
 
+          //Initialize the fitDeviation histograms (array of TH1F, one for each configuration ...)
+          if(consEvts == 1){
+            for(int ii = 0; ii < NrConfigs; ii++){
+              stringstream ssConfig; ssConfig << ii+1; string sConfig = ssConfig.str();
+              h_FitDeviation[ii] = new TH1F(("FitDeviation_LowestConfig"+sConfig).c_str(),("FitDeviation histogram for "+sConfig+"st lowest value").c_str(), 200, 0, 0.1);
+              h_FitDeviationRel[ii] = new TH1F(("FitDeviationRelative_LowestConfig"+sConfig).c_str(), ("FitDeviationRelative histogram for "+sConfig+"st lowest value").c_str(),200,0,0.005);
+            }
+          }
+
+          if( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) h_SMLikValue_AfterCut->Fill(LnLik[nrNorms-1][SMConfig]);
+
           histSum[iNorm]->Add( h_LnLik[iNorm] );
-          h_SMLikelihoodValue_vs_DeltaLikelihood->Fill((-log(weight)+log(MGXSCut[SMConfig]))*CosThetaCorr, MaxLik-MinLik);
+          h_SMLikelihoodValue_vs_DeltaLikelihood->Fill(LnLik[nrNorms-1][SMConfig], MaxLik-MinLik);
 
           //Save xDivide*yDivide of these histograms in one TCanvas!
           if( storeSplittedCanvas == true){
@@ -394,6 +402,7 @@ void doublePolFitMacro(){
   h_TotalRelFitDeviation->Write();
   h_SMLikelihoodValue->GetXaxis()->SetTitle("Likelihood value at gR = 0.0"); h_SMLikelihoodValue->GetYaxis()->SetTitle("# events");
   h_SMLikelihoodValue->Write();
+  h_SMLikValue_AfterCut->Write();
   h_SMLikelihoodValue_vs_DeltaLikelihood->Write();
 
   TDirectory *dir_FitDevDelete = dir_FitResults->GetDirectory("PointsDeletedByFitDev");
