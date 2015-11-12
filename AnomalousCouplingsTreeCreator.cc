@@ -324,13 +324,13 @@ int main (int argc, char *argv[]){
     /////////////////////////////////////
     vector<JetCorrectorParameters> vCorrParam;
     if( isData ){// Data!
-      JetCorrectorParameters *L1JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V5_DATA_L1FastJet_AK5PFchs.txt");
+      JetCorrectorParameters *L1JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V8_DATA_L1FastJet_AK5PFchs.txt");
       vCorrParam.push_back(*L1JetCorPar);
-      JetCorrectorParameters *L2JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V5_DATA_L2Relative_AK5PFchs.txt");
+      JetCorrectorParameters *L2JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V8_DATA_L2Relative_AK5PFchs.txt");
       vCorrParam.push_back(*L2JetCorPar);
-      JetCorrectorParameters *L3JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V5_DATA_L3Absolute_AK5PFchs.txt");
+      JetCorrectorParameters *L3JetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V8_DATA_L3Absolute_AK5PFchs.txt");
       vCorrParam.push_back(*L3JetCorPar);
-      JetCorrectorParameters *L2L3ResJetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V5_DATA_L2L3Residual_AK5PFchs.txt");
+      JetCorrectorParameters *L2L3ResJetCorPar = new JetCorrectorParameters("PersonalClasses/Calibrations/JECFiles/Winter14_V8_DATA_L2L3Residual_AK5PFchs.txt");
       vCorrParam.push_back(*L2L3ResJetCorPar);
     }
     else{
@@ -817,9 +817,11 @@ int main (int argc, char *argv[]){
 
       std::vector<float> CSVbTagValues;
       vector<TLorentzVector> SelectedJets;
+      vector<int> SelectedJetsPartonFlavour;
       for(int iJet = 0; iJet < selectedJets.size(); iJet++){
         CSVbTagValues.push_back(selectedJets[iJet]->btag_combinedSecondaryVertexBJetTags());
         SelectedJets.push_back(*selectedJets[iJet]);
+        SelectedJetsPartonFlavour.push_back(selectedJets[iJet]->partonFlavour());
       }
 
       anomCoupLight->setEventId(event->eventId());
@@ -830,6 +832,7 @@ int main (int argc, char *argv[]){
       anomCoupLight->setScaleFactor(scaleFactor);
 
       anomCoupLight->setSelectedJets(SelectedJets);
+      anomCoupLight->setSelectedJetsPartonFlavour(SelectedJetsPartonFlavour);
       anomCoupLight->setBTagCSV(CSVbTagValues);
       anomCoupLight->setSelectedLepton(*selectedLepton);
       anomCoupLight->setDecayChannel(decayChannel);

@@ -20,6 +20,7 @@ class AnomCoupLight : public TObject
       ,nTruePU_(0)
       ,scaleFactor_(0)
       ,selectedJets_()
+      ,selectedJetsPartonFlavour_()
       ,CSVbTag_()
       ,selectedLepton_()
       ,decayChannel_(0)
@@ -43,6 +44,7 @@ class AnomCoupLight : public TObject
     float scaleFactor()        const {return scaleFactor_;}
 
     vector<TLorentzVector> selectedJets() const {return selectedJets_;}
+    vector<int> selectedJetsPartonFlavour() const {return selectedJetsPartonFlavour_;}
     vector<float> CSVbTag() const {return CSVbTag_;}
     TLorentzVector selectedLepton() const {return selectedLepton_;}
     unsigned int decayChannel() const {return decayChannel_;}
@@ -65,6 +67,7 @@ class AnomCoupLight : public TObject
     void setScaleFactor(float scaleFactor) {scaleFactor_ = scaleFactor;}
 
     void setSelectedJets(vector<TLorentzVector> selectedJets) {selectedJets_ = selectedJets;}
+    void setSelectedJetsPartonFlavour(vector<int> selectedJetsPartonFlavour){selectedJetsPartonFlavour_ = selectedJetsPartonFlavour;}
     void setBTagCSV(vector<float> CSVbTag) {CSVbTag_ = CSVbTag;}
     void setSelectedLepton( TLorentzVector selectedLepton) {selectedLepton_ = selectedLepton;}
     void setDecayChannel(unsigned int decayChannel) {decayChannel_ = decayChannel;}
@@ -88,6 +91,7 @@ class AnomCoupLight : public TObject
     float scaleFactor_;
 
     vector<TLorentzVector> selectedJets_;
+    vector<int> selectedJetsPartonFlavour_;
     vector<float> CSVbTag_;
     TLorentzVector selectedLepton_;
     unsigned int decayChannel_;
