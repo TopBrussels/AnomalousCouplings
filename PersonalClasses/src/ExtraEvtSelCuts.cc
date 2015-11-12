@@ -24,7 +24,6 @@ ExtraEvtSelCuts::ExtraEvtSelCuts(float TopMassHadr, float sTopMassHadr, float WM
       if(iCut == 0){ NrEvts_AllChosenCuts_[iCWU] = 0; OriginalEvts_[iCWU] = 0;}
     }
   }
-
 }
 
 ExtraEvtSelCuts::~ExtraEvtSelCuts(){
@@ -33,11 +32,16 @@ ExtraEvtSelCuts::~ExtraEvtSelCuts(){
 
 void ExtraEvtSelCuts::Initialize(std::string bTagTitle, std::string dataSetName){
 
+  dataSetName_ = dataSetName;
   histTitle_ = bTagTitle+"_"+dataSetName;
   //Get the Mlb-Mqqb chiSq for correct and wrong events to decide on a cut-value
-  histo1D["LowestChiSq_CorrectEvents_"+histTitle_]   = new TH1F(("LowestChiSq_CorrectEvents_"+histTitle_).c_str(),   ("#chi^{2} distribution for chosen jet-combination (correct events -- "+histTitle_+")").c_str(),   50,0,80);
-  histo1D["LowestChiSq_WrongEvents_"+histTitle_]     = new TH1F(("LowestChiSq_WrongEvents_"+histTitle_).c_str(),     ("#chi^{2} distribution for chosen jet-combination (wrong events -- "+histTitle_+")").c_str(),     50,0,80);
-  histo1D["LowestChiSq_UnmatchedEvents_"+histTitle_] = new TH1F(("LowestChiSq_UnmatchedEvents_"+histTitle_).c_str(), ("#chi^{2} distribution for chosen jet-combination (unmatched events -- "+histTitle_+")").c_str(), 50,0,80);
+  if(dataSetName.find("TTbarJets") == 0){
+    histo1D["LowestChiSq_CorrectEvents_"+histTitle_]   = new TH1F(("LowestChiSq_CorrectEvents_"+histTitle_).c_str(),   ("#chi^{2} distribution for chosen jet-combination (correct events -- "+histTitle_+")").c_str(),   50,0,80);
+    histo1D["LowestChiSq_WrongEvents_"+histTitle_]     = new TH1F(("LowestChiSq_WrongEvents_"+histTitle_).c_str(),     ("#chi^{2} distribution for chosen jet-combination (wrong events -- "+histTitle_+")").c_str(),     50,0,80);
+    histo1D["LowestChiSq_UnmatchedEvents_"+histTitle_] = new TH1F(("LowestChiSq_UnmatchedEvents_"+histTitle_).c_str(), ("#chi^{2} distribution for chosen jet-combination (unmatched events -- "+histTitle_+")").c_str(), 50,0,80);
+  }
+  else
+    histo1D["LowestChiSq_AllEvents_"+histTitle_] = new TH1F(("LowestChiSq_AllEvents_"+histTitle_).c_str(), ("#chi^{2} distribution for chosen jet-combination (all events -- "+histTitle_+")").c_str(), 50,0,80);
 
   //Reset the counters!
   for(int iCut = 0; iCut < nrCuts_; iCut++){
@@ -46,9 +50,10 @@ void ExtraEvtSelCuts::Initialize(std::string bTagTitle, std::string dataSetName)
       if(iCut == 0){ NrEvts_AllChosenCuts_[iCWU] = 0; OriginalEvts_[iCWU] = 0;}
     }
   }
+
 }
 
-bool ExtraEvtSelCuts::KeepEvent(vector<int> jetComb, TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int> selJetComb, float chiSq, int CWUIndex, int decayCh){
+bool ExtraEvtSelCuts::KeepEvent(TLorentzVector lepton, vector<TLorentzVector> Jets, vector<int> selJetComb, float chiSq, int CWUIndex, int decayCh){
 
   bool keepEvt = false;  
 
@@ -65,9 +70,13 @@ bool ExtraEvtSelCuts::KeepEvent(vector<int> jetComb, TLorentzVector lepton, vect
     if(ChiSqSurv[chosenChiSq_] && MTSurv[chosenMassWindow_] && MWSurv[chosenMassWindow_]) keepEvt = true;
 
     //Now get the numbers for the correct/wrong/unmatched categories!
-    if(CWUIndex == 0)      histo1D["LowestChiSq_CorrectEvents_"+histTitle_]->Fill(chiSq);  
-    else if(CWUIndex == 1) histo1D["LowestChiSq_WrongEvents_"+histTitle_]->Fill(chiSq);    
-    else if(CWUIndex == 2) histo1D["LowestChiSq_UnmatchedEvents_"+histTitle_]->Fill(chiSq);
+    if(dataSetName_.find("TTbarJets") == 0){
+      if(CWUIndex == 0)      histo1D["LowestChiSq_CorrectEvents_"+histTitle_]->Fill(chiSq);  
+      else if(CWUIndex == 1) histo1D["LowestChiSq_WrongEvents_"+histTitle_]->Fill(chiSq);    
+      else if(CWUIndex == 2) histo1D["LowestChiSq_UnmatchedEvents_"+histTitle_]->Fill(chiSq);
+    }
+    else
+      histo1D["LowestChiSq_AllEvents_"+histTitle_]->Fill(chiSq);
  
     OriginalEvts_[CWUIndex]++;
 
@@ -86,12 +95,6 @@ bool ExtraEvtSelCuts::KeepEvent(vector<int> jetComb, TLorentzVector lepton, vect
 void ExtraEvtSelCuts::StoreCutInfluence(TFile* outfile){
 
   if(oneBTag_){
-
-//    std::cout << " Number of correct muon events (cuts) : " << CorrEvts_Mu << endl;
-//    std::cout << " Number of correct electron events (cuts) : " << CorrEvts_El << endl;
-//    std::cout << " Number of wrong muon events (cuts): " << WrongEvts_Mu << endl;
-//    std::cout << " Number of wrong electron events (cuts): " << WrongEvts_El << endl;
-
     //Count the total number of events for each of the different categories:
     int TotalEvts = 0, TotalEvts_ChiSq[5] = {0}, TotalEvts_MT[5] = {0}, TotalEvts_MW[5] = {0}, TotalEvts_MComb[5] = {0}, TotalEvts_AllChosenCuts = 0;
     for(int iCWU = 0; iCWU < 3; iCWU++){
@@ -105,8 +108,9 @@ void ExtraEvtSelCuts::StoreCutInfluence(TFile* outfile){
       }
     }
 
+
     ofstream CutInfl;
-    CutInfl.open("EventSelectionResults/AnalyzerOutput/ExtraEventSelectionCuts.tex");
+    CutInfl.open(("EventSelectionResults/AnalyzerOutput/ExtraEventSelectionCuts"+dataSetName_+".tex").c_str());
 
     //Initialize the tex document
     CutInfl << "\\documentclass{article} \n\\usepackage[margin=0.5in]{geometry} \n\\begin{document} \n" << endl;
@@ -119,63 +123,102 @@ void ExtraEvtSelCuts::StoreCutInfluence(TFile* outfile){
     CutInfl << " \\end{abstract} \n " << endl;
  
     //Statistics for all events 
-    CutInfl << " \\begin{table}[h!t] \n  \\caption{Original number of events, before any additional event selection cuts are applied} \n  \\centering \n   \\begin{tabular}{c|c|c|c|c} " << endl;
-    CutInfl << "     Correct evts    & Wrong evts     & Unmatched evts      &  Total evts & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
-    CutInfl << "     " << OriginalEvts_[0] << "   &   " << OriginalEvts_[1] << "  & " << OriginalEvts_[2] << " & " << TotalEvts << "  & " << OriginalEvts_[0]*100.0/TotalEvts << " \n " << endl;
+    CutInfl << " \\begin{table}[h!t] \n  \\caption{Original number of events, before any additional event selection cuts are applied} \n  \\centering " << endl;
+    if(dataSetName_.find("TTbarJets") == 0){
+      CutInfl << "   \\begin{tabular}{c|c|c|c|c} \n     Correct evts    & Wrong evts     & Unmatched evts      &  Total evts & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
+      CutInfl << "     " << OriginalEvts_[0] << "   &   " << OriginalEvts_[1] << "  & " << OriginalEvts_[2] << " & " << TotalEvts << "  & " << OriginalEvts_[0]*100.0/TotalEvts << " \n " << endl;
+    }
+    else{
+      CutInfl << "   \\begin{tabular}{c|c} \n     Number of events    & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
+      CutInfl << "     " << TotalEvts << "  & " << OriginalEvts_[0]*100.0/TotalEvts << " \n " << endl;
+    }
     CutInfl << "   \\end{tabular} \n \\end{table} \n " << endl;
 
     //Numbers after chi-sq cut
-    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the Mlb-Mqqb $\\chi^{2}$.} \n  \\centering \n   \\begin{tabular}{c|c|c|c|c|c} " << endl;
-    CutInfl << "     $\\chi^{2}$ cut-value    & Correct evts    & Wrong evts     & Unmatched evts  & Evt reduction ($\\%$)    & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
-    for(int iCut = 0; iCut < nrCuts_; iCut++){
-      CutInfl << "     " << ChiSqCutVal_[iCut] << "  &   ";
-      for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_ChiSq_[iCWU][iCut] << "  &  "; 
-      CutInfl << 100.0-(TotalEvts_ChiSq[iCut]*100.0/TotalEvts) << " & " << NrEvts_ChiSq_[0][iCut]*100.0/TotalEvts_ChiSq[iCut];
-      if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the Mlb-Mqqb $\\chi^{2}$.} \n  \\centering " << endl;
+    if(dataSetName_.find("TTbarJets") == 0){
+      CutInfl << "   \\begin{tabular}{c|c|c|c|c|c} \n     $\\chi^{2}$ cut-value    & Correct evts    & Wrong evts     & Unmatched evts  & Evt reduction ($\\%$)    & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++){
+        CutInfl << "     " << ChiSqCutVal_[iCut] << "  &   ";
+        for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_ChiSq_[iCWU][iCut] << "  &  "; 
+        CutInfl << 100.0-(TotalEvts_ChiSq[iCut]*100.0/TotalEvts) << " & " << NrEvts_ChiSq_[0][iCut]*100.0/TotalEvts_ChiSq[iCut];
+        if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+      }
     }
-    CutInfl << "\n   \\end{tabular} \n \\end{table} \n " << endl;
+    else{
+      CutInfl << "   \\begin{tabular}{c|c|c|} \n     $\\chi^{2}$ cut-value    & Number of events  & Evt reduction ($\\%$)    \\\\ \n     \\hline" << endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++) CutInfl << "     " << ChiSqCutVal_[iCut] << "  &   " << TotalEvts_ChiSq[iCut] << "  &  " << 100.0-(TotalEvts_ChiSq[iCut]*100.0/TotalEvts) << " \\\\ " << endl;
+    }
+    CutInfl << "   \\end{tabular} \n \\end{table} \n " << endl;
 
     //Numbers after mT mass-window
-    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the $M_{top}$ mass-window.} \n  \\centering \n   \\begin{tabular}{c|c|c|c|c|c|c} " << endl;
-    CutInfl << "     Nr $\\sigma$'s & Mass-window ($m_{top}$)    & Correct evts    & Wrong evts     & Unmatched evts   & Evt reduction ($\\%$)    & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
-    for(int iCut = 0; iCut < nrCuts_; iCut++){
-      CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & " << MTop_Down_[iCut] << " - " << MTop_Up_[iCut] << "  &   ";
-      for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_MT_[iCWU][iCut] << "  &  ";
-      CutInfl << 100.0-(TotalEvts_MT[iCut]*100.0/TotalEvts) << " &  " << NrEvts_MT_[0][iCut]*100.0/TotalEvts_MT[iCut];
-      if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the $M_{top}$ mass-window.} \n  \\centering " << endl;
+    if(dataSetName_.find("TTbarJets") == 0){
+      CutInfl << "   \\begin{tabular}{c|c|c|c|c|c|c}\n     Nr $\\sigma$'s & Mass-window ($m_{top}$)    & Correct evts    & Wrong evts     & Unmatched evts   & Evt reduction ($\\%$)    & s/b ($\\%$)     \\\\\n     \\hline"<< endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++){
+        CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & " << MTop_Down_[iCut] << " - " << MTop_Up_[iCut] << "  &   ";
+        for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_MT_[iCWU][iCut] << "  &  ";
+        CutInfl << 100.0-(TotalEvts_MT[iCut]*100.0/TotalEvts) << " &  " << NrEvts_MT_[0][iCut]*100.0/TotalEvts_MT[iCut];
+        if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+      }
     }
-    CutInfl << "\n   \\end{tabular} \n \\end{table} \n " << endl;
+    else{
+      CutInfl << "   \\begin{tabular}{c|c|c|c|}\n     Nr $\\sigma$'s & Mass-window ($m_{top}$)   & Number of events   & Evt reduction ($\\%$)     \\\\\n     \\hline"<< endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++) 
+        CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & " << MTop_Down_[iCut] << " - " << MTop_Up_[iCut] << "  &   " << TotalEvts_MT[iCut] << " &  " << 100.0-(TotalEvts_MT[iCut]*100.0/TotalEvts) << " \\\\ " << endl;
+    }
+    CutInfl << "   \\end{tabular} \n \\end{table} \n " << endl;
 
     //Numbers after mW mass-window
-    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the $M_{W}$ mass-window.} \n  \\centering \n   \\begin{tabular}{c|c|c|c|c|c|c} " << endl;
-    CutInfl << "     Nr $\\sigma$'s & Mass-window ($m_{top}$)    & Correct evts    & Wrong evts     & Unmatched evts   & Evt reduction ($\\%$)    & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
-    for(int iCut = 0; iCut < nrCuts_; iCut++){
-      CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & " << MW_Down_[iCut] << " - " << MW_Up_[iCut] << "  &   ";
-      for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_MW_[iCWU][iCut] << "  &  ";
-      CutInfl << 100.0-(TotalEvts_MW[iCut]*100.0/TotalEvts) << " &  " << NrEvts_MW_[0][iCut]*100.0/TotalEvts_MW[iCut];
-      if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the $M_{W}$ mass-window.} \n  \\centering " << endl;
+    if(dataSetName_.find("TTbarJets") == 0){
+      CutInfl << "   \\begin{tabular}{c|c|c|c|c|c|c}\n     Nr $\\sigma$'s & Mass-window ($m_{top}$)    & Correct evts    & Wrong evts     & Unmatched evts   & Evt reduction ($\\%$)    & s/b ($\\%$)     \\\\\n     \\hline"<< endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++){
+        CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & " << MW_Down_[iCut] << " - " << MW_Up_[iCut] << "  &   ";
+        for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_MW_[iCWU][iCut] << "  &  ";
+        CutInfl << 100.0-(TotalEvts_MW[iCut]*100.0/TotalEvts) << " &  " << NrEvts_MW_[0][iCut]*100.0/TotalEvts_MW[iCut];
+        if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+      }
     }
-    CutInfl << "\n   \\end{tabular} \n \\end{table} \n " << endl;
+    else{
+      CutInfl << "   \\begin{tabular}{c|c|c|c|}\n     Nr $\\sigma$'s & Mass-window ($m_{top}$)    & Number of events   & Evt reduction ($\\%$)    \\\\\n     \\hline"<< endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++)
+        CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & " << MW_Down_[iCut] << " - " << MW_Up_[iCut] << "  &   " << TotalEvts_MW[iCut] << " & " << 100.0-(TotalEvts_MW[iCut]*100.0/TotalEvts) << " \\\\ " << endl;
+    }
+    CutInfl << "   \\end{tabular} \n \\end{table} \n " << endl;
 
     //Numbers after combined mT-mW mass-window
-    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the combined $M_{top}-M_{W}$ mass-window.} \n  \\centering \n   \\begin{tabular}{c|c|c|c|c|c} " << endl;
-    CutInfl << "     Mass-window $\\sigma$'s & Correct evts    & Wrong evts     & Unmatched evts  & Evt reduction ($\\%$)   & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
-    for(int iCut = 0; iCut < nrCuts_; iCut++){
-      CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & ";
-      for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_MComb_[iCWU][iCut] << "  &  ";
-      CutInfl << 100.0-(TotalEvts_MComb[iCut]*100.0/TotalEvts) << " &  " << NrEvts_MComb_[0][iCut]*100.0/TotalEvts_MComb[iCut];
-      if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+    CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on the combined $M_{top}-M_{W}$ mass-window.} \n  \\centering " << endl;
+    if(dataSetName_.find("TTbarJets") == 0){
+      CutInfl << "   \\begin{tabular}{c|c|c|c|c|c} \n     Mass-window $\\sigma$'s & Correct evts    & Wrong evts     & Unmatched evts  & Evt reduction ($\\%$)   & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++){
+        CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & ";
+        for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_MComb_[iCWU][iCut] << "  &  ";
+        CutInfl << 100.0-(TotalEvts_MComb[iCut]*100.0/TotalEvts) << " &  " << NrEvts_MComb_[0][iCut]*100.0/TotalEvts_MComb[iCut];
+        if(iCut < nrCuts_-1) CutInfl << " \\\\ " << endl;
+      }
     }
-    CutInfl << "\n   \\end{tabular} \n \\end{table} \n " << endl;
+    else{
+      CutInfl << "   \\begin{tabular}{c|c|c|} \n     Mass-window $\\sigma$'s & Total number of events    & Evt reduction ($\\%$)     \\\\ \n     \\hline" << endl;
+      for(int iCut = 0; iCut < nrCuts_; iCut++)
+        CutInfl << "     " << MassWindow_Sigmas_[iCut] << " & " << TotalEvts_MComb[iCut] << " & " << 100.0-(TotalEvts_MComb[iCut]*100.0/TotalEvts) << " \\\\ " << endl;
+    }
+    CutInfl << "   \\end{tabular} \n \\end{table} \n " << endl;
 
     //Numbers after all cuts combined
     if(chosenChiSq_ != -1 && chosenMassWindow_ != -1){
-      CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on both the Mlb-Mqqb $\\chi^{2}$ and the combined $M_{top}-M_{W}$ mass-window.} \n  \\centering \n   \\begin{tabular}{c|c|c|c|c|c|c} " << endl;
-      CutInfl << "     Mass-window $\\sigma$'s & $\\chi^{2}$ cut-value    & Correct evts    & Wrong evts     & Unmatched evts  & Evt reduction ($\\%$)    & s/b ($\\%$)     \\\\ \n     \\hline" << endl;
-      CutInfl << "     " << MassWindow_Sigmas_[chosenMassWindow_] << " & " << ChiSqCutVal_[chosenChiSq_] << " & ";
-      for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_AllChosenCuts_[iCWU] << " & ";
-      CutInfl << 100.0-(TotalEvts_AllChosenCuts*100.0/TotalEvts)  << " & " << NrEvts_AllChosenCuts_[0]*100.0/TotalEvts_AllChosenCuts << endl;
-      CutInfl << "\n   \\end{tabular} \n \\end{table} \n " << endl;
+      CutInfl << " \\begin{table}[h!t] \n  \\caption{Remaining number of events, after applying cuts on both the Mlb-Mqqb $\\chi^{2}$ and the combined $M_{top}-M_{W}$ mass-window.} \n  \\centering \n" << endl;
+      if(dataSetName_.find("TTbarJets") == 0){
+        CutInfl << "   \\begin{tabular}{c|c|c|c|c|c|c}\n    Mass-window $\\sigma$'s & $\\chi^{2}$ cut-value   & Correct evts   & Wrong evts    & Unmatched evts & Evt reduction ($\\%$)   & s/b ($\\%$)    \\\\\n     \\hline"<<endl;
+        CutInfl << "     " << MassWindow_Sigmas_[chosenMassWindow_] << " & " << ChiSqCutVal_[chosenChiSq_] << " & ";
+        for(int iCWU = 0; iCWU < 3; iCWU++) CutInfl << NrEvts_AllChosenCuts_[iCWU] << " & ";
+        CutInfl << 100.0-(TotalEvts_AllChosenCuts*100.0/TotalEvts)  << " & " << NrEvts_AllChosenCuts_[0]*100.0/TotalEvts_AllChosenCuts << endl;
+        CutInfl << "   \\end{tabular} \n \\end{table} \n " << endl;
+      }
+      else{
+        CutInfl << "   \\begin{tabular}{c|c|c|c|}\n    Mass-window $\\sigma$'s & $\\chi^{2}$ cut-value   & Number of events & Evt reduction ($\\%$)  \\\\\n     \\hline"<<endl;
+        CutInfl << "   " << MassWindow_Sigmas_[chosenMassWindow_] << " & " << ChiSqCutVal_[chosenChiSq_] << " & " << TotalEvts_AllChosenCuts << " & " << 100.0-(TotalEvts_AllChosenCuts*100.0/TotalEvts) << " \\\\ " << endl;
+      }
     }
     else{
       cout << " No cut-values given for chi-sq and mass-window " << endl;
@@ -199,6 +242,7 @@ void ExtraEvtSelCuts::StoreCutInfluence(TFile* outfile){
         temp->Write();
       }
     }
+    histo1D.clear();  //Need to clear the map since every dataset refills the histo1D's!
    
     if(histo2D.size() > 0){ 
       TDirectory* th2dir = outfile->GetDirectory("2D_histograms_ExtraEvtSelCuts");
@@ -209,6 +253,8 @@ void ExtraEvtSelCuts::StoreCutInfluence(TFile* outfile){
         temp->Write();
       }
     }
+    histo2D.clear();
+
     outfile->cd(); 
   }
 }

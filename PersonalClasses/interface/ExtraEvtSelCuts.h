@@ -26,7 +26,7 @@ class ExtraEvtSelCuts{
     ~ExtraEvtSelCuts();
 
     void Initialize(std::string bTagTitle, std::string dataSetName);
-    bool KeepEvent(vector<int>, TLorentzVector, vector<TLorentzVector>, vector<int>, float chiSqValue, int CWUIndex, int decayCh);
+    bool KeepEvent(TLorentzVector, vector<TLorentzVector>, vector<int>, float chiSqValue, int CWUIndex, int decayCh);
     void StoreCutInfluence(TFile*);
 
   private:
@@ -40,7 +40,8 @@ class ExtraEvtSelCuts{
     int NrEvts_ChiSq_[3][5], NrEvts_MT_[3][5], NrEvts_MW_[3][5], NrEvts_MComb_[3][5];
 
     int WrongEvts_Mu, WrongEvts_El, CorrEvts_Mu, CorrEvts_El;
-
+    std::string dataSetName_;
+  
     map<string,TH1F*> histo1D;
     map<string,TH2F*> histo2D;
 };
