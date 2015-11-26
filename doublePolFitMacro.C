@@ -123,14 +123,12 @@ void PaintOverflow(TH1F *h, TFile *FileToWrite, std::string dirName){  // This f
   delete h_tmp;
 }                  
 
-void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter, TCanvas *canv_SplittedLL){
+void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter, TCanvas *canv_SplittedLL, float Luminosity, float NormFactor){
   file_FitDist->cd();
-
-  TH1::SetDefaultSumw2();
 
   double LogLikelihood[NrConfigs];
   for(int ii = 0; ii < NrConfigs; ii++)
-    LogLikelihood[ii] = h_LogLik->GetBinContent(h_LogLik->FindBin(Var[ii]));
+    LogLikelihood[ii] = h_LogLik->GetBinContent(h_LogLik->FindBin(Var[ii]))*Luminosity*NormFactor;
 
   dir_OriginalLL[normType]->cd();
   h_LogLik->Write();
@@ -263,7 +261,6 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter
 }
 
 void doublePolFitMacro(){
-  TH1::SetDefaultSumw2();
 
   clock_t start = clock();
   
@@ -276,8 +273,7 @@ void doublePolFitMacro(){
 
   TH1F *histSum[nrNorms];
   for(int iNorm = 0; iNorm < nrNorms; iNorm++){
-    histSum[iNorm] = new TH1F(("SummedHist"+NormTypeName[iNorm]).c_str(),("Sum of all individual histograms ("+NormType[iNorm]+" norm)").c_str(),NrBins+1,xLow,xHigh);
-    histSum[iNorm]->Sumw2();
+    histSum[iNorm] = new TH1F(("SummedHist"+NormTypeName[iNorm]).c_str(),("Sum of all individual histograms ("+NormType[iNorm]+" norm)").c_str(),NrBins+1,xLow,xHigh); 
   }
 
   TH1F *h_LnLik[nrNorms] = {0};
@@ -311,7 +307,6 @@ void doublePolFitMacro(){
   while( std::getline(ifs,line) && consEvts < nEvts){
     std::istringstream iss(line);
     if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor >> Luminosity >> NormFactor ){ 
-      MCScaleFactor = 1; Luminosity = 1; NormFactor = 1;
       if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
       stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
 
@@ -325,8 +320,8 @@ void doublePolFitMacro(){
           h_LnLik[iNorm]->SetMarkerStyle(20+iNorm); h_LnLik[iNorm]->SetLineColor(3+iNorm); h_LnLik[iNorm]->SetMarkerColor(1); h_LnLik[iNorm]->SetMarkerSize(1.2);
         }
         if(iNorm == 0)                      LnLik[iNorm][config-1] = -log(weight)*CosThetaCorr;
-        else if(iNorm == 1 && nrNorms == 3) LnLik[iNorm][config-1] = (-log(weight)+log(MGXS[config-1]))*CosThetaCorr;
-        else if(iNorm == nrNorms-1)         LnLik[iNorm][config-1] = (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr;
+        else if(iNorm == 1 && nrNorms == 3) LnLik[iNorm][config-1] = (-log(weight)+log(MGXS[config-1]));
+        else if(iNorm == nrNorms-1)         LnLik[iNorm][config-1] = (-log(weight)+log(MGXSCut[config-1]));
 
         //Get the maximum and minimum likelihood value
         if(LnLik[iNorm][config-1] > MaxLik) MaxLik = LnLik[iNorm][config-1];
@@ -335,10 +330,10 @@ void doublePolFitMacro(){
         //Set the SMConfig:
         if( Var[config-1] == 0.0) SMConfig = config-1;
 
-        if( ( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) && Var[config-1] == 0.0){ h_SMLikelihoodValue->Fill((-log(weight)+log(MGXSCut[config-1])));} //, MCScaleFactor*Luminosity*NormFactor);}
+        if( ( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) && Var[config-1] == 0.0){ h_SMLikelihoodValue->Fill((-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr, MCScaleFactor*Luminosity*NormFactor);}
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
-        h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]); //*MCScaleFactor*Luminosity*NormFactor);
+        h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]);
 
         //---  Only perform the fit after all configurations are considered!  ---//
         if( config == NrConfigs){
@@ -357,9 +352,9 @@ void doublePolFitMacro(){
             }
           }
 
-          if( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) h_SMLikValue_AfterCut->Fill(LnLik[nrNorms-1][SMConfig]);//, MCScaleFactor*Luminosity*NormFactor);
+          if( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) h_SMLikValue_AfterCut->Fill(LnLik[nrNorms-1][SMConfig]);
 
-          histSum[iNorm]->Add( h_LnLik[iNorm] );
+          histSum[iNorm]->Add( h_LnLik[iNorm], MCScaleFactor*Luminosity*NormFactor);
           h_SMLikelihoodValue_vs_DeltaLikelihood->Fill(LnLik[nrNorms-1][SMConfig], MaxLik-MinLik);
 
           //Save xDivide*yDivide of these histograms in one TCanvas!
@@ -370,7 +365,7 @@ void doublePolFitMacro(){
           }
 
           //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
-	  calculateFit(h_LnLik[iNorm], sEvt, iNorm, consEvts, canv_SplitLL[iNorm]);
+	  calculateFit(h_LnLik[iNorm], sEvt, iNorm, consEvts, canv_SplitLL[iNorm], Luminosity, NormFactor);
 
           if( storeSplittedCanvas == true && consEvts < 600){
             if( consEvts == (xDivide*yDivide*(NrCanvas+1)) || consEvts == nEvts){
