@@ -34,12 +34,12 @@ elif len(sys.argv) == 2:
 whichDir = sys.argv[1]
 MGorRECO = sys.argv[2]
 
-YesOptions = ['y', 'yes', 'Y', 'YES', 'Yes']
 
 # -----------------------------------------#
 #  Set all the optional parameters correct #
 # -----------------------------------------#
-# Full syntax is : python FitDeviation.py Events/blabla/ MGorRECO #evts(opt) applyCosTheta(y/n - opt) Range(opt) weightsFile(opt) applyAcc(y/n - opt) TexWanted(y/n - opt)
+# Full syntax is : python FitDeviation.py Events/blabla/ MGorRECO #evts(opt) Range(opt) weightsFile(opt) likCutValue(opt) excludeOuterBinsFit(y/n - opt)  applyAcc(y/n - opt) TexWanted(y/n - opt)
+YesOptions = ['y', 'yes', 'Y', 'YES', 'Yes']
 
 nEvts = "-1"
 if len(sys.argv) > 3:
@@ -47,57 +47,57 @@ if len(sys.argv) > 3:
         nEvts = int(sys.argv[3])
 print "Number of events should be : ", nEvts
 
-applyCosTheta = "n"
-if len(sys.argv) > 4:
-    applyCosTheta = sys.argv[4]
-
 VarWindowGiven = False
-if len(sys.argv) > 5:
+if len(sys.argv) > 4:
     VarWindowGiven = True
-    if sys.argv[5] == "Normal":
+    if sys.argv[4] == "Normal":
         VarWindow = "1"
-    elif sys.argv[5] == "Wide":
+    elif sys.argv[4] == "Wide":
         VarWindow = "2"
-    elif sys.argv[5] == "Middle":
+    elif sys.argv[4] == "Middle":
         VarWindow = "3"
 
 WeightsFileGiven = False
-if len(sys.argv) > 6:
+if len(sys.argv) > 5:
     WeightsFileGiven = True
-    WeightsFileName = sys.argv[6]
+    WeightsFileName = sys.argv[5]
     WeightsFile = open(os.path.join(WeightsFileName), 'r')
+
+# Give the cut-value on the -ln(Likelihood) as an input
+if len(sys.argv) > 6:
+    LikCut = sys.argv[6]
+else:
+    LikCut = 100
+
+# Specify whether the cuts should exclude the two outer bins!
+excludeOuterBinsFit = False
+if len(sys.argv) > 7:
+    if sys.argv[7] in YesOptions:
+        excludeOuterBinsFit = True
 
 applyAccNorm = "n"
 if MGorRECO == "RECO":
     applyAccNorm = "y"
     print "\n To notice: For RECO events acceptance is always applied!!    **********"
 elif MGorRECO == "MG":
-    if len(sys.argv) > 7:
-        applyAccNorm = sys.argv[7]
+    if len(sys.argv) > 8:
+        applyAccNorm = sys.argv[8]
 
 # Set the 'CreateTexFile' correctly:
 CreateTexFile = False
-if len(sys.argv) > 8:
-    if sys.argv[8] == "y" or sys.argv[8] == "yes" or sys.argv[8] == "Y" or sys.argv[8] == "YES":
+if len(sys.argv) > 9:
+    if sys.argv[9] in YesOptions:
         CreateTexFile = True
 
 # Use this boolean to calculate the acceptance XS by scaling the MadGraph XS with the SM-acceptance ratio
 UseScaledXS = False
-if len(sys.argv) > 9:
-    if sys.argv[9] == "y" or sys.argv[9] == "Y":
+if len(sys.argv) > 10:
+    if sys.argv[10] in YesOptions:
         UseScaledXS = True
 
-# Give the cut-value on the -ln(Likelihood) as an input
-if len(sys.argv) > 10:
-    LikCut = sys.argv[10]
-else:
-    LikCut = 100
-
-# Specify whether the cuts should exclude the two outer bins!
-excludeOuterBinsFit = False
-if len(sys.argv) > 11:
-    if sys.argv[11] in YesOptions:
-        excludeOuterBinsFit = True
+#applyCosTheta = "n"
+#if len(sys.argv) > 4:
+#    applyCosTheta = sys.argv[4]
 
 # --------------------------------------------------------------#
 #  Now continue by selecting the desired configs form the range #
@@ -178,6 +178,11 @@ if not WeightsFileGiven:
             print " ", ii, " ) ", WeightsFileArray[ii]
         fileNr = raw_input(' --> Choose the number of the desired file! : ')
         WeightsFileName = str(whichDir) + '' + str(WeightsFileArray[int(fileNr)])
+
+# If _SFAdded is in the name of the used weights file, this should also be applied in the analyzer!
+applySF = False
+if '_SFAdded' in str(WeightsFileName):
+    applySF = True
 
 # Open the selected files!
 WeightsFile, LikelihoodFile = open(WeightsFileName, 'r'), open(WeightsFileName, 'r')
@@ -335,6 +340,9 @@ for RootLine in RootAnalyzer:
         if applyCosTheta == "y" or applyCosTheta == "Y":
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> CosThetaCorr ){ \n')
             print " Cos theta* reweighting will be applied! \n"
+        elif applySF == True:
+            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor ){ \n')
+            print " MC Scale Factor will be applied! \n"
         else:
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc){ \n')
     elif re.search(r"bool storeSplittedCanvas", RootLine):
