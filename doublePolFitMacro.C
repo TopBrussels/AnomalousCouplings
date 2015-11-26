@@ -14,38 +14,38 @@
 #include <cstring>
 
 //Title of considered directory and number of events
-std::string title = "CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos03_20000Evts_CutsAlsoOnMET"; 
-const int nEvts = 20000; 
+std::string title = "Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct_SFAdded_LikelihoodCut66_OuterBinsExclForFit"; 
+const int nEvts = 117658; 
 
 // Specify whether the stacked canvasses have to be stored 
 bool storeSplittedCanvas = false; 
-std::string SplittedDir = "Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos03_20000Evts_CutsAlsoOnMET/SplittedCanvasses"; 
+std::string SplittedDir = "Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct/SplittedCanvasses"; 
 int NrCanvas = 0, xDivide = 4, yDivide = 4;
 
 //Considered values and corresponding XS-values
-const int NrConfigs = 13; 
-double Var[] = {-0.4,-0.3,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.3,0.4};
-double MGXS[] = {3.95248,5.5612,8.24066,10.09161,12.39876,15.16567,18.54042,22.52782,27.3093,32.9283,39.4799,55.9507,77.7365};
-double MGXSCut[] = {0.93159,1.27966,1.825208,2.194079,2.6393,3.17698,3.80921,4.5645,5.45665,6.47791,7.66805,10.63243,14.46786};
+const int NrConfigs = 9; 
+double Var[] = {-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2};
+double MGXS[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double MGXSCut[] = {0.947244,1.13624,1.36448,1.63952,1.96892,2.36027,2.82111,3.35903,3.98157};
 std::string KinVar = "Re(g_{R})"; 
 
 //Applied normalisations!
-std::string NormTypeName[3] = {"","_XS","_Acc"}; 
-std::string NormType[3] = {"no","XS","acceptance"}; 
+std::string NormTypeName[2] = {"","_Acc"}; 
+std::string NormType[2] = {"no","acceptance"}; 
 const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
 
 //Information for the histograms
-int NrBins = 16; 
+int NrBins = 8; 
 float xLow, xHigh;
-double FitMin = -0.4, FitMax = 0.4; 
-const unsigned int NrToDel = 4; 
+double FitMin = -0.15, FitMax = 0.15; 
+const unsigned int NrToDel = 2; 
 int NrRemaining = NrConfigs-NrToDel;
 
 //Apply the following likelihood cut (100 should correspond to keeping everything!)
-double LikCut = 100; 
+double LikCut = 66; 
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos03_20000Evts_CutsAlsoOnMET/FitDistributions_CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos03_20000Evts_CutsAlsoOnMET_20000Evts.root","RECREATE"); 
+TFile* file_FitDist = new TFile("Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct/FitDistributions_Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct_SFAdded_LikelihoodCut66_OuterBinsExclForFit_117658Evts.root","RECREATE"); 
 TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
 std::string sNrCanvas ="0";
@@ -125,6 +125,8 @@ void PaintOverflow(TH1F *h, TFile *FileToWrite, std::string dirName){  // This f
 
 void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter, TCanvas *canv_SplittedLL){
   file_FitDist->cd();
+
+  TH1::SetDefaultSumw2();
 
   double LogLikelihood[NrConfigs];
   for(int ii = 0; ii < NrConfigs; ii++)
@@ -261,6 +263,7 @@ void calculateFit(TH1F *h_LogLik, string EvtNumber, int normType, int evtCounter
 }
 
 void doublePolFitMacro(){
+  TH1::SetDefaultSumw2();
 
   clock_t start = clock();
   
@@ -273,7 +276,8 @@ void doublePolFitMacro(){
 
   TH1F *histSum[nrNorms];
   for(int iNorm = 0; iNorm < nrNorms; iNorm++){
-    histSum[iNorm] = new TH1F(("SummedHist"+NormTypeName[iNorm]).c_str(),("Sum of all individual histograms ("+NormType[iNorm]+" norm)").c_str(),NrBins+1,xLow,xHigh); 
+    histSum[iNorm] = new TH1F(("SummedHist"+NormTypeName[iNorm]).c_str(),("Sum of all individual histograms ("+NormType[iNorm]+" norm)").c_str(),NrBins+1,xLow,xHigh);
+    histSum[iNorm]->Sumw2();
   }
 
   TH1F *h_LnLik[nrNorms] = {0};
@@ -296,17 +300,18 @@ void doublePolFitMacro(){
   double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
-  std::ifstream ifs ("Events_CalibCurve/CalibCurve_SemiMu_RgR_AllDeltaTF_MGSamplePos03_20000Evts_CutsAlsoOnMET/weights.out", std::ifstream::in); 
+  std::ifstream ifs ("Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct/weights_SFAdded.out", std::ifstream::in); 
   std::cout << " Value of ifs : " << ifs.eof() << std::endl;
   std::string line;
   int evt,config,tf;
   double weight, weightUnc;
   double CosThetaCorr = 1;
-  double MCScaleFactor = 1;
+  double MCScaleFactor = 1, Luminosity = 1, NormFactor = 1;
   int SMConfig = 99; 
   while( std::getline(ifs,line) && consEvts < nEvts){
     std::istringstream iss(line);
-    if( iss >> evt >> config >> tf >> weight >> weightUnc){ 
+    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor >> Luminosity >> NormFactor ){ 
+      MCScaleFactor = 1; Luminosity = 1; NormFactor = 1;
       if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
       stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
 
@@ -319,9 +324,9 @@ void doublePolFitMacro(){
           h_LnLik[iNorm] = new TH1F(("LnLik"+NormTypeName[iNorm]+"_Evt"+sEvt).c_str(),("LnLik"+NormTypeName[iNorm]+" distribution for event "+sEvt+" -- "+title).c_str(),NrBins+1,xLow,xHigh);
           h_LnLik[iNorm]->SetMarkerStyle(20+iNorm); h_LnLik[iNorm]->SetLineColor(3+iNorm); h_LnLik[iNorm]->SetMarkerColor(1); h_LnLik[iNorm]->SetMarkerSize(1.2);
         }
-        if(iNorm == 0)                      LnLik[iNorm][config-1] = -log(weight)*CosThetaCorr*MCScaleFactor;
-        else if(iNorm == 1 && nrNorms == 3) LnLik[iNorm][config-1] = (-log(weight)+log(MGXS[config-1]))*CosThetaCorr*MCScaleFactor;
-        else if(iNorm == nrNorms-1)         LnLik[iNorm][config-1] = (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr*MCScaleFactor;
+        if(iNorm == 0)                      LnLik[iNorm][config-1] = -log(weight)*CosThetaCorr;
+        else if(iNorm == 1 && nrNorms == 3) LnLik[iNorm][config-1] = (-log(weight)+log(MGXS[config-1]))*CosThetaCorr;
+        else if(iNorm == nrNorms-1)         LnLik[iNorm][config-1] = (-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr;
 
         //Get the maximum and minimum likelihood value
         if(LnLik[iNorm][config-1] > MaxLik) MaxLik = LnLik[iNorm][config-1];
@@ -330,10 +335,10 @@ void doublePolFitMacro(){
         //Set the SMConfig:
         if( Var[config-1] == 0.0) SMConfig = config-1;
 
-        if( ( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) && Var[config-1] == 0.0){ h_SMLikelihoodValue->Fill((-log(weight)+log(MGXSCut[config-1]))*CosThetaCorr*MCScaleFactor);}
+        if( ( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) && Var[config-1] == 0.0){ h_SMLikelihoodValue->Fill((-log(weight)+log(MGXSCut[config-1])));} //, MCScaleFactor*Luminosity*NormFactor);}
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
-        h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]);
+        h_LnLik[iNorm]->SetBinContent(h_LnLik[iNorm]->FindBin(Var[config-1]), LnLik[iNorm][config-1]); //*MCScaleFactor*Luminosity*NormFactor);
 
         //---  Only perform the fit after all configurations are considered!  ---//
         if( config == NrConfigs){
@@ -352,7 +357,7 @@ void doublePolFitMacro(){
             }
           }
 
-          if( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) h_SMLikValue_AfterCut->Fill(LnLik[nrNorms-1][SMConfig]);
+          if( (nrNorms == 3 && iNorm == 2) || (nrNorms == 2 && iNorm == 1) ) h_SMLikValue_AfterCut->Fill(LnLik[nrNorms-1][SMConfig]);//, MCScaleFactor*Luminosity*NormFactor);
 
           histSum[iNorm]->Add( h_LnLik[iNorm] );
           h_SMLikelihoodValue_vs_DeltaLikelihood->Fill(LnLik[nrNorms-1][SMConfig], MaxLik-MinLik);

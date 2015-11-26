@@ -95,7 +95,7 @@ if len(sys.argv) > 10:
     if sys.argv[10] in YesOptions:
         UseScaledXS = True
 
-#applyCosTheta = "n"
+applyCosTheta = "n"
 #if len(sys.argv) > 4:
 #    applyCosTheta = sys.argv[4]
 
@@ -341,7 +341,7 @@ for RootLine in RootAnalyzer:
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> CosThetaCorr ){ \n')
             print " Cos theta* reweighting will be applied! \n"
         elif applySF == True:
-            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor ){ \n')
+            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor >> Luminosity >> NormFactor ){ \n')
             print " MC Scale Factor will be applied! \n"
         else:
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc){ \n')

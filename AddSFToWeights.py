@@ -16,6 +16,7 @@
 
 import os
 import sys
+import re
 
 # Values to give as input:
 #  1) Which directory
@@ -32,9 +33,19 @@ whichSample = sys.argv[2]
 # -- First run over the EvtNrMatching file and store the scale factors in an array -- #
 EvtNrMatching = open('EventNrMatching_'+whichSample+'.txt', 'r')
 EvtNrMatchingArray = []
+Luminosity = ""
+NormFactor = ""
 if str(whichSample) != "TTbarJets_SemiLept":
     for evtNr in EvtNrMatching:
         evtNrWord = evtNr.split()
+
+        #First get the lumi and the normFactor!
+        if re.search(r" * Lumi = ", evtNr):
+            Luminosity = evtNrWord[3]
+            print "Luminosity is : ", Luminosity
+        if re.search(r" * NormFactor = ", evtNr):
+            NormFactor = evtNrWord[3]
+            print "Norm factor is : ", NormFactor
 
         # Only want files with at least 6 input variables, otherwise they have not been processed
         if len(evtNrWord) == 7:
@@ -48,6 +59,14 @@ else:
             print "Will be looking at ", NameOptions[iOpt], " events!"
             for evtNrTT in EvtNrMatching:
                 evtNrWordTT = evtNrTT.split()
+
+                #First get the lumi and the normFactor!
+                if re.search(r" * Lumi = ", evtNrTT):
+                    Luminosity = evtNrWordTT[3]
+                    print "Luminosity is : ", Luminosity
+                if re.search(r" * NormFactor = ", evtNrTT):
+                    NormFactor = evtNrWordTT[3]
+                    print "Norm factor is : ", NormFactor
 
                 if len(evtNrWordTT) == 7 and str(evtNrWordTT[4]) == NameOptions[iOpt]:
                     EvtNrMatchingArray.append(str(evtNrWordTT[6]))
@@ -68,9 +87,9 @@ else:
     for line in origWeights:
         word = line.split()
 
-        if str(word[0]) != "#":
-            newWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '+EvtNrMatchingArray[int(word[0])-1]+'\n')
-        else:
+        if str(word[0]) != "#" and int(word[0]) <= 117658:
+            newWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '+EvtNrMatchingArray[int(word[0])-1]+' '+Luminosity+' '+NormFactor+'\n')
+        elif str(word[0]) == "#":
             newWeights.write(line)
     origWeights.close()
     newWeights.close()
