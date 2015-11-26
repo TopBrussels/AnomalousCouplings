@@ -106,6 +106,7 @@ latexOutput.write('\\usepackage[top=.5in, bottom=1.25in, left=.5in, right=.5in,l
 latexOutput.write('\n \\begin{document} \n')
 latexOutput.write(' \\begin{abstract} \n')
 latexOutput.write('   File where all the calibration curves are compared for different likelihood cuts \\\\ \n')
+latexOutput.write('   Version: \\today \n')
 latexOutput.write(' \\end{abstract} \n \n')
 
 latexOutput.write(' \\section{Original summed histogram} ')

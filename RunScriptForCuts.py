@@ -18,7 +18,7 @@ if len(sys.argv) <= 1:
     sys.exit()
 whichDir = sys.argv[1]
 
-LikelihoodCuts = [60, 62, 65, 70, 100]       # 100 corresponds to no cut applied! (Reco cuts)
+LikelihoodCuts = [60, 62, 64, 65, 66, 67, 68, 69, 70, 100]       # 100 corresponds to no cut applied! (Reco cuts)
 ExclOuterBinsFit = ['y', 'n']
 
 # *** Other arguments are optional and can be used to avoid running over all possible cases!  *** #
