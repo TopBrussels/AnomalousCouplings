@@ -76,9 +76,9 @@ if len(sys.argv) > 7:
         excludeOuterBinsFit = True
 
 applyAccNorm = "n"
-if MGorRECO == "RECO":
+if MGorRECO == "RECO" or MGorRECO == "DATA":
     applyAccNorm = "y"
-    print "\n To notice: For RECO events acceptance is always applied!!    **********"
+    print "\n To notice: For RECO and DATA events acceptance is always applied!!    **********"
 elif MGorRECO == "MG":
     if len(sys.argv) > 8:
         applyAccNorm = sys.argv[8]
@@ -131,7 +131,7 @@ OnlyXSPossible = True
 if MGorRECO == "MG":
     MGXS = array('d',      [3.95248, 5.5612,  8.24066,  10.09161, 12.39876, 15.16567, 0.0, 18.54042, 0.0, 22.52782, 27.3093, 32.9283, 39.4799, 55.9507,  77.7365])
     MGXSCut = array('d',   [0.93159, 1.27966, 1.825208, 2.194079, 2.6393,   3.17698,  0.0, 3.80921,  0.0, 4.5645,   5.45665, 6.47791, 7.66805, 10.63243, 14.46786])  # Also MET cuts!
-elif MGorRECO == "RECO":
+elif MGorRECO == "RECO" or MGorRECO == "DATA":
     MGXS = array('d', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     #MGXSCut = array('d',[0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203,  3.3578,  3.97995, 5.50855, 0.0])  # Up to 1 additional jet
     MGXSCut = array('d',[0.0, 0.65669,  0.947244, 1.13624, 1.36448, 1.63952, 0.0, 1.96892, 0.0, 2.36027, 2.82111, 3.35903, 3.98157, 5.51083, 0.0])  # Up to 2 additional jets
@@ -181,7 +181,7 @@ if not WeightsFileGiven:
 
 # If _SFAdded is in the name of the used weights file, this should also be applied in the analyzer!
 applySF = False
-if '_SFAdded' in str(WeightsFileName):
+if '_SFAdded' in str(WeightsFileName) and MGorRECO == "RECO":
     applySF = True
 
 # Open the selected files!
@@ -340,9 +340,11 @@ for RootLine in RootAnalyzer:
         if applyCosTheta == "y" or applyCosTheta == "Y":
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> CosThetaCorr ){ \n')
             print " Cos theta* reweighting will be applied! \n"
-        elif applySF == True:
-            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor >> Luminosity >> NormFactor ){ \n')
+        elif applySF == True and MGorRECO == "RECO":
+            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor >> Luminosity >> NormFactor >> SampleName){ \n')
             print " MC Scale Factor will be applied! \n"
+        elif MGorRECO == "DATA":
+            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> SampleName){ \n')
         else:
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc){ \n')
     elif re.search(r"bool storeSplittedCanvas", RootLine):
