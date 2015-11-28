@@ -105,34 +105,35 @@ if applyExtraCuts:
   print " --> Number of events surviving the extra cuts : ", len(CutEventsToKeep)
 
 # In order to check the influence of the TF's, remove the events which have a jet/lepton in the endcap
-lhcoFile = open(os.path.join(whichDir+'TTbarSemiLepton_CorrectReco_Muon.lhco'))
 EtaBarrelJetsToKeep, EtaBarrelLeptonToKeep = [], []
-for lhcoLine in lhcoFile:
-  lhcoWord = lhcoLine.split()
-  if not str(lhcoWord[0]) == "#":
-    if len(lhcoWord) == 3:
-      if not int(lhcoWord[1]) == 1 and etaBarrelJetEvt:
-        EtaBarrelJetsToKeep.append(int(Event))
-      if not int(lhcoWord[1]) == 1 and etaBarrelLeptEvt:
-        EtaBarrelLeptonToKeep.append(int(Event))
-      # if not int(lhcoWord[1]) == 1 and etaEndCap[0] == etaEndCap[1] == etaEndCap[2] == etaEndCap[3] == 1:
-      #   EtaEndCapToKeep.append(int(Event))
-      Event = lhcoWord[1]
-      etaBarrelJetEvt, etaBarrelLeptEvt = True, True
-      # etaEndCap = [0,0,0,0]
-      # ECIndex = 0
-    if len(lhcoWord) == 11:
-      if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 4:
-        etaBarrelJetEvt = False
-      if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 2:
-        etaBarrelLeptEvt = False
-      # if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 4:
-      #   etaEndCap[ECIndex] = 1
-      #   ECIndex += 1
-lhcoFile.close()
-print " Number of events with no jet in the endcap : ", len(EtaBarrelJetsToKeep)
-print " Number of events with no lepton in the EC  : ", len(EtaBarrelLeptonToKeep)
-# print " Number of events with only jets in the endcap : ", len(EtaEndCapToKeep)
+if os.path.exists(os.path.join(whichDir+'TTbarSemiLepton_CorrectReco_Muon.lhco')):
+  lhcoFile = open(os.path.join(whichDir+'TTbarSemiLepton_CorrectReco_Muon.lhco'))
+  for lhcoLine in lhcoFile:
+    lhcoWord = lhcoLine.split()
+    if not str(lhcoWord[0]) == "#":
+      if len(lhcoWord) == 3:
+        if not int(lhcoWord[1]) == 1 and etaBarrelJetEvt:
+          EtaBarrelJetsToKeep.append(int(Event))
+        if not int(lhcoWord[1]) == 1 and etaBarrelLeptEvt:
+          EtaBarrelLeptonToKeep.append(int(Event))
+        # if not int(lhcoWord[1]) == 1 and etaEndCap[0] == etaEndCap[1] == etaEndCap[2] == etaEndCap[3] == 1:
+        #   EtaEndCapToKeep.append(int(Event))
+        Event = lhcoWord[1]
+        etaBarrelJetEvt, etaBarrelLeptEvt = True, True
+        # etaEndCap = [0,0,0,0]
+        # ECIndex = 0
+      if len(lhcoWord) == 11:
+        if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 4:
+          etaBarrelJetEvt = False
+        if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 2:
+          etaBarrelLeptEvt = False
+        # if abs(float(lhcoWord[2])) > float(1.45) and int(lhcoWord[1]) == 4:
+        #   etaEndCap[ECIndex] = 1
+        #   ECIndex += 1
+  lhcoFile.close()
+  print " Number of events with no jet in the endcap : ", len(EtaBarrelJetsToKeep)
+  print " Number of events with no lepton in the EC  : ", len(EtaBarrelLeptonToKeep)
+  # print " Number of events with only jets in the endcap : ", len(EtaEndCapToKeep)
 
 # ------------------------------------------------------------------#
 #  Step 3: Save the cos theta weight from the MadAnalysis directory #
@@ -225,8 +226,7 @@ if len(IncomplEventsToDelete) != 0 or len(ZeroEventsToDelete) != 0:
   NoIncomplEvtsFile.close()
   NoIncomplEvtsFile_CosTh.close()
   if not applyCosTheta:
-    # os.system('rm '+NoIncomplEvtsFile_CosTh.name)
-    os.system('mv '+NoIncomplEvtsFile_CosTh.name+' '+whichDir+'test.out')
+    os.remove(NoIncomplEvtsFile_CosTh.name)
 elif applyCosTheta:
   print " In elif case (meaning that there are no events which should be deleted, but cosTheta should still be applied)"
   WeightsFile_CosTheta = open(os.path.join(whichDir+'weights_CosTheta.out'),'w')
