@@ -220,9 +220,9 @@ if len(IncomplEventsToDelete) != 0 or len(ZeroEventsToDelete) != 0:
         NoIncomplEvtsFile_CosTh.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ')
         if applyCosTheta:
           NoIncomplEvtsFile_CosTh.write(str(float(CosTheta[int(word[0])-1])*float(CosTh_Norm_CheckedEvts))+'\n')
-    else:
-      NoIncomplEvtsFile.write(line)
-      NoIncomplEvtsFile_CosTh.write(line)
+    #else:
+    #  NoIncomplEvtsFile.write(line)
+    #  NoIncomplEvtsFile_CosTh.write(line)
   NoIncomplEvtsFile.close()
   NoIncomplEvtsFile_CosTh.close()
   if not applyCosTheta:
@@ -236,8 +236,8 @@ elif applyCosTheta:
     if str(word[0]) != "#":
       WeightsFile_CosTheta.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ')
       WeightsFile_CosTheta.write(str(float(CosTheta[int(word[0])-1])*float(CosTh_Norm_CheckedEvts))+'\n')
-    else:
-      WeightsFile_CosTheta.write(line)
+    #else:
+    #  WeightsFile_CosTheta.write(line)
   WeightsFile_CosTheta.close()
 
 weightFile.close()
@@ -277,12 +277,12 @@ if len(CutEventsToKeep) != 0 and applyExtraCuts:
           DeletedEvtsFile_CosTh.write(str(float(CosTheta[int(checkedWord[0])-1])*float(CosTh_Norm_CheckedEvts))+'\n')
       if int(checkedWord[0]) in EtaEvtsToKeep:
         EtaSelectedFile.write(checkedLine)
-    else:
-      NoCutsEvtsFile.write(checkedLine)
-      NoCutsEvtsFile_CosTh.write(checkedLine)
-      DeletedEvtsFile.write(checkedLine)
-      DeletedEvtsFile_CosTh.write(checkedLine)
-      EtaSelectedFile.write(checkedLine)
+    #else:
+    #  NoCutsEvtsFile.write(checkedLine)
+    #  NoCutsEvtsFile_CosTh.write(checkedLine)
+    #  DeletedEvtsFile.write(checkedLine)
+    #  DeletedEvtsFile_CosTh.write(checkedLine)
+    #  EtaSelectedFile.write(checkedLine)
   print "Done, closing all files ! "
   NoCutsEvtsFile.close(), NoCutsEvtsFile_CosTh.close()
   DeletedEvtsFile.close(), DeletedEvtsFile_CosTh.close()
@@ -305,9 +305,9 @@ if len(EtaBarrelJetsToKeep) != 0 and len(EtaBarrelLeptonToKeep) != 0 and doEtaSp
         BarrelJetFile.write(etaLine)
       if int(etaWord[0]) in EtaBarrelLeptonToKeep:
         BarrelLeptonFile.write(etaLine)
-    else:
-      BarrelJetFile.write(etaLine)
-      BarrelLeptonFile.write(etaLine)
+    #else:
+    #  BarrelJetFile.write(etaLine)
+    #  BarrelLeptonFile.write(etaLine)
   print "Done, closing all files ! "
   BarrelJetFile.close()
 
