@@ -1,3 +1,9 @@
+//------------------------------------------------------------------------------------------------------------//
+//  Scripts which compares the different root files and directories and directly saves the histogram!         //
+//  Run command: g++ -m64 -g -I `root-config --incdir` `root-config --libs` finalFitMacr.C -o finalFitMacro   //
+//               ./finalFitMacro                                                                              //
+//------------------------------------------------------------------------------------------------------------//
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -17,26 +23,40 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 
-//Considered values and corresponding XS-values
-const int NrConfigs = 9; 
-double Var[NrConfigs] = {-0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2    };
-double MGXSCut[] =      {0.947244, 1.13624, 1.36448, 1.63952, 1.96892, 2.36027, 2.82111, 3.35903, 3.98157};
-std::string KinVar = "Re(g_{R})"; 
+  //Input variables will be:
+  // 1) Likelihood cut value!
+  // 2-..) Weight files which will be considered
 
-//Applied normalisations!
-//std::string NormTypeName[2] = {"","_Acc"}; 
-//std::string NormType[2] = {"no","acceptance"}; 
-//const int nrNorms = sizeof(NormType)/sizeof(NormType[0]);
+  double LikCut = 100;
+  if( argc >= 2)
+    LikCut = atoi(argv[1]);
+  std::cout << " LikCut value is : " << LikCut << std::endl;
 
-//Information for the histograms
-int NrBins = 8; 
-float xLow, xHigh;
-double FitMin = -0.15, FitMax = 0.15; 
-const unsigned int NrToDel = 2; 
-int NrRemaining = NrConfigs-NrToDel;
+  vector<string> inputFiles;
+  if( argc >= 3){
+    for(int iFile = 2; iFile < argc; iFile++){
+      inputFiles.push_back(string(argv[iFile]).c_str());
+      std::cout << " Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
+    }
+  }
 
-//Apply the following likelihood cut (100 should correspond to keeping everything!)
-double LikCut = 66; 
+  //Considered values and corresponding XS-values
+  const int NrConfigs = 9; 
+  double Var[NrConfigs]     = {-0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2    };
+  double MGXSCut[NrConfigs] = {0.947244, 1.13624, 1.36448, 1.63952, 1.96892, 2.36027, 2.82111, 3.35903, 3.98157};
+
+  return 0;
+}
+
+/*
+
+  //Information for the histograms
+  int NrBins = 8; 
+  float xLow, xHigh;
+  double FitMin = -0.15, FitMax = 0.15; 
+  const unsigned int NrToDel = 2; 
+  int NrRemaining = NrConfigs-NrToDel;
+
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
 TFile* file_FitDist = new TFile("Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct/FitDistributions_Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct_SFAdded_LikelihoodCut66_OuterBinsExclForFit_117658Evts.root","RECREATE"); 
@@ -382,3 +402,4 @@ void doublePolFitMacro(){
 
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
 }
+*/
