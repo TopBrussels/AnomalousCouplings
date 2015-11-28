@@ -35,10 +35,10 @@ sampleNames = ['TTbarJets_FullHadr', 'TTbarJets_FullLept', 'TTbarJets_SemiLept',
 whichSample = "-1"
 if len(sys.argv) > 2:
     whichSample = sys.argv[2]
-    print "Specified which sample should be considered, so only for ", whichSample," new weights file will be created!!"
+    print "Specified which sample to considered, so only for ", whichSample, " new weights file will be created!!"
 
 CWUChoice = "-1"
-CWUOptions = ['Correct','Wrong','Unmatched']
+CWUOptions = ['Correct', 'Wrong', 'Unmatched']
 if len(sys.argv) > 3:
     CWUChoice = sys.argv[3]
     print "Specified whether Correct/Wrong/Unmatched TTbarJets_SemiLept events should be considered!!"
@@ -47,7 +47,7 @@ if str(whichSample) != "-1" and str(whichSample) != "TTbarJets_SemiLept":
     CWUChoice = "0"
 
 Luminosity, NormFactor, NrEvts, consSamples = [], [], [], []
-EvtNrMatchingArray = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+EvtNrMatchingArray = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
 for iSample in range(len(sampleNames)):
     print "Looking at : ", sampleNames[iSample]
     if (str(whichSample) == "-1") or (str(whichSample) != "-1" and str(whichSample) in sampleNames[iSample]):
@@ -59,7 +59,7 @@ for iSample in range(len(sampleNames)):
             sampleSize = len(EvtNrMatchingArray)
             for evtNr in EvtNrMatching:
 
-                #First get the lumi and the normFactor!
+                # First get the lumi and the normFactor!
                 if re.search(r" * Lumi = ", evtNr):
                     Luminosity.append(evtNrWord[3])
                     print "Luminosity is : ", evtNrWord[3]
@@ -79,7 +79,7 @@ for iSample in range(len(sampleNames)):
 
             for iCWU in range(len(CWUOptions)):
                 print " Looking at CWU index of : ", CWUOptions[iCWU]
-                if str(CWUChoice) == "-1" or (str(CWUChoice) != "-1" and str(CWUChoice) in CWUOptions):
+                if str(CWUChoice) == "-1" or (str(CWUChoice) != "-1" and str(CWUChoice) in CWUOptions[iCWU]):
                     print " --> Now looking at ", CWUOptions[iCWU], "events ! \n"
 
                     EvtNrMatching = open('MWEventNrMatching_'+sampleNames[iSample]+'.txt', 'r')
@@ -88,35 +88,30 @@ for iSample in range(len(sampleNames)):
                     for evtNrTT in EvtNrMatching:
                         evtNrWordTT = evtNrTT.split()
 
-                        #First get the lumi and the normFactor!
+                        # First get the lumi and the normFactor!
                         if re.search(r" * Lumi = ", evtNrTT):
                             Luminosity.append(evtNrWordTT[3])
                             print " Luminosity is : ", evtNrWordTT[3]
-                            print " Luminosity array has ", len(Luminosity), " entries : ", Luminosity
                         if re.search(r" * NormFactor = ", evtNrTT):
                             NormFactor.append(evtNrWordTT[3])
                             print "Norm factor is : ", evtNrWordTT[3]
-                            print " Norm factoar array has ", len(NormFactor), " entries : ", NormFactor
 
                         if len(evtNrWordTT) == 7 and str(evtNrWordTT[4]) == CWUOptions[iCWU]:
                             EvtNrMatchingArray[len(consSamples)-1].append(str(evtNrWordTT[6]))
-                    print "Filled EvtNrMatching array with ", len(EvtNrMatchingArray[len(consSamples)-1]), " entries ... :", EvtNrMatchingArray[len(consSamples)-1]
+                    print "Stored a total of ", len(EvtNrMatchingArray[len(consSamples)-1]), " events !"
                     EvtNrMatching.close()
 
 print " "
 # -- Now go into the different directories and change the weights.out file -- #
-combinedMCWeights = open('weights_CheckedEvts_CombinedMC_SFAdded.out', 'w')  # One output file for all MC!
 for mcDir in os.listdir("."):
-    if (str(whichDir) == "-1" and not 'Combined' in mcDir and not '.' in mcDir) or (str(whichDir) != "-1" and str(whichDir) in mcDir and not '.' in mcDir):
-        combinedSampleWeights = open(mcDir+'/weights_CheckedEvts_Combined'+mcDir+'_SFAdded.out', 'w')
-        combinedSemiMuWeights= " "  # = open(mcDir+'/weights_CheckedEvts_CombinedSemiLeptEvts_SFAdded.out', 'w')
+    if (str(whichDir) == "-1" and not 'Combined' in mcDir and not '.' in mcDir) or \
+            (str(whichDir) != "-1" and str(whichDir) in mcDir and not '.' in mcDir):
 
         print "Looking at directory : ", mcDir
-        if str(mcDir) == "TTbarJets":
-            combinedSemiMuWeights = open(mcDir+'/weights_CheckedEvts_CombinedSemiLeptEvts_SFAdded.out', 'w')
 
         for MCsubdir in os.listdir(mcDir):
-            if (str(whichSample) == "-1" and MCsubdir.startswith('Reco_')) or (str(whichSample) != "-1" and str(whichSample) in MCsubdir):
+            if (str(whichSample) == "-1" and MCsubdir.startswith('Reco_')) or \
+                    (str(whichSample) != "-1" and str(whichSample) in MCsubdir):
                 print " --> Continuing with directory ", MCsubdir
 
                 if not 'TTbarJets_SemiLept' in MCsubdir:
@@ -130,13 +125,16 @@ for mcDir in os.listdir("."):
                         if MCsubdir.startswith('Reco_'+str(j)):
                             arrayIndex = int(i)
 
+                    newWeights.write(consSamples[arrayIndex] + ' ' + NormFactor[arrayIndex] + '\n')
                     for line in origWeights:
                         word = line.split()
 
                         if str(word[0]) != "#" and int(word[0]) <= 117658:
-                            newWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '+EvtNrMatchingArray[arrayIndex][int(word[0])-1]+' '+Luminosity[arrayIndex]+' '+NormFactor[arrayIndex]+' '+consSamples[arrayIndex]+'\n')
+                            newWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ' +
+                                             EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
                             if str(whichSample) == "-1":
-                                combinedSampleWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '+EvtNrMatchingArray[arrayIndex][int(word[0])-1]+' '+Luminosity[arrayIndex]+' '+NormFactor[arrayIndex]+' '+consSamples[arrayIndex]+'\n')
+                                combinedSampleWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '
+                                                            + EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
                         elif str(word[0]) == "#":
                             newWeights.write(line)
                     origWeights.close()
@@ -146,7 +144,7 @@ for mcDir in os.listdir("."):
 
                     for iCase in range(len(CWUOptions)):
                         print "  * Looping over the different CWU options ", CWUOptions[iCase]
-                        if str(CWUChoice) == "-1" or (str(CWUChoice) != "-1" and str(CWUChoice) in CWUOptions):
+                        if str(CWUChoice) == "-1" or (str(CWUChoice) != "-1" and str(CWUChoice) in CWUOptions[iCase]):
                             if CWUOptions[iCase] in MCsubdir:
                                 origWeightsTT = open(mcDir+'/'+MCsubdir+'/weights_CheckedEvts.out', 'r')
                                 newWeightsTT = open(mcDir+'/'+MCsubdir+'/weights_CheckedEvts_SFAdded.out', 'w')
@@ -157,34 +155,14 @@ for mcDir in os.listdir("."):
                                     if MCsubdir.startswith('Reco_'+str(j)):
                                         arrayIndex = int(i)
 
+                                newWeightsTT.write(consSamples[arrayIndex] + ' ' + NormFactor[arrayIndex] + '\n')
                                 for line in origWeightsTT:
                                     word = line.split()
 
-                                    if str(word[0]) != "#" and int(word[0]) <= 117658:
-                                        newWeightsTT.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '+EvtNrMatchingArray[arrayIndex][int(word[0])-1]+' '+Luminosity[arrayIndex]+' '+NormFactor[arrayIndex]+' '+consSamples[arrayIndex]+'\n')
-                                        if str(whichSample) == "-1":
-                                            combinedSampleWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '+EvtNrMatchingArray[arrayIndex][int(word[0])-1]+' '+Luminosity[arrayIndex]+' '+NormFactor[arrayIndex]+' '+consSamples[arrayIndex]+'\n')
-                                        if str(CWUChoice) == "-1":
-                                            combinedSemiMuWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '+EvtNrMatchingArray[arrayIndex][int(word[0])-1]+' '+Luminosity[arrayIndex]+' '+NormFactor[arrayIndex]+' '+consSamples[arrayIndex]+'\n')
+                                    if str(word[0]) != "#":
+                                        newWeightsTT.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ' +
+                                                           EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
                                     elif str(word[0]) == "#":
                                         newWeightsTT.write(line)
                                 origWeightsTT.close()
                                 newWeightsTT.close()
-
-        # Remove this combined SemiLept weights output file in case only 1 CWU type has been considered
-        if str(mcDir) == "TTbarJets":
-            combinedSemiMuWeights.close()
-            if str(CWUChoice) != "-1":
-                os.system('rm '+combinedSemiMuWeights.name)
-
-        # Remove this combined MC type weights output file in case only 1 MC sample has been considered
-        combinedSampleWeights.close()
-        if str(whichSample) != "-1":
-            os.system('rm '+combinedSampleWeights.name)
-    else:
-        print "    **** Nothing done with directory ", mcDir
-
-# Remove this combined weights output file in case only 1 MC directory has been considered!
-combinedMCWeights.close()
-if str(whichDir) != "-1":
-    os.system('rm '+combinedMCWeights.name)
