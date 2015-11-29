@@ -51,9 +51,6 @@ struct sort_pred {
 void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool consAllPoints, const int NConfigs, vector<double> FitParamsFirstFit, vector<double> FitParamsSecondFit, double Var[], double FitMin, double FitMax){
   const unsigned int NrToDel = 2; 
 
-  std::string whichFit = "AllPoints";
-  if(!consAllPoints) whichFit = "ReducedPoints";
-
   //Set name of chisquared distributions!
   //if(evtCounter == 1){
   //  if(consAllPoints) h_ChiSquaredFirstFit  = new TH1F("ChiSquared_FirstFit", "Distribution of the #chi^{2} after the fit on all the points",200,0,0.05);
@@ -64,21 +61,25 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
   //  }
   //}
  
-  TF1* polFit = new TF1(("polFit_"+whichFit+"_Evt"+EvtNumber).c_str(),"pol2",FitMin, FitMax); 
+  TF1* polFit = new TF1(("polFit_Evt"+EvtNumber).c_str(),"pol2",FitMin, FitMax); 
   TGraph* gr_LnLik = new TGraph(NConfigs,Var, LogLikelihood);
   gr_LnLik->Fit(polFit,"Q","",polFit->GetXmin(), polFit->GetXmax());
   //if(consAllPoints) h_ChiSquaredFirstFit->Fill(polFit->GetChisquare());
 
-  if(consAllPoints && evtCounter == 1){
+  std::cout << " evtCounter is : " << evtCounter << std::endl;
+  if(evtCounter == 1){
+    std::cout << " Should store the fit variables for the first event ! " << std::endl;
     for(int ipar = 0; ipar < polFit->GetNpar(); ipar++)
       FitParamsFirstFit.push_back(polFit->GetParameter(ipar));
   }
-  else if(consAllPoints && evtCounter != 1){
+  else{
+    std::cout << " Filling fit variables ... " << std::endl;
     for(int ipar = 0; ipar < polFit->GetNpar(); ipar++)
       FitParamsFirstFit[ipar] += polFit->GetParameter(ipar);
   }
+  std::cout << " calculateFit --> FitParms[0] = " << FitParamsFirstFit[0] << std::endl;
 
-  if(!consAllPoints){
+  if(consAllPoints){
     std::vector<std::pair<int, double> > FitDeviation, FitDeviationRel;
     double LogLikFit[] = {-9999};
     //double TotalRelFitDeviation = 0;
@@ -144,7 +145,8 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
     delete polFit_ReducedPoints;
     delete gr_ReducedLnLik;
   }
-  
+
+  std::cout << " End of calculateFit " << std::endl; 
   delete polFit;
   delete gr_LnLik;
 }
@@ -203,7 +205,7 @@ int main(int argc, char *argv[]){
 
     vector<double> FitParametersFirstFit, FitParametersSecondFit;
     FitParametersFirstFit.clear(); FitParametersSecondFit.clear();
-    bool doFits = false, allPointsInFit = false;
+    bool doFits = false, allPointsInFit = false;       //Before changing this to true the issue of passing on the fit parameters should be resolved!!
   
     TH1F *h_LnLik = 0;
     int NrBins = 8; 
@@ -221,19 +223,18 @@ int main(int argc, char *argv[]){
       std::istringstream iss(line);
 
       if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor ){
-        if(!sampleNameSet) std::cout << " Already went into if .... " << std::endl;
 
-        NormFactor = 4.41493e-06;
-
-        //if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
-        //if(config == 1 && ((consEvts+1) % 2000 == 0) ) 
-        if((consEvts+1) % 2000 == 0) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
+        if(config == 1 && (consEvts+1) % 2000 == 0) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
         stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
 
         //--- Initialize the event-per-event variables! ---//          
         if( config == 1){
           MaxLik = 0; MinLik = 9999; //Reset this variable at the beginning of each event!
           SMConfig = 99;
+
+          //Add the dataSetName to the histSum histogram!
+          histSum->SetName(("SummedHist_"+sSampleName).c_str());
+          histSum->SetTitle(("Sum of all individual histograms for "+sSampleName).c_str());
 
           h_LnLik = new TH1F(("LnLik_Evt"+sEvt+"_"+sSampleName).c_str(),("LnLik distribution for event "+sEvt+" -- "+sSampleName).c_str(),NrBins+1,xLow,xHigh);
           h_LnLik->SetMarkerStyle(20); h_LnLik->SetLineColor(3); h_LnLik->SetMarkerColor(1); h_LnLik->SetMarkerSize(1.2);
@@ -245,7 +246,6 @@ int main(int argc, char *argv[]){
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         LnLik[config-1] = (-log(weight)+log(MGXSCut[config-1]));
         h_LnLik->SetBinContent(h_LnLik->FindBin(Var[config-1]), LnLik[config-1]*MCScaleFactor*Luminosity*NormFactor);
-        //std::cout << " Setting bin-content : " << LnLik[config-1] << " * " << MCScaleFactor << " * " << Luminosity << " * " << NormFactor << std::endl;
 
         //Get the maximum and minimum likelihood value
         if(LnLik[config-1] > MaxLik) MaxLik = LnLik[config-1];
@@ -279,8 +279,12 @@ int main(int argc, char *argv[]){
           //h_SMLikelihoodValue_vs_DeltaLikelihood->Fill(LnLik[SMConfig], MaxLik-MinLik);
 
           //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
-          if(doFits)
+          if(doFits){
+            std::cout << " Will do fit now ! " << std::endl;
             calculateFit(LnLik, sEvt, consEvts, allPointsInFit, NrConfigs, FitParametersFirstFit, FitParametersSecondFit, Var, FitMin, FitMax);
+            std::cout << " Done with calculateFit ! " << std::endl;
+            std::cout << " FitParameter[0] = " << FitParametersFirstFit[0] << std::endl;
+          }
 
           delete h_LnLik;
         }
@@ -292,12 +296,12 @@ int main(int argc, char *argv[]){
       }*/
       else{
         sampleNameSet = true;
-        std::cout << " ELSE -> Line = " << line << std::endl;
+        std::cout << " In ELSE -> Line = " << line << std::endl;
         sSampleName = line.substr(0, line.find(" "));
         sNormFactor = line.substr(sSampleName.length(), line.length());
         NormFactor = atof(sNormFactor.c_str());
-        std::cout << " What is sample name : " << sSampleName << std::endl; 
-        std::cout << " What is norm-factor : " << NormFactor << std::endl;
+        std::cout << " * What is sample name : " << sSampleName << std::endl; 
+        std::cout << " * What is norm-factor : " << NormFactor << std::endl;
       }
     }
     ifs.close();
