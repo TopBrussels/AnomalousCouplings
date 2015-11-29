@@ -18,6 +18,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstring>
+#include <cstdlib>
 
 using namespace std;
 
@@ -171,7 +172,7 @@ int main(int argc, char *argv[]){
     }
   }
 
-  TFile* outputFile = new TFile(("Events_MC/OutFile_"+timestamp()).c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_MC/OutFile_"+timestamp()+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Considered values and corresponding XS-values
@@ -193,16 +194,16 @@ int main(int argc, char *argv[]){
     int evt,config,tf;
     double weight, weightUnc;
     double CosThetaCorr = 1;
-    double MCScaleFactor = 1, Luminosity = 1, NormFactor = 1;
+    double MCScaleFactor = 1, NormFactor = 1;
     double SampleName;
-    std::string sSampleName;
+    std::string sSampleName, sNormFactor;
     bool sampleNameSet = false;
     int SMConfig = 99, consEvts = 0;
     double MaxLik = 0, MinLik = 9999;
 
     vector<double> FitParametersFirstFit, FitParametersSecondFit;
     FitParametersFirstFit.clear(); FitParametersSecondFit.clear();
-    bool doFits = true, allPointsInFit = true; 
+    bool doFits = false, allPointsInFit = false;
   
     TH1F *h_LnLik = 0;
     int NrBins = 8; 
@@ -211,6 +212,9 @@ int main(int argc, char *argv[]){
     TH1F *histSum = new TH1F("SummedHist","Sum of all individual histograms",NrBins+1,xLow,xHigh); 
     TH1F* h_SMLikelihoodValue = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
     TH1F* h_SMLikValue_AfterCut = new TH1F("SMLikelihoodValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut of ..)",500,30,90);
+    TH1F* h_MCScaleFactor = new TH1F("MCScaleFactor","Scale factor for MC sample", 100,0,2);
+    TH1F* h_Luminosity = new TH1F("Luminosity","Luminosity used", 100,15000,23000);
+    TH1F* h_NormFactor = new TH1F("NormFactor","Norm factor for MC sample", 100,0,0.000001);
 
     //while( std::getline(ifs,line) && consEvts < nEvts){
     while( std::getline(ifs,line)){
@@ -219,8 +223,11 @@ int main(int argc, char *argv[]){
       if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor ){
         if(!sampleNameSet) std::cout << " Already went into if .... " << std::endl;
 
+        NormFactor = 4.41493e-06;
+
         //if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
-        if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
+        //if(config == 1 && ((consEvts+1) % 2000 == 0) ) 
+        if((consEvts+1) % 2000 == 0) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
         stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
 
         //--- Initialize the event-per-event variables! ---//          
@@ -238,6 +245,7 @@ int main(int argc, char *argv[]){
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         LnLik[config-1] = (-log(weight)+log(MGXSCut[config-1]));
         h_LnLik->SetBinContent(h_LnLik->FindBin(Var[config-1]), LnLik[config-1]*MCScaleFactor*Luminosity*NormFactor);
+        //std::cout << " Setting bin-content : " << LnLik[config-1] << " * " << MCScaleFactor << " * " << Luminosity << " * " << NormFactor << std::endl;
 
         //Get the maximum and minimum likelihood value
         if(LnLik[config-1] > MaxLik) MaxLik = LnLik[config-1];
@@ -248,6 +256,9 @@ int main(int argc, char *argv[]){
 
           //Plot the SM likelihood value:
           h_SMLikelihoodValue->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
+          h_MCScaleFactor->Fill(MCScaleFactor);
+          h_Luminosity->Fill(Luminosity);
+          h_NormFactor->Fill(NormFactor);
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
@@ -281,19 +292,27 @@ int main(int argc, char *argv[]){
       }*/
       else{
         sampleNameSet = true;
-        iss >> sSampleName >> NormFactor;
-        //stringstream ssSampleName; ssSampleName << SampleName; sSampleName = ssSampleName.str();
-        std::cout << " What is sample name : " << sSampleName.c_str() << std::endl; 
-        std::cout << " What is norm-factor : " << NormFactor << std::endl;
         std::cout << " ELSE -> Line = " << line << std::endl;
+        sSampleName = line.substr(0, line.find(" "));
+        sNormFactor = line.substr(sSampleName.length(), line.length());
+        NormFactor = atof(sNormFactor.c_str());
+        std::cout << " What is sample name : " << sSampleName << std::endl; 
+        std::cout << " What is norm-factor : " << NormFactor << std::endl;
       }
     }
     ifs.close();
+
+    std::cout << " Studied a total of " << consEvts+1 << " events !" << std::endl;
 
     TF1* polFit_histSum = new TF1("polFit_SummedHist","pol2",FitMin, FitMax); 
     histSum->Fit(polFit_histSum,"Q","",polFit_histSum->GetXmin(), polFit_histSum->GetXmax());
     std::cout << " Minimum for " << polFit_histSum->GetName() << " is : " << polFit_histSum->GetMinimumX() << " +- " << polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, polFit_histSum->GetMinimumX(),0.2) - polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, -0.2, polFit_histSum->GetMinimumX()) << endl;
     histSum->Write();
+
+    h_SMLikelihoodValue->Write();
+    h_MCScaleFactor->Write();
+    h_Luminosity->Write();
+    h_NormFactor->Write();
 
     if(doFits){
       TF1* FitSum_FirstFit = new TF1("SummedFit_FirstFit","pol2",FitMin,FitMax);

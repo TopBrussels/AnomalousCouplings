@@ -135,8 +135,8 @@ for mcDir in os.listdir("."):
                             if str(whichSample) == "-1":
                                 combinedSampleWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '
                                                             + EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
-                        elif str(word[0]) == "#":
-                            newWeights.write(line)
+                        #elif str(word[0]) == "#":
+                        #    newWeights.write(line)
                     origWeights.close()
                     newWeights.close()
                 else:
@@ -162,7 +162,7 @@ for mcDir in os.listdir("."):
                                     if str(word[0]) != "#":
                                         newWeightsTT.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ' +
                                                            EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
-                                    elif str(word[0]) == "#":
-                                        newWeightsTT.write(line)
+                                    #elif str(word[0]) == "#":
+                                    #    newWeightsTT.write(line)
                                 origWeightsTT.close()
                                 newWeightsTT.close()

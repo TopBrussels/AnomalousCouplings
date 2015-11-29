@@ -34,11 +34,11 @@ elif len(sys.argv) == 2:
 whichDir = sys.argv[1]
 MGorRECO = sys.argv[2]
 
-
 # -----------------------------------------#
 #  Set all the optional parameters correct #
 # -----------------------------------------#
-# Full syntax is : python FitDeviation.py Events/blabla/ MGorRECO #evts(opt) Range(opt) weightsFile(opt) likCutValue(opt) excludeOuterBinsFit(y/n - opt)  applyAcc(y/n - opt) TexWanted(y/n - opt)
+# Full syntax is : python FitDeviation.py Events/blabla/ MGorRECO #evts(opt) Range(opt) weightsFile(opt)
+# likCutValue(opt) excludeOuterBinsFit(y/n - opt)  applyAcc(y/n - opt) TexWanted(y/n - opt)
 YesOptions = ['y', 'yes', 'Y', 'YES', 'Yes']
 
 nEvts = "-1"
@@ -96,7 +96,7 @@ if len(sys.argv) > 10:
         UseScaledXS = True
 
 applyCosTheta = "n"
-#if len(sys.argv) > 4:
+# if len(sys.argv) > 4:
 #    applyCosTheta = sys.argv[4]
 
 # --------------------------------------------------------------#
@@ -129,12 +129,18 @@ elif VarWindow == "3":
 
 OnlyXSPossible = True
 if MGorRECO == "MG":
-    MGXS = array('d',      [3.95248, 5.5612,  8.24066,  10.09161, 12.39876, 15.16567, 0.0, 18.54042, 0.0, 22.52782, 27.3093, 32.9283, 39.4799, 55.9507,  77.7365])
-    MGXSCut = array('d',   [0.93159, 1.27966, 1.825208, 2.194079, 2.6393,   3.17698,  0.0, 3.80921,  0.0, 4.5645,   5.45665, 6.47791, 7.66805, 10.63243, 14.46786])  # Also MET cuts!
+    MGXS = array('d', [3.95248, 5.5612, 8.24066, 10.09161, 12.39876, 15.16567, 0.0, 18.54042, 0.0, 22.52782, 27.3093,
+                       32.9283, 39.4799, 55.9507, 77.7365])
+    MGXSCut = array('d',
+                    [0.93159, 1.27966, 1.825208, 2.194079, 2.6393, 3.17698, 0.0, 3.80921, 0.0, 4.5645, 5.45665, 6.47791,
+                     7.66805, 10.63243, 14.46786])  # Also MET cuts!
 elif MGorRECO == "RECO" or MGorRECO == "DATA":
     MGXS = array('d', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-    #MGXSCut = array('d',[0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203,  3.3578,  3.97995, 5.50855, 0.0])  # Up to 1 additional jet
-    MGXSCut = array('d',[0.0, 0.65669,  0.947244, 1.13624, 1.36448, 1.63952, 0.0, 1.96892, 0.0, 2.36027, 2.82111, 3.35903, 3.98157, 5.51083, 0.0])  # Up to 2 additional jets
+    # MGXSCut = array('d',[0.0, 0.657583, 0.948253, 1.13713, 1.36514, 1.63988, 0.0, 1.96892, 0.0, 2.35987, 2.8203,
+    # 3.3578,  3.97995, 5.50855, 0.0])  # Up to 1 additional jet
+    MGXSCut = array('d',
+                    [0.0, 0.65669, 0.947244, 1.13624, 1.36448, 1.63952, 0.0, 1.96892, 0.0, 2.36027, 2.82111, 3.35903,
+                     3.98157, 5.51083, 0.0])  # Up to 2 additional jets
     OnlyXSPossible = False
 else:
     print "\n Should specify whether MG or RECO is desired! "
@@ -163,7 +169,8 @@ if not WeightsFileGiven:
     list_dir = os.listdir(whichDir)
     WeightsFileArray, weightsFileCounter = [], 0
     for file in list_dir:
-        if (applyCosTheta == "n" and not "CosTheta" in file or applyCosTheta == "y" and "_CosTheta" in file) and file.startswith("weights") and file.endswith(".out"):
+        if (applyCosTheta == "n" and not "CosTheta" in file or applyCosTheta == "y" and "_CosTheta" in file) \
+                and file.startswith("weights") and file.endswith(".out"):
             weightsFileCounter += 1
             WeightsFileArray.append(file)
 
@@ -204,7 +211,7 @@ if str(LikCut) != '100':
     print " Will apply cut on -ln(Likelihood) of ", str(LikCut)
 else:
     print ' Will apply no cut on -ln(Likelihood) '
-print " Will fit between ", FitMin, " and ", FitMax, " (full range = [", Var[0], ",", Var[NrConfigs-1], "] ) "
+print " Will fit between ", FitMin, " and ", FitMax, " (full range = [", Var[0], ",", Var[NrConfigs - 1], "] ) "
 
 # --------------------------------------------------------------------------------------#
 #   Set the MGXSCut values based on whether acceptance normalisation should be applied  #
@@ -218,10 +225,10 @@ if applyAccNorm == "n" or applyAccNorm == "no" or applyAccNorm == "No":
 else:
     print " Will apply acceptance normalisation! "
     if (len(whichDir) >= whichDir.find("MGSample") > 0 > whichDir.find("Cut")) or (
-                    len(whichDir) >= whichDir.find("GEN") > 0):
+            len(whichDir) >= whichDir.find("GEN") > 0):
         print " \n ************************* ERROR **************************** "
         print " -----> Applying Acceptance normalisation to generator-level events .... \n"
-if UseScaledXS and MGorRECO =="MG":
+if UseScaledXS and MGorRECO == "MG":
     MGXSCut = MGXSScale
 
 # ---------------------------#
@@ -230,8 +237,10 @@ if UseScaledXS and MGorRECO =="MG":
 # *** Indicating that the cos theta* reweighting has been applied
 if applyCosTheta == "y" or applyCosTheta == "yes" or applyCosTheta == "Y":
     if nEvts != int(maxNrEvts):
-        print "\n *** ERROR: Since cos theta weights have to be normalized, this can only be applied if ALL events are considered ***"
-        cont = raw_input(' *** Decide whether the script should be continued, but then using all events (y).\n *** If (n) is chosen script will be terminated. ')
+        print "\n *** ERROR: Since cos theta weights have to be normalized, this can only be applied" \
+              " if ALL events are considered ***"
+        cont = raw_input(' *** Decide whether the script should be continued, but then using all events (y).\n'
+                         ' *** If (n) is chosen script will be terminated. ')
         if cont == "y":
             nEvts = int(maxNrEvts)
             print " --> Will now be using ", nEvts
@@ -262,7 +271,7 @@ if len(WeightsFileName) >= WeightsFileName.find("NoLowPt") >= 0:
     title = title + "_" + "NoLowPtEvts" + WeightsFileName[WeightsFileName.find("_Cut"):-4]
 
 # *** Indicating that scaled acceptance XS have been used
-if UseScaledXS and MGorRECO =="MG":
+if UseScaledXS and MGorRECO == "MG":
     title = title + "_" + "XSScaledWithSMAcc"
 
 # -------------------------------------------------#
@@ -341,7 +350,9 @@ for RootLine in RootAnalyzer:
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> CosThetaCorr ){ \n')
             print " Cos theta* reweighting will be applied! \n"
         elif applySF == True and MGorRECO == "RECO":
-            NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor >> Luminosity >> NormFactor >> SampleName){ \n')
+            NewRootAnalyzer.write(
+                '    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor){ \n') # >> '
+                #'NormFactor >> SampleName){ \n')
             print " MC Scale Factor will be applied! \n"
         elif MGorRECO == "DATA":
             NewRootAnalyzer.write('    if( iss >> evt >> config >> tf >> weight >> weightUnc >> SampleName){ \n')
@@ -353,7 +364,9 @@ for RootLine in RootAnalyzer:
         else:
             NewRootAnalyzer.write('bool storeSplittedCanvas = false; \n')
     elif re.search(r"new TFile", RootLine) and re.search(r"file_FitDist", RootLine):
-            NewRootAnalyzer.write('TFile* file_FitDist = new TFile("' + str(whichDir) + 'FitDistributions_' + str(title) + '_' + str(nEvts) + 'Evts.root","RECREATE"); \n')
+        NewRootAnalyzer.write(
+            'TFile* file_FitDist = new TFile("' + str(whichDir) + 'FitDistributions_' + str(title) + '_' + str(
+                nEvts) + 'Evts.root","RECREATE"); \n')
     else:
         NewRootAnalyzer.write(RootLine)
 NewRootAnalyzer.close(), RootAnalyzer.close()
@@ -384,7 +397,8 @@ if CreateTexFile:
             if ii != iNormType:
                 OtherNorms.append(ii)
 
-        CanvasOutputFile = open(os.path.join('FitDeviationSplitCanvas_' + str(title) + '_' + str(nEvts) + 'Evts'+NormTypeName[iNormType]+'.tex'), 'w')
+        CanvasOutputFile = open(os.path.join('FitDeviationSplitCanvas_' + str(title) + '_' + str(nEvts) + 'Evts' +
+                                             NormTypeName[iNormType] + '.tex'), 'w')
 
         # Check whether these output files already exist, otherwise delete them !
         if os.path.isfile(os.path.join("../" + CanvasOutputFile.name[:-4] + ".pdf")):
@@ -395,17 +409,21 @@ if CreateTexFile:
         CanvasOutputFile.write('\\usepackage[top=.5in, bottom=1.25in, left=.5in, right=.5in,landscape]{geometry} \n \n')
         CanvasOutputFile.write('\\begin{document} \n')
 
-        CanvasOutputFile.write('\\section{Distributions of -ln(L) when ' + NormType[iNormType] + ' normalisation is applied} \n')
+        CanvasOutputFile.write(
+            '\\section{Distributions of -ln(L) when ' + NormType[iNormType] + ' normalisation is applied} \n')
         CanvasOutputFile.write('\\begin{abstract} \n')
-        CanvasOutputFile.write('  Looking at directory : $'+ whichDir +'$')
+        CanvasOutputFile.write('  Looking at directory : $' + whichDir + '$')
         CanvasOutputFile.write('\\end{abstract} \n')
         CanvasOutputFile.write('\n \\centering \n')
 
         # Include the overall likelihood and secondPol distribution (together one 1 page!):
         # if ("Summed" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir and ("SummedFit_FirstFit" + NormTypeName[iNormType] + ".pdf") in Canvaslist_dir:
-        CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{SummedHist' + NormTypeName[iNormType] + '.pdf} \n')
-        CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{SummedFit_FirstFit' + NormTypeName[iNormType] + '.pdf} \n')
-        CanvasOutputFile.write('\\includegraphics[width = 0.32 \\textwidth]{SummedFit_SecondFit' + NormTypeName[iNormType] + '.pdf} \n')
+        CanvasOutputFile.write(
+            '\\includegraphics[width = 0.32 \\textwidth]{SummedHist' + NormTypeName[iNormType] + '.pdf} \n')
+        CanvasOutputFile.write(
+            '\\includegraphics[width = 0.32 \\textwidth]{SummedFit_FirstFit' + NormTypeName[iNormType] + '.pdf} \n')
+        CanvasOutputFile.write(
+            '\\includegraphics[width = 0.32 \\textwidth]{SummedFit_SecondFit' + NormTypeName[iNormType] + '.pdf} \n')
 
         for File in Canvaslist_dir:
             # Include the stacked canvasses:

@@ -14,12 +14,12 @@
 #include <cstring>
 
 //Title of considered directory and number of events
-std::string title = "Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct_SFAdded_LikelihoodCut66_OuterBinsExclForFit"; 
-const int nEvts = 117658; 
+std::string title = "TTbarJets_SemiMu_RgR_CorrectEvts_LatestEvtSel_Nov25_CheckedEvts_SFAdded_LikelihoodCut65_OuterBinsExclForFit"; 
+const int nEvts = 117655; 
 
 // Specify whether the stacked canvasses have to be stored 
 bool storeSplittedCanvas = false; 
-std::string SplittedDir = "Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct/SplittedCanvasses"; 
+std::string SplittedDir = "Events_RecoTest/TTbarJets_SemiMu_RgR_CorrectEvts_LatestEvtSel_Nov25/SplittedCanvasses"; 
 int NrCanvas = 0, xDivide = 4, yDivide = 4;
 
 //Considered values and corresponding XS-values
@@ -42,10 +42,10 @@ const unsigned int NrToDel = 2;
 int NrRemaining = NrConfigs-NrToDel;
 
 //Apply the following likelihood cut (100 should correspond to keeping everything!)
-double LikCut = 66; 
+double LikCut = 65; 
 
 //ROOT file to store the Fit functions --> Will fasten the study of the cut-influences ...
-TFile* file_FitDist = new TFile("Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct/FitDistributions_Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct_SFAdded_LikelihoodCut66_OuterBinsExclForFit_117658Evts.root","RECREATE"); 
+TFile* file_FitDist = new TFile("Events_RecoTest/TTbarJets_SemiMu_RgR_CorrectEvts_LatestEvtSel_Nov25/FitDistributions_TTbarJets_SemiMu_RgR_CorrectEvts_LatestEvtSel_Nov25_CheckedEvts_SFAdded_LikelihoodCut65_OuterBinsExclForFit_117655Evts.root","RECREATE"); 
 TDirectory *dir_OriginalLL[nrNorms] = {0}, *dir_FirstFit[nrNorms] = {0}, *dir_SecondFit[nrNorms] = {0};
 
 std::string sNrCanvas ="0";
@@ -63,6 +63,9 @@ TH1F* h_TotalRelFitDeviation = new TH1F("TotalRelFitDeviation","TotalRelFitDevia
 TH1F* h_SMLikelihoodValue = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
 TH1F* h_SMLikValue_AfterCut = new TH1F("SMLikValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut)",500,30,90);
 TH2F* h_SMLikelihoodValue_vs_DeltaLikelihood = new TH2F("SMLikelihoodValue_vs_DeltaLikelihood","Likelihood value at gR = 0 versus difference in likelihood",500,30,90,100,0,5);
+TH1F* h_MCScaleFactor = new TH1F("MCScaleFactor","Scale factor for MC sample", 100,0,2);
+TH1F* h_Luminosity = new TH1F("Luminosity","Luminosity used", 100,1500,2300);
+TH1F* h_NormFactor = new TH1F("NormFactor","Norm factor for MC sample", 100,0,0.000001);
 
 //Store all the fit parameters into a vector of doubles
 vector<double> FitParams_FirstFit[nrNorms];
@@ -296,17 +299,18 @@ void doublePolFitMacro(){
   double LnLik[nrNorms][NrConfigs] = {{0.0}}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
 
   //--- Read all likelihood values ! ---//
-  std::ifstream ifs ("Events_RecoTest/Reco_CorrectEvts_DblGausTF_LeptDelta_NonBinned_AllEvts_ISR1_28Oct/weights_SFAdded.out", std::ifstream::in); 
+  std::ifstream ifs ("Events_RecoTest/TTbarJets_SemiMu_RgR_CorrectEvts_LatestEvtSel_Nov25/weights_CheckedEvts_SFAdded.out", std::ifstream::in); 
   std::cout << " Value of ifs : " << ifs.eof() << std::endl;
   std::string line;
   int evt,config,tf;
   double weight, weightUnc;
   double CosThetaCorr = 1;
-  double MCScaleFactor = 1, Luminosity = 1, NormFactor = 1;
+  double MCScaleFactor = 1, Luminosity = 19646.8, NormFactor = 4.41493e-06;
   int SMConfig = 99; 
   while( std::getline(ifs,line) && consEvts < nEvts){
     std::istringstream iss(line);
-    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor >> Luminosity >> NormFactor ){ 
+
+    if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor){ 
       if(config == 1 && ((consEvts+1) % 2000 == 0) ) std::cout << " Looking at event : " << consEvts+1 << " (" << (double)(consEvts+1)*100/(double)nEvts << "%)" << flush<<"\r";
       stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
 
@@ -337,6 +341,10 @@ void doublePolFitMacro(){
 
         //---  Only perform the fit after all configurations are considered!  ---//
         if( config == NrConfigs){
+
+          h_MCScaleFactor->Fill(MCScaleFactor);
+          h_Luminosity->Fill(Luminosity);
+          h_NormFactor->Fill(NormFactor);
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
@@ -387,6 +395,7 @@ void doublePolFitMacro(){
   }
   ifs.close();
 
+  std::cout << " Studied a total of " << consEvts+1 << " events !" << std::endl;
 
   //-- Save the histograms for which oveflow information is needed! --//
   for(int iConf = 0; iConf < NrConfigs; iConf++){
@@ -404,6 +413,9 @@ void doublePolFitMacro(){
   h_SMLikelihoodValue->Write();
   h_SMLikValue_AfterCut->Write();
   h_SMLikelihoodValue_vs_DeltaLikelihood->Write();
+  h_MCScaleFactor->Write();
+  h_Luminosity->Write();
+  h_NormFactor->Write();
 
   TDirectory *dir_FitDevDelete = dir_FitResults->GetDirectory("PointsDeletedByFitDev");
   if(!dir_FitDevDelete) dir_FitDevDelete = dir_FitResults->mkdir("PointsDeletedByFitDev");
