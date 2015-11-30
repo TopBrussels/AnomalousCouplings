@@ -214,7 +214,8 @@ class Cluster(object):
         while 1: 
             old_mode = mode
             nb_iter += 1
-	    cmd = "qstat -u aolbrech @cream02 | grep "+ self.MWparam['mw_run']['pbsname'] + " | wc -l"
+	    #cmd = "qstat -u aolbrech @cream02 | grep "+ self.MWparam['mw_run']['pbsname'] + " | wc -l"
+	    cmd = "qstat -u aolbrech @cream02 | wc -l"
             NrRemainingEvts = os.popen(cmd).read()
             idle, run, finish, fail = self.control(me_dir)
             if int(NrRemainingEvts) != 0:
@@ -1038,8 +1039,8 @@ class PBSCluster(Cluster):
 	#print 'Name used for qsub command : ', me_dir
 	#print 'Change name of qsub command just before sumbitting to : ',CorrectMadWeightName 
 	me_dir = CorrectMadWeightName         #ADDED 21 JANUARY (Annik)
-	print "Output from self.MWparam['mw_run']['pbsname'] is : ", self.MWparam['mw_run']['pbsname'] 
-	me_dir = self.MWparam['mw_run']['pbsname']
+	#print "Output from self.MWparam['mw_run']['pbsname'] is : ", self.MWparam['mw_run']['pbsname'] 
+	#me_dir = self.MWparam['mw_run']['pbsname']
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,
