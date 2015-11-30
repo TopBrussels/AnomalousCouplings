@@ -322,11 +322,8 @@ int main(int argc, char *argv[]){
     ifs.close();
     indivLnLik.push_back(indivSampleLnLik);
 
-    std::cout << " Studied a total of " << consEvts+1 << " events !" << std::endl;
+    std::cout << " Studied a total of " << consEvts << " events !" << std::endl;
 
-    std::cout << std::endl << " Bin content of histSum is : " << std::endl;
-    for(int iConf = 0; iConf <= NrConfigs+1; iConf++)
-      std::cout << "  * " << iConf << ") " << histSum->GetBinContent(iConf) << std::endl;
     TF1* polFit_histSum = new TF1("polFit_SummedHist","pol2",FitMin, FitMax); 
     histSum->Fit(polFit_histSum,"Q","",polFit_histSum->GetXmin(), polFit_histSum->GetXmax());
     std::cout << " Minimum for " << polFit_histSum->GetName() << " is : " << polFit_histSum->GetMinimumX() << " +- " << polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, polFit_histSum->GetMinimumX(),0.2) - polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, -0.2, polFit_histSum->GetMinimumX()) << endl;
@@ -362,11 +359,9 @@ int main(int argc, char *argv[]){
   std::cout << " Each event array has " << indivLnLik[0][0].size() << " entries " << std::endl;
 
   double summedEntries[NrConfigs] = {0};
-  std::cout << " Obtained entries for summedEntries is : " << std::endl;
   for(int iEvt = 0; iEvt < indivLnLik[0].size(); iEvt++){
     for(int iConf = 0; iConf < NrConfigs; iConf++){
       summedEntries[iConf] += indivLnLik[0][iEvt][iConf];
-      if(iEvt == indivLnLik[0].size()-1) std::cout << "  * " << iConf << ") " << summedEntries[iConf] << std::endl;
     }
   }
   TGraph* gr_histSum = new TGraph(NrConfigs, Var, summedEntries);
