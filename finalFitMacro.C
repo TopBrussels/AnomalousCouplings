@@ -164,13 +164,13 @@ int main(int argc, char *argv[]){
   double LikCut = 100;
   if( argc >= 2)
     LikCut = atoi(argv[1]);
-  std::cout << " LikCut value is : " << LikCut << std::endl;
+  std::cout << " - Applied likelihood cut value is : " << LikCut << std::endl;
 
   vector<string> inputFiles;
   if( argc >= 3){
     for(int iFile = 2; iFile < argc; iFile++){
       inputFiles.push_back(string(argv[iFile]).c_str());
-      std::cout << " Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
+      std::cout << " - Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
     }
   }
 
@@ -186,9 +186,16 @@ int main(int argc, char *argv[]){
   double FitMin = -0.15, FitMax = 0.15;
   double LnLik[NrConfigs] = {0.0};
 
+  //vector< vector<TH1F> > indivLnLik;
+  vector< vector< vector<double> > > indivLnLik;
+
   //** Loop over the different input files and read out the necessary info **//
   double Luminosity = 19646.8;
   for(int iWeightFile = 0; iWeightFile < inputFiles.size(); iWeightFile++){
+
+    //Make sure that for each dataset the vector storing the individual histograms is empty
+    vector< vector<double> > indivSampleLnLik;
+    indivSampleLnLik.clear();
 
     //--- Read the likelihood values ! ---//
     std::ifstream ifs (inputFiles[iWeightFile].c_str(), std::ifstream::in); 
@@ -245,6 +252,7 @@ int main(int argc, char *argv[]){
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         LnLik[config-1] = (-log(weight)+log(MGXSCut[config-1]));
+        //indivSampleLnLik.push_back(LnLik[config-1]);
         h_LnLik->SetBinContent(h_LnLik->FindBin(Var[config-1]), LnLik[config-1]*MCScaleFactor*Luminosity*NormFactor);
 
         //Get the maximum and minimum likelihood value
@@ -264,6 +272,13 @@ int main(int argc, char *argv[]){
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
           if( LnLik[SMConfig] > LikCut){ if(LikCut == 100) std::cout << " ******** \n ERROR: Should not reject any event when cut-value = 100 !!! \n ******** \n " << std::endl; delete h_LnLik; continue; }
           consEvts++;   //Count the number of full events!
+
+          vector<double> indivEvtLnLik;
+          indivEvtLnLik.clear();
+
+          for(int i=0; i< NrConfigs; i++)
+            indivEvtLnLik.push_back(LnLik[i]*MCScaleFactor*Luminosity*NormFactor);
+          indivSampleLnLik.push_back(indivEvtLnLik);
 
           //Initialize the fitDeviation histograms (array of TH1F, one for each configuration ...)
           //if(consEvts == 1){
@@ -305,9 +320,13 @@ int main(int argc, char *argv[]){
       }
     }
     ifs.close();
+    indivLnLik.push_back(indivSampleLnLik);
 
     std::cout << " Studied a total of " << consEvts+1 << " events !" << std::endl;
 
+    std::cout << std::endl << " Bin content of histSum is : " << std::endl;
+    for(int iConf = 0; iConf <= NrConfigs+1; iConf++)
+      std::cout << "  * " << iConf << ") " << histSum->GetBinContent(iConf) << std::endl;
     TF1* polFit_histSum = new TF1("polFit_SummedHist","pol2",FitMin, FitMax); 
     histSum->Fit(polFit_histSum,"Q","",polFit_histSum->GetXmin(), polFit_histSum->GetXmax());
     std::cout << " Minimum for " << polFit_histSum->GetName() << " is : " << polFit_histSum->GetMinimumX() << " +- " << polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, polFit_histSum->GetMinimumX(),0.2) - polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, -0.2, polFit_histSum->GetMinimumX()) << endl;
@@ -337,12 +356,31 @@ int main(int argc, char *argv[]){
 
   }//End of looping over the different weight files
 
+  //Store the 6th histo:
+  std::cout << "\n Considered a total of : " << indivLnLik.size() << " samples" << std::endl;
+  std::cout << " Stored a total of : " << indivLnLik[0].size() << " arrays " << std::endl;
+  std::cout << " Each event array has " << indivLnLik[0][0].size() << " entries " << std::endl;
+
+  double summedEntries[NrConfigs] = {0};
+  std::cout << " Obtained entries for summedEntries is : " << std::endl;
+  for(int iEvt = 0; iEvt < indivLnLik[0].size(); iEvt++){
+    for(int iConf = 0; iConf < NrConfigs; iConf++){
+      summedEntries[iConf] += indivLnLik[0][iEvt][iConf];
+      if(iEvt == indivLnLik[0].size()-1) std::cout << "  * " << iConf << ") " << summedEntries[iConf] << std::endl;
+    }
+  }
+  TGraph* gr_histSum = new TGraph(NrConfigs, Var, summedEntries);
+  TF1* polFit_histSum = new TF1("polFit_SummedHist","pol2",FitMin, FitMax);
+  gr_histSum->Fit(polFit_histSum,"Q","",polFit_histSum->GetXmin(), polFit_histSum->GetXmax());
+  std::cout << "\n Minimum for " << polFit_histSum->GetName() << " is : " << polFit_histSum->GetMinimumX() << " +- " << polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, polFit_histSum->GetMinimumX(),0.2) - polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, -0.2, polFit_histSum->GetMinimumX()) << endl;
+  gr_histSum->Write();
+
   outputFile->Close();
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
   return 0;
-}
+  }
 
-/*
+  /*
 
   //Information for the histograms
   int NrBins = 8; 
@@ -350,79 +388,79 @@ int main(int argc, char *argv[]){
   const unsigned int NrToDel = 2; 
   int NrRemaining = NrConfigs-NrToDel;
 
-std::string sNrRemaining = ""; std::stringstream ssNrRemaining; 
-std::string sNEvts = ""; std::stringstream ssNEvts;
-std::string sNrConfigs = ""; std::stringstream ssNrConfigs;
+  std::string sNrRemaining = ""; std::stringstream ssNrRemaining; 
+  std::string sNEvts = ""; std::stringstream ssNEvts;
+  std::string sNrConfigs = ""; std::stringstream ssNrConfigs;
 
-TH1F *h_FitDeviation[NrConfigs], *h_FitDeviationRel[NrConfigs];
-TH1F *h_PointsDelByFitDev[3], *h_PointsDelByFitDevRel[3];
-TH1F *h_ChiSquaredFirstFit[3], *h_ChiSquaredSecondFit[3];
-TH2F* h_TotalFitDevVSChiSq = new TH2F("TotalFitDevVSChiSq","Total fit deviation versus chi-squared",200,0,0.000005, 200, 0, 0.0005);
-TH1F* h_TotalRelFitDeviationReduced = new TH1F("TotalRelFitDeviationReduced","TotalRelFitDeviationReduced",200,0,0.001);
-TH1F* h_TotalRelFitDeviation = new TH1F("TotalRelFitDeviation","TotalRelFitDeviation",200,0,0.01);
-TH1F* h_SMLikelihoodValue = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
-TH1F* h_SMLikValue_AfterCut = new TH1F("SMLikValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut)",500,30,90);
-TH2F* h_SMLikelihoodValue_vs_DeltaLikelihood = new TH2F("SMLikelihoodValue_vs_DeltaLikelihood","Likelihood value at gR = 0 versus difference in likelihood",500,30,90,100,0,5);
+  TH1F *h_FitDeviation[NrConfigs], *h_FitDeviationRel[NrConfigs];
+  TH1F *h_PointsDelByFitDev[3], *h_PointsDelByFitDevRel[3];
+  TH1F *h_ChiSquaredFirstFit[3], *h_ChiSquaredSecondFit[3];
+  TH2F* h_TotalFitDevVSChiSq = new TH2F("TotalFitDevVSChiSq","Total fit deviation versus chi-squared",200,0,0.000005, 200, 0, 0.0005);
+  TH1F* h_TotalRelFitDeviationReduced = new TH1F("TotalRelFitDeviationReduced","TotalRelFitDeviationReduced",200,0,0.001);
+  TH1F* h_TotalRelFitDeviation = new TH1F("TotalRelFitDeviation","TotalRelFitDeviation",200,0,0.01);
+  TH1F* h_SMLikelihoodValue = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
+  TH1F* h_SMLikValue_AfterCut = new TH1F("SMLikValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut)",500,30,90);
+  TH2F* h_SMLikelihoodValue_vs_DeltaLikelihood = new TH2F("SMLikelihoodValue_vs_DeltaLikelihood","Likelihood value at gR = 0 versus difference in likelihood",500,30,90,100,0,5);
 
-//Store all the fit parameters into a vector of doubles
-vector<double> FitParams_FirstFit;
-vector<double> FitParams_SecondFit;
+  //Store all the fit parameters into a vector of doubles
+  vector<double> FitParams_FirstFit;
+  vector<double> FitParams_SecondFit;
 
 
-void PaintOverflow(TH1F *h, TFile *FileToWrite, std::string dirName){  // This function draws the histogram h with an extra bin for overflows
+  void PaintOverflow(TH1F *h, TFile *FileToWrite, std::string dirName){  // This function draws the histogram h with an extra bin for overflows
   Int_t nx    = h->GetNbinsX()+1;
   Double_t x1 = h->GetBinLowEdge(1), bw = h->GetBinWidth(nx), x2 = h->GetBinLowEdge(nx)+bw;
 
-  //Define a temporary histogram having an extra bin for overflows
-  char newTitle[100], newName[100];
-  strcpy(newTitle,h->GetTitle()); strcat(newTitle," (under- and overflow added)" );
-  strcpy(newName,h->GetName());  strcat(newName, "_Flow");
-  TH1F *h_tmp = new TH1F(newName, newTitle, nx, x1, x2);
+//Define a temporary histogram having an extra bin for overflows
+char newTitle[100], newName[100];
+strcpy(newTitle,h->GetTitle()); strcat(newTitle," (under- and overflow added)" );
+strcpy(newName,h->GetName());  strcat(newName, "_Flow");
+TH1F *h_tmp = new TH1F(newName, newTitle, nx, x1, x2);
 
-  // Fill the new histogram including the extra bin for overflows
-  for (Int_t i=1; i<=nx; i++)
-    h_tmp->Fill(h_tmp->GetBinCenter(i), h->GetBinContent(i));
-  // Fill the underflows
-  h_tmp->Fill(x1-1, h->GetBinContent(0));
+// Fill the new histogram including the extra bin for overflows
+for (Int_t i=1; i<=nx; i++)
+h_tmp->Fill(h_tmp->GetBinCenter(i), h->GetBinContent(i));
+// Fill the underflows
+h_tmp->Fill(x1-1, h->GetBinContent(0));
 
-  // Restore the number of entries
-  h_tmp->SetEntries(h->GetEntries());
+// Restore the number of entries
+h_tmp->SetEntries(h->GetEntries());
 
-  //Set the correct path to save the file
-  FileToWrite->cd();
-  if(dirName != ""){
-    if(dirName.find("_") < 999){
+//Set the correct path to save the file
+FileToWrite->cd();
+if(dirName != ""){
+if(dirName.find("_") < 999){
 
-      std::string firstDirName = dirName.substr(0,dirName.find("_"));
-      TDirectory *firstDir = FileToWrite->GetDirectory(firstDirName.c_str());
-      if (!firstDir) firstDir = FileToWrite->mkdir(firstDirName.c_str());
-      firstDir->cd();
+std::string firstDirName = dirName.substr(0,dirName.find("_"));
+TDirectory *firstDir = FileToWrite->GetDirectory(firstDirName.c_str());
+if (!firstDir) firstDir = FileToWrite->mkdir(firstDirName.c_str());
+firstDir->cd();
 
-      std::string secondDirName = dirName.substr(dirName.find("_")+1);
-      TDirectory *dir = firstDir->GetDirectory(secondDirName.c_str());
-      if (!dir) dir = firstDir->mkdir(secondDirName.c_str());
-      dir->cd();
-    }
-    else{
-      TDirectory *dir = FileToWrite->GetDirectory(dirName.c_str());
-      if (!dir) dir = FileToWrite->mkdir(dirName.c_str());
-      dir->cd();
-    }
-  }
+std::string secondDirName = dirName.substr(dirName.find("_")+1);
+TDirectory *dir = firstDir->GetDirectory(secondDirName.c_str());
+if (!dir) dir = firstDir->mkdir(secondDirName.c_str());
+dir->cd();
+}
+else{
+TDirectory *dir = FileToWrite->GetDirectory(dirName.c_str());
+if (!dir) dir = FileToWrite->mkdir(dirName.c_str());
+dir->cd();
+}
+}
 
-  h_tmp->Write();  
-  FileToWrite->cd();  //Reset to general directory! 
+h_tmp->Write();  
+FileToWrite->cd();  //Reset to general directory! 
 
-  delete h_tmp;
+delete h_tmp;
 }                  
 
 
 void doublePolFitMacro(){
 
-  
+
   double halfBinWidth = (Var[NrConfigs-1]- Var[0])/((double) NrBins*2.0);
   xLow = Var[0] - halfBinWidth; xHigh = Var[NrConfigs-1] + halfBinWidth; 
-  
+
   ssNrRemaining << NrRemaining; sNrRemaining = ssNrRemaining.str();
   ssNEvts << nEvts; sNEvts = ssNEvts.str();
   ssNrConfigs << NrConfigs; sNrConfigs = ssNrConfigs.str();
@@ -461,11 +499,11 @@ void doublePolFitMacro(){
   dir_RelFitDevDelete->cd(); h_PointsDelByFitDevRel->Write();         delete h_PointsDelByFitDevRel;
   PaintOverflow(h_ChiSquaredFirstFit, file_FitDist, "FitResults_ChiSquaredFit"); delete h_ChiSquaredFirstFit;
   PaintOverflow(h_ChiSquaredSecondFit,file_FitDist, "FitResults_ChiSquaredFit"); delete h_ChiSquaredSecondFit;
-  
+
   TDirectory *dir_FitSums = file_FitDist->GetDirectory("FitSums");
   if (!dir_FitSums) dir_FitSums = file_FitDist->mkdir("FitSums");
   dir_FitSums->cd();
-  
+
   //Now create the final fit from the individually summed fit parameters!
   std::cout << " " << endl;
 
