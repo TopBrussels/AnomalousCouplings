@@ -354,15 +354,10 @@ int main(int argc, char *argv[]){
   }//End of looping over the different weight files
 
   std::cout << "\n Considered a total of : " << indivLnLik.size() << " samples" << std::endl;
-  std::string outFileName = "Events_MC/OutputFile_"+timestamp()+"_LikelihoodCut"+string(argv[1])+"_";
   for(int iFile = 0; iFile < inputFiles.size(); iFile++){
     std::cout << " Considering : " << sampleName[iFile] << std::endl;
     std::cout << " Stored a total of : " << indivLnLik[iFile].size() << " arrays " << std::endl;
     std::cout << " Each event array has " << indivLnLik[iFile][0].size() << " entries " << std::endl;
-
-    outFileName += sampleName[iFile];
-    if(iFile != inputFiles.size()-1) outFileName += "_AND_";
-    else                             outFileName += ".root";
 
     double summedEntries[NrConfigs] = {0};
     for(int iEvt = 0; iEvt < indivLnLik[iFile].size(); iEvt++){
@@ -377,9 +372,6 @@ int main(int argc, char *argv[]){
     gr_graphSum->Write();
   }
 
-  outputFile->SetName(outFileName.c_str());
-  outputFile->Write(outFileName.c_str());
-  std::cout << " What is name of outputFile : " << outputFile->GetName() << std::endl;
   outputFile->Close();
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
   return 0;
