@@ -189,7 +189,6 @@ int main(int argc, char *argv[]){
     FitParametersFirstFit.clear(); FitParametersSecondFit.clear();
     bool doFits = false, allPointsInFit = false;       //Before changing this to true the issue of passing on the fit parameters should be resolved!!
   
-    TH1F *h_LnLik = 0;
     int NrBins = 8; 
     double halfBinWidth = (Var[NrConfigs-1]- Var[0])/((double) NrBins*2.0);
     float xLow = Var[0] - halfBinWidth, xHigh = Var[NrConfigs-1] + halfBinWidth; 
@@ -216,9 +215,6 @@ int main(int argc, char *argv[]){
           //Add the dataSetName to the histSum histogram!
           histSum->SetName(("SummedHist_"+sSampleName).c_str());
           histSum->SetTitle(("Sum of all individual histograms for "+sSampleName).c_str());
-
-          h_LnLik = new TH1F(("LnLik_Evt"+sEvt+"_"+sSampleName).c_str(),("LnLik distribution for event "+sEvt+" -- "+sSampleName).c_str(),NrBins+1,xLow,xHigh);
-          h_LnLik->SetMarkerStyle(20); h_LnLik->SetLineColor(3); h_LnLik->SetMarkerColor(1); h_LnLik->SetMarkerSize(1.2);
         }
 
         //Set the SMConfig:
@@ -226,8 +222,6 @@ int main(int argc, char *argv[]){
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         LnLik[config-1] = (-log(weight)+log(MGXSCut[config-1]));
-        //indivSampleLnLik.push_back(LnLik[config-1]);
-        h_LnLik->SetBinContent(h_LnLik->FindBin(Var[config-1]), LnLik[config-1]*MCScaleFactor*Luminosity*NormFactor);
 
         //Get the maximum and minimum likelihood value
         if(LnLik[config-1] > MaxLik) MaxLik = LnLik[config-1];
@@ -244,7 +238,7 @@ int main(int argc, char *argv[]){
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
-          if( LnLik[SMConfig] > LikCut){ if(LikCut == 100) std::cout << " ******** \n ERROR: Should not reject any event when cut-value = 100 !!! \n ******** \n " << std::endl; delete h_LnLik; continue; }
+          if( LnLik[SMConfig] > LikCut){ if(LikCut == 100) std::cout << " ******** \n ERROR: Should not reject any event when cut-value = 100 !!! \n ******** \n " << std::endl; continue; }
           consEvts++;   //Count the number of full events!
 
           vector<double> indivEvtLnLik;
@@ -256,14 +250,11 @@ int main(int argc, char *argv[]){
           sampleSF.push_back(MCScaleFactor);
 
           h_SMLikValue_AfterCut->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
-          histSum->Add(h_LnLik);
 
           //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
           if(doFits){
             calculateFit(LnLik, sEvt, consEvts, allPointsInFit, NrConfigs, FitParametersFirstFit, FitParametersSecondFit, Var, FitMin, FitMax);
           }
-
-          delete h_LnLik;
         }
       }
       /*if( iss >> evt >> config >> tf >> weight ){ 
