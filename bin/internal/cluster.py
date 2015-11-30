@@ -15,6 +15,7 @@ import subprocess
 import logging
 import os
 import time
+from time import gmtime, strftime
 import re
 import glob
 import inspect
@@ -213,7 +214,8 @@ class Cluster(object):
         while 1: 
             old_mode = mode
             nb_iter += 1
-            NrRemainingEvts = os.popen('qstat @cream02 | grep aolbrech | wc -l').read()
+	    cmd = "qstat -u aolbrech @cream02 | grep "+ self.MWparam['mw_run']['pbsname'] + " | wc -l"
+            NrRemainingEvts = os.popen(cmd).read()
             idle, run, finish, fail = self.control(me_dir)
             if int(NrRemainingEvts) != 0:
               if idle+run == 0: logger.info('Still some jobs running on PBS ...')
@@ -987,7 +989,7 @@ class PBSCluster(Cluster):
     running_tag = ['T','E','R']
     complete_tag = ['C']
     
-    maximum_submited_jobs = 2000
+    maximum_submited_jobs = 1000
 
     @multiple_try()
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, log=None,
@@ -1003,7 +1005,7 @@ class PBSCluster(Cluster):
 
 	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
         if len(self.submitted_ids) >= self.maximum_submited_jobs or len(self.submitted_ids) > 2100:
-            fct = lambda idle, run, finish: logger.info('Waiting for free slot (max nr set to %s, nr submitted is %s): %s %s %s' % (self.maximum_submited_jobs, len(self.submitted_ids), idle, run, finish))
+            fct = lambda idle, run, finish: logger.info('[%s] Waiting for free slot (max nr = %s, nr subm = %s): %s %s %s' % (strftime("%d/%m/%y %H:%M"), self.maximum_submited_jobs, len(self.submitted_ids), idle, run, finish))
             me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
             #print 'Change name of me_dir in wait : '
             #me_dir = misc.digest(me_dir)[-14:]    --> Wrong result!! (Seems to be some kind of random generator)
@@ -1036,6 +1038,8 @@ class PBSCluster(Cluster):
 	#print 'Name used for qsub command : ', me_dir
 	#print 'Change name of qsub command just before sumbitting to : ',CorrectMadWeightName 
 	me_dir = CorrectMadWeightName         #ADDED 21 JANUARY (Annik)
+	print "Output from self.MWparam['mw_run']['pbsname'] is : ", self.MWparam['mw_run']['pbsname'] 
+	me_dir = self.MWparam['mw_run']['pbsname']
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,

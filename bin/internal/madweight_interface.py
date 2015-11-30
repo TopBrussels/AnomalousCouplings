@@ -574,9 +574,8 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
             fsock2.write('<subprocess id=\'%s\'>\n' % MWdir)
 	    print "Value of boolean at_least_one : ", at_least_one
             for output in glob.glob(pjoin(input_dir, 'output_*_*.xml')):
-		print "Looking at xml file : ", output
+		#print "Looking at xml file : ", output
                 at_least_one = True
-		print "Changing at_least_one boolean to True ... "
                 text = open(output).read()
                 fsock2.write(text)
                 fsock.write(text)
