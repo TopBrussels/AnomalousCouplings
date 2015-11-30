@@ -51,20 +51,9 @@ struct sort_pred {
 void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool consAllPoints, const int NConfigs, vector<double> FitParamsFirstFit, vector<double> FitParamsSecondFit, double Var[], double FitMin, double FitMax){
   const unsigned int NrToDel = 2; 
 
-  //Set name of chisquared distributions!
-  //if(evtCounter == 1){
-  //  if(consAllPoints) h_ChiSquaredFirstFit  = new TH1F("ChiSquared_FirstFit", "Distribution of the #chi^{2} after the fit on all the points",200,0,0.05);
-  //  if(!consAllPoints){
-  //    h_ChiSquaredSecondFit = new TH1F("ChiSquared_SecondFit","Distribution of the #chi^{2} after the fit on the reduced points",200,0,0.005);
-  //    h_PointsDelByFitDev    = new TH1F("DeletedPointsFitDev",   "Overview of deleted points due to largest FitDeviation",NrBins+1,xLow,xHigh);
-  //    h_PointsDelByFitDevRel = new TH1F("DeletedPointsFitDevRel","Overview of deleted points due to largest relative FitDeviation",NrBins+1,xLow,xHigh);
-  //  }
-  //}
- 
   TF1* polFit = new TF1(("polFit_Evt"+EvtNumber).c_str(),"pol2",FitMin, FitMax); 
   TGraph* gr_LnLik = new TGraph(NConfigs,Var, LogLikelihood);
   gr_LnLik->Fit(polFit,"Q","",polFit->GetXmin(), polFit->GetXmax());
-  //if(consAllPoints) h_ChiSquaredFirstFit->Fill(polFit->GetChisquare());
 
   if(evtCounter == 1){
     for(int ipar = 0; ipar < polFit->GetNpar(); ipar++)
@@ -86,19 +75,14 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
         LogLikFit[iConfig] = polFit->GetParameter(0)+polFit->GetParameter(1)*Var[iConfig]+polFit->GetParameter(2)*Var[iConfig]*Var[iConfig]+polFit->GetParameter(3)*pow(Var[iConfig],3)+polFit->GetParameter(4)*pow(Var[iConfig],4)+polFit->GetParameter(5)*pow(Var[iConfig],5);
       FitDeviation.push_back( std::make_pair(iConfig, abs(LogLikelihood[iConfig]-LogLikFit[iConfig]) ) );
       FitDeviationRel.push_back( std::make_pair(iConfig, abs(LogLikelihood[iConfig]-LogLikFit[iConfig])/LogLikelihood[iConfig] ) );
-      //TotalRelFitDeviation += abs(LogLikelihood[iConfig]-LogLikFit[iConfig])/LogLikelihood[iConfig];
     }
     //Sort the fitdeviation values depending on the second value!
     std::sort(FitDeviation.begin(), FitDeviation.end(), sort_pred() );
     std::sort(FitDeviationRel.begin(), FitDeviationRel.end(), sort_pred() );
-    //h_TotalRelFitDeviation->Fill(TotalRelFitDeviation);
 
     //Now loop again over all configurations, plot the FitDeviation in sorted order and save the configNr's which should be excluded 
     std::vector<int> FitDevPointsToDel, FitDevRelPointsToDel;
     for(int itSortedConfig = NConfigs-1; itSortedConfig >= 0 ; itSortedConfig--){  //Looping from high to low values of the deviation!
-      //h_FitDeviation[itSortedConfig]->Fill(FitDeviation[itSortedConfig].second);
-      //h_FitDeviationRel[itSortedConfig]->Fill(FitDeviationRel[itSortedConfig].second);
-    
       //Store the 'NrToDel' points which need to be excluded from the TGraph!
       if(FitDevPointsToDel.size() < NrToDel){ FitDevPointsToDel.push_back(FitDeviation[itSortedConfig].first); }//h_PointsDelByFitDev->Fill(Var[FitDeviation[itSortedConfig].first]);
       if(FitDevRelPointsToDel.size() < NrToDel){FitDevRelPointsToDel.push_back(FitDeviationRel[itSortedConfig].first); }//h_PointsDelByFitDevRel->Fill(Var[FitDeviationRel[itSortedConfig].first]);
@@ -106,23 +90,19 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
 
     //Create new arrays with the reduced information!
     double ReducedVar[NConfigs-NrToDel], ReducedLogLik[NConfigs-NrToDel];
-    //double TotalRelFitDeviationReduced = 0;
     int iCounter = 0;
     for(int iConf = 0; iConf < NConfigs; iConf++){
       if(!(std::find(FitDevPointsToDel.begin(), FitDevPointsToDel.end(), iConf) != FitDevPointsToDel.end()) ){
         ReducedVar[iCounter] = Var[iConf];
         ReducedLogLik[iCounter] = LogLikelihood[iConf];
-        //TotalRelFitDeviationReduced += (abs(LogLikelihood[iConf]-LogLikFit[iConf])/LogLikelihood[iConf]);
         iCounter++;
       }
     }
-    //h_TotalRelFitDeviationReduced->Fill(TotalRelFitDeviationReduced);
 
     //Define new TGraph and fit again
     TGraph* gr_ReducedLnLik = new TGraph(NConfigs-NrToDel, ReducedVar, ReducedLogLik);
     TF1* polFit_ReducedPoints = new TF1(("polFit_ReducedPoints_Evt"+EvtNumber).c_str(),"pol2",FitMin, FitMax); 
     gr_ReducedLnLik->Fit(polFit_ReducedPoints,"Q","",polFit->GetXmin(), polFit->GetXmax()); 
-    //h_ChiSquaredSecondFit->Fill(polFit_ReducedPoints->GetChisquare());   //As expected NDF is always equal to NConfigs-NrToDel-3 (= nr params needed to define a parabola)
 
     //Add the different parameters of the individual fits in order to form a final fit!
     if(evtCounter == 1){
@@ -133,9 +113,6 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
       for(int ipar = 0; ipar < polFit_ReducedPoints->GetNpar(); ipar++)
         FitParamsSecondFit[ipar] += polFit_ReducedPoints->GetParameter(ipar);
     }
-
-    //Create a 2D-plot which contains the deviation of the expected minimum wrt the chi-squared of the fit
-    //h_TotalFitDevVSChiSq->Fill(polFit_ReducedPoints->GetChisquare(), TotalRelFitDeviationReduced);
 
     //polFit_ReducedPoints->Write();
     delete polFit_ReducedPoints;
@@ -278,18 +255,8 @@ int main(int argc, char *argv[]){
           indivSampleLnLik.push_back(indivEvtLnLik);
           sampleSF.push_back(MCScaleFactor);
 
-          //Initialize the fitDeviation histograms (array of TH1F, one for each configuration ...)
-          //if(consEvts == 1){
-          //  for(int ii = 0; ii < NrConfigs; ii++){
-          //    stringstream ssConfig; ssConfig << ii+1; string sConfig = ssConfig.str();
-          //    h_FitDeviation[ii] = new TH1F(("FitDeviation_LowestConfig"+sConfig).c_str(),("FitDeviation histogram for "+sConfig+"st lowest value").c_str(), 200, 0, 0.1);
-          //    h_FitDeviationRel[ii] = new TH1F(("FitDeviationRelative_LowestConfig"+sConfig).c_str(), ("FitDeviationRelative histogram for "+sConfig+"st lowest value").c_str(),200,0,0.005);
-          //  }
-          //}
-
           h_SMLikValue_AfterCut->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
           histSum->Add(h_LnLik);
-          //h_SMLikelihoodValue_vs_DeltaLikelihood->Fill(LnLik[SMConfig], MaxLik-MinLik);
 
           //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
           if(doFits){
@@ -324,32 +291,10 @@ int main(int argc, char *argv[]){
 
     std::cout << " Studied a total of " << consEvts << " events !" << std::endl;
 
-    TF1* polFit_histSum = new TF1("polFit_SummedHist","pol2",FitMin, FitMax); 
-    histSum->Fit(polFit_histSum,"Q","",polFit_histSum->GetXmin(), polFit_histSum->GetXmax());
-    std::cout << " Minimum for " << polFit_histSum->GetName() << " is : " << polFit_histSum->GetMinimumX() << " +- " << polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, polFit_histSum->GetMinimumX(),0.2) - polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, -0.2, polFit_histSum->GetMinimumX()) << endl;
-    histSum->Write();
-
     h_SMLikelihoodValue->Write();
     h_MCScaleFactor->Write();
     h_Luminosity->Write();
     h_NormFactor->Write();
-
-    if(doFits){
-      TF1* FitSum_FirstFit = new TF1("SummedFit_FirstFit","pol2",FitMin,FitMax);
-      TF1* FitSum_SecondFit = new TF1("SummedFit_SecondFit","pol2",FitMin,FitMax);
-      FitSum_FirstFit->SetTitle(("Distribution of first fit after summing over "+sNrConfigs+" points").c_str());
-      FitSum_SecondFit->SetTitle(("Distribution of second fit after summing over "+sNrConfigs+" points").c_str());
-
-      for(int ipar = 0; ipar < FitSum_FirstFit->GetNpar(); ipar++) FitSum_FirstFit->SetParameter(ipar, FitParametersFirstFit[ipar]);
-      FitSum_FirstFit->Write();
-      std::cout << " MinimumX value for " << FitSum_FirstFit->GetName() << " is : " << FitSum_FirstFit->GetMinimumX() << " +- " << FitSum_FirstFit->GetX(FitSum_FirstFit->GetMinimum()+0.5, FitSum_FirstFit->GetMinimumX(), 0.2) - FitSum_FirstFit->GetX(FitSum_FirstFit->GetMinimum()+0.5, -0.2, FitSum_FirstFit->GetMinimumX()) << endl;
-      delete FitSum_FirstFit;
-
-      for(int ipar = 0; ipar < FitSum_SecondFit->GetNpar(); ipar++) FitSum_SecondFit->SetParameter(ipar, FitParametersSecondFit[ipar]);
-      FitSum_SecondFit->Write();
-      std::cout << " MinimumX value for " << FitSum_SecondFit->GetName() << " is : " << FitSum_SecondFit->GetMinimumX() << " +- " << FitSum_SecondFit->GetX(FitSum_SecondFit->GetMinimum()+0.5, FitSum_SecondFit->GetMinimumX(), 0.2) - FitSum_SecondFit->GetX(FitSum_SecondFit->GetMinimum()+0.5, -0.2, FitSum_SecondFit->GetMinimumX()) << endl;
-      delete FitSum_SecondFit;
-    }
 
   }//End of looping over the different weight files
 
@@ -376,155 +321,3 @@ int main(int argc, char *argv[]){
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
   return 0;
   }
-
-  /*
-
-  //Information for the histograms
-  int NrBins = 8; 
-  float xLow, xHigh;
-  const unsigned int NrToDel = 2; 
-  int NrRemaining = NrConfigs-NrToDel;
-
-  std::string sNrRemaining = ""; std::stringstream ssNrRemaining; 
-  std::string sNEvts = ""; std::stringstream ssNEvts;
-  std::string sNrConfigs = ""; std::stringstream ssNrConfigs;
-
-  TH1F *h_FitDeviation[NrConfigs], *h_FitDeviationRel[NrConfigs];
-  TH1F *h_PointsDelByFitDev[3], *h_PointsDelByFitDevRel[3];
-  TH1F *h_ChiSquaredFirstFit[3], *h_ChiSquaredSecondFit[3];
-  TH2F* h_TotalFitDevVSChiSq = new TH2F("TotalFitDevVSChiSq","Total fit deviation versus chi-squared",200,0,0.000005, 200, 0, 0.0005);
-  TH1F* h_TotalRelFitDeviationReduced = new TH1F("TotalRelFitDeviationReduced","TotalRelFitDeviationReduced",200,0,0.001);
-  TH1F* h_TotalRelFitDeviation = new TH1F("TotalRelFitDeviation","TotalRelFitDeviation",200,0,0.01);
-  TH1F* h_SMLikelihoodValue = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
-  TH1F* h_SMLikValue_AfterCut = new TH1F("SMLikValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut)",500,30,90);
-  TH2F* h_SMLikelihoodValue_vs_DeltaLikelihood = new TH2F("SMLikelihoodValue_vs_DeltaLikelihood","Likelihood value at gR = 0 versus difference in likelihood",500,30,90,100,0,5);
-
-  //Store all the fit parameters into a vector of doubles
-  vector<double> FitParams_FirstFit;
-  vector<double> FitParams_SecondFit;
-
-
-  void PaintOverflow(TH1F *h, TFile *FileToWrite, std::string dirName){  // This function draws the histogram h with an extra bin for overflows
-  Int_t nx    = h->GetNbinsX()+1;
-  Double_t x1 = h->GetBinLowEdge(1), bw = h->GetBinWidth(nx), x2 = h->GetBinLowEdge(nx)+bw;
-
-//Define a temporary histogram having an extra bin for overflows
-char newTitle[100], newName[100];
-strcpy(newTitle,h->GetTitle()); strcat(newTitle," (under- and overflow added)" );
-strcpy(newName,h->GetName());  strcat(newName, "_Flow");
-TH1F *h_tmp = new TH1F(newName, newTitle, nx, x1, x2);
-
-// Fill the new histogram including the extra bin for overflows
-for (Int_t i=1; i<=nx; i++)
-h_tmp->Fill(h_tmp->GetBinCenter(i), h->GetBinContent(i));
-// Fill the underflows
-h_tmp->Fill(x1-1, h->GetBinContent(0));
-
-// Restore the number of entries
-h_tmp->SetEntries(h->GetEntries());
-
-//Set the correct path to save the file
-FileToWrite->cd();
-if(dirName != ""){
-if(dirName.find("_") < 999){
-
-std::string firstDirName = dirName.substr(0,dirName.find("_"));
-TDirectory *firstDir = FileToWrite->GetDirectory(firstDirName.c_str());
-if (!firstDir) firstDir = FileToWrite->mkdir(firstDirName.c_str());
-firstDir->cd();
-
-std::string secondDirName = dirName.substr(dirName.find("_")+1);
-TDirectory *dir = firstDir->GetDirectory(secondDirName.c_str());
-if (!dir) dir = firstDir->mkdir(secondDirName.c_str());
-dir->cd();
-}
-else{
-TDirectory *dir = FileToWrite->GetDirectory(dirName.c_str());
-if (!dir) dir = FileToWrite->mkdir(dirName.c_str());
-dir->cd();
-}
-}
-
-h_tmp->Write();  
-FileToWrite->cd();  //Reset to general directory! 
-
-delete h_tmp;
-}                  
-
-
-void doublePolFitMacro(){
-
-
-  double halfBinWidth = (Var[NrConfigs-1]- Var[0])/((double) NrBins*2.0);
-  xLow = Var[0] - halfBinWidth; xHigh = Var[NrConfigs-1] + halfBinWidth; 
-
-  ssNrRemaining << NrRemaining; sNrRemaining = ssNrRemaining.str();
-  ssNEvts << nEvts; sNEvts = ssNEvts.str();
-  ssNrConfigs << NrConfigs; sNrConfigs = ssNrConfigs.str();
-
-  TH1F *histSum = new TH1F("SummedHist","Sum of all individual histograms",NrBins+1,xLow,xHigh); 
-  TH1F *h_LnLik = 0;
-
-  TCanvas *canv_SplitLL = 0;
-  double LnLik[NrConfigs] = {0.0}; //, LnLikXS[NrConfigs] = {0.0}, LnLikAcc[NrConfigs] = {0.0};        
-
-
-  //-- Save the histograms for which oveflow information is needed! --//
-  for(int iConf = 0; iConf < NrConfigs; iConf++){
-    PaintOverflow(h_FitDeviation[iConf],    file_FitDist, "FitResults_FitDeviation");         delete h_FitDeviation[iConf];
-    PaintOverflow(h_FitDeviationRel[iConf], file_FitDist, "FitResults_RelativeFitDeviation"); delete h_FitDeviationRel[iConf];
-  }
-  TDirectory *dir_FitResults = file_FitDist->GetDirectory("FitResults");
-  if (!dir_FitResults) dir_FitResults = file_FitDist->mkdir("FitResults");
-  dir_FitResults->cd();
-
-  h_TotalFitDevVSChiSq->Write();
-  h_TotalRelFitDeviationReduced->Write();
-  h_TotalRelFitDeviation->Write();
-  h_SMLikelihoodValue->GetXaxis()->SetTitle("Likelihood value at gR = 0.0"); h_SMLikelihoodValue->GetYaxis()->SetTitle("# events");
-  h_SMLikelihoodValue->Write();
-  h_SMLikValue_AfterCut->Write();
-  h_SMLikelihoodValue_vs_DeltaLikelihood->Write();
-
-  TDirectory *dir_FitDevDelete = dir_FitResults->GetDirectory("PointsDeletedByFitDev");
-  if(!dir_FitDevDelete) dir_FitDevDelete = dir_FitResults->mkdir("PointsDeletedByFitDev");
-
-  TDirectory *dir_RelFitDevDelete = dir_FitResults->GetDirectory("PointsDeletedByRelFitDev");
-  if(!dir_RelFitDevDelete) dir_RelFitDevDelete = dir_FitResults->mkdir("PointsDeletedByRelFitDev");
-
-  dir_FitDevDelete->cd(); h_PointsDelByFitDev->Write();               delete h_PointsDelByFitDev;
-  dir_RelFitDevDelete->cd(); h_PointsDelByFitDevRel->Write();         delete h_PointsDelByFitDevRel;
-  PaintOverflow(h_ChiSquaredFirstFit, file_FitDist, "FitResults_ChiSquaredFit"); delete h_ChiSquaredFirstFit;
-  PaintOverflow(h_ChiSquaredSecondFit,file_FitDist, "FitResults_ChiSquaredFit"); delete h_ChiSquaredSecondFit;
-
-  TDirectory *dir_FitSums = file_FitDist->GetDirectory("FitSums");
-  if (!dir_FitSums) dir_FitSums = file_FitDist->mkdir("FitSums");
-  dir_FitSums->cd();
-
-  //Now create the final fit from the individually summed fit parameters!
-  std::cout << " " << endl;
-
-  TF1* polFit_histSum = new TF1("polFit_SummedHist","pol2",FitMin, FitMax); 
-  histSum->Fit(polFit_histSum,"Q","",polFit_histSum->GetXmin(), polFit_histSum->GetXmax());
-  std::cout << " Minimum for " << polFit_histSum->GetName() << " is : " << polFit_histSum->GetMinimumX() << " +- " << polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, polFit_histSum->GetMinimumX(),0.2) - polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, -0.2, polFit_histSum->GetMinimumX()) << endl;
-  histSum->Write();
-
-  TF1* FitSum_FirstFit = new TF1("SummedFit_FirstFit","pol2",FitMin,FitMax);
-  TF1* FitSum_SecondFit = new TF1("SummedFit_SecondFit","pol2",FitMin,FitMax);
-  FitSum_FirstFit->SetTitle(("Distribution of first fit after summing over "+sNrConfigs+" points ("+sNEvts+" events)").c_str());
-  FitSum_SecondFit->SetTitle(("Distribution of second fit after summing over "+sNrConfigs+" points ("+sNEvts+" events)").c_str());
-
-  for(int ipar = 0; ipar < FitSum_FirstFit->GetNpar(); ipar++) FitSum_FirstFit->SetParameter(ipar, FitParams_FirstFit[ipar]);
-  FitSum_FirstFit->Write();
-  std::cout << " MinimumX value for " << FitSum_FirstFit->GetName() << " is : " << FitSum_FirstFit->GetMinimumX() << " +- " << FitSum_FirstFit->GetX(FitSum_FirstFit->GetMinimum()+0.5, FitSum_FirstFit->GetMinimumX(), 0.2) - FitSum_FirstFit->GetX(FitSum_FirstFit->GetMinimum()+0.5, -0.2, FitSum_FirstFit->GetMinimumX()) << endl;
-  delete FitSum_FirstFit;
-
-  for(int ipar = 0; ipar < FitSum_SecondFit->GetNpar(); ipar++) FitSum_SecondFit->SetParameter(ipar, FitParams_SecondFit[ipar]);
-  FitSum_SecondFit->Write();
-  std::cout << " MinimumX value for " << FitSum_SecondFit->GetName() << " is : " << FitSum_SecondFit->GetMinimumX() << " +- " << FitSum_SecondFit->GetX(FitSum_SecondFit->GetMinimum()+0.5, FitSum_SecondFit->GetMinimumX(), 0.2) - FitSum_SecondFit->GetX(FitSum_SecondFit->GetMinimum()+0.5, -0.2, FitSum_SecondFit->GetMinimumX()) << endl;
-  delete FitSum_SecondFit;
-
-  file_FitDist->Close();
-
-}
-*/
