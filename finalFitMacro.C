@@ -66,18 +66,14 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
   gr_LnLik->Fit(polFit,"Q","",polFit->GetXmin(), polFit->GetXmax());
   //if(consAllPoints) h_ChiSquaredFirstFit->Fill(polFit->GetChisquare());
 
-  std::cout << " evtCounter is : " << evtCounter << std::endl;
   if(evtCounter == 1){
-    std::cout << " Should store the fit variables for the first event ! " << std::endl;
     for(int ipar = 0; ipar < polFit->GetNpar(); ipar++)
       FitParamsFirstFit.push_back(polFit->GetParameter(ipar));
   }
   else{
-    std::cout << " Filling fit variables ... " << std::endl;
     for(int ipar = 0; ipar < polFit->GetNpar(); ipar++)
       FitParamsFirstFit[ipar] += polFit->GetParameter(ipar);
   }
-  std::cout << " calculateFit --> FitParms[0] = " << FitParamsFirstFit[0] << std::endl;
 
   if(consAllPoints){
     std::vector<std::pair<int, double> > FitDeviation, FitDeviationRel;
@@ -146,7 +142,6 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
     delete gr_ReducedLnLik;
   }
 
-  std::cout << " End of calculateFit " << std::endl; 
   delete polFit;
   delete gr_LnLik;
 }
@@ -295,10 +290,7 @@ int main(int argc, char *argv[]){
 
           //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
           if(doFits){
-            std::cout << " Will do fit now ! " << std::endl;
             calculateFit(LnLik, sEvt, consEvts, allPointsInFit, NrConfigs, FitParametersFirstFit, FitParametersSecondFit, Var, FitMin, FitMax);
-            std::cout << " Done with calculateFit ! " << std::endl;
-            std::cout << " FitParameter[0] = " << FitParametersFirstFit[0] << std::endl;
           }
 
           delete h_LnLik;
