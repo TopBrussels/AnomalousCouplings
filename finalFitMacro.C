@@ -183,14 +183,17 @@ int main(int argc, char *argv[]){
 
   //vector< vector<TH1F> > indivLnLik;
   vector< vector< vector<double> > > indivLnLik;
+  vector< std::string > sampleName; sampleName.clear();
+  vector< double > normFactor;     normFactor.clear();
+  vector< vector<double> > scaleFactor;
 
   //** Loop over the different input files and read out the necessary info **//
   double Luminosity = 19646.8;
   for(int iWeightFile = 0; iWeightFile < inputFiles.size(); iWeightFile++){
 
     //Make sure that for each dataset the vector storing the individual histograms is empty
-    vector< vector<double> > indivSampleLnLik;
-    indivSampleLnLik.clear();
+    vector< vector<double> > indivSampleLnLik; indivSampleLnLik.clear();
+    vector<double> sampleSF; sampleSF.clear();
 
     //--- Read the likelihood values ! ---//
     std::ifstream ifs (inputFiles[iWeightFile].c_str(), std::ifstream::in); 
@@ -220,7 +223,6 @@ int main(int argc, char *argv[]){
     TH1F* h_Luminosity = new TH1F("Luminosity","Luminosity used", 100,15000,23000);
     TH1F* h_NormFactor = new TH1F("NormFactor","Norm factor for MC sample", 100,0,0.000001);
 
-    //while( std::getline(ifs,line) && consEvts < nEvts){
     while( std::getline(ifs,line)){
       std::istringstream iss(line);
 
@@ -272,8 +274,9 @@ int main(int argc, char *argv[]){
           indivEvtLnLik.clear();
 
           for(int i=0; i< NrConfigs; i++)
-            indivEvtLnLik.push_back(LnLik[i]*MCScaleFactor*Luminosity*NormFactor);
+            indivEvtLnLik.push_back(LnLik[i]);
           indivSampleLnLik.push_back(indivEvtLnLik);
+          sampleSF.push_back(MCScaleFactor);
 
           //Initialize the fitDeviation histograms (array of TH1F, one for each configuration ...)
           //if(consEvts == 1){
@@ -307,12 +310,17 @@ int main(int argc, char *argv[]){
         sSampleName = line.substr(0, line.find(" "));
         sNormFactor = line.substr(sSampleName.length(), line.length());
         NormFactor = atof(sNormFactor.c_str());
-        std::cout << " * What is sample name : " << sSampleName << std::endl; 
+        std::cout << " * What is sample name : " << sSampleName << std::endl;
+        sampleName.push_back(sSampleName);
         std::cout << " * What is norm-factor : " << NormFactor << std::endl;
+        normFactor.push_back(NormFactor);
       }
     }
     ifs.close();
+
+    //Push back all the vectors containing event-per-event information!
     indivLnLik.push_back(indivSampleLnLik);
+    scaleFactor.push_back(sampleSF);
 
     std::cout << " Studied a total of " << consEvts << " events !" << std::endl;
 
@@ -345,23 +353,33 @@ int main(int argc, char *argv[]){
 
   }//End of looping over the different weight files
 
-  //Store the 6th histo:
   std::cout << "\n Considered a total of : " << indivLnLik.size() << " samples" << std::endl;
-  std::cout << " Stored a total of : " << indivLnLik[0].size() << " arrays " << std::endl;
-  std::cout << " Each event array has " << indivLnLik[0][0].size() << " entries " << std::endl;
+  std::string outFileName = "Events_MC/OutputFile_"+timestamp()+"_LikelihoodCut"+string(argv[1])+"_";
+  for(int iFile = 0; iFile < inputFiles.size(); iFile++){
+    std::cout << " Considering : " << sampleName[iFile] << std::endl;
+    std::cout << " Stored a total of : " << indivLnLik[iFile].size() << " arrays " << std::endl;
+    std::cout << " Each event array has " << indivLnLik[iFile][0].size() << " entries " << std::endl;
 
-  double summedEntries[NrConfigs] = {0};
-  for(int iEvt = 0; iEvt < indivLnLik[0].size(); iEvt++){
-    for(int iConf = 0; iConf < NrConfigs; iConf++){
-      summedEntries[iConf] += indivLnLik[0][iEvt][iConf];
+    outFileName += sampleName[iFile];
+    if(iFile != inputFiles.size()-1) outFileName += "_AND_";
+    else                             outFileName += ".root";
+
+    double summedEntries[NrConfigs] = {0};
+    for(int iEvt = 0; iEvt < indivLnLik[iFile].size(); iEvt++){
+      for(int iConf = 0; iConf < NrConfigs; iConf++){
+        summedEntries[iConf] += indivLnLik[iFile][iEvt][iConf]*scaleFactor[iFile][iEvt]*Luminosity*normFactor[iFile];
+      }
     }
+    TGraph* gr_graphSum = new TGraph(NrConfigs, Var, summedEntries);
+    TF1* polFit_graphSum = new TF1(("polFit_SummedGraph_"+sampleName[iFile]).c_str(),"pol2",FitMin, FitMax);
+    gr_graphSum->Fit(polFit_graphSum,"Q","",polFit_graphSum->GetXmin(), polFit_graphSum->GetXmax());
+    std::cout << "\n Minimum for " << polFit_graphSum->GetName() << " is : " << polFit_graphSum->GetMinimumX() << " +- " << polFit_graphSum->GetX(polFit_graphSum->GetMinimum()+0.5, polFit_graphSum->GetMinimumX(),0.2) - polFit_graphSum->GetX(polFit_graphSum->GetMinimum()+0.5, -0.2, polFit_graphSum->GetMinimumX()) << endl;
+    gr_graphSum->Write();
   }
-  TGraph* gr_histSum = new TGraph(NrConfigs, Var, summedEntries);
-  TF1* polFit_histSum = new TF1("polFit_SummedHist","pol2",FitMin, FitMax);
-  gr_histSum->Fit(polFit_histSum,"Q","",polFit_histSum->GetXmin(), polFit_histSum->GetXmax());
-  std::cout << "\n Minimum for " << polFit_histSum->GetName() << " is : " << polFit_histSum->GetMinimumX() << " +- " << polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, polFit_histSum->GetMinimumX(),0.2) - polFit_histSum->GetX(polFit_histSum->GetMinimum()+0.5, -0.2, polFit_histSum->GetMinimumX()) << endl;
-  gr_histSum->Write();
 
+  outputFile->SetName(outFileName.c_str());
+  outputFile->Write(outFileName.c_str());
+  std::cout << " What is name of outputFile : " << outputFile->GetName() << std::endl;
   outputFile->Close();
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
   return 0;
