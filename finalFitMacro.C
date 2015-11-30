@@ -127,31 +127,62 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
 void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax){
 
   std::cout << "\n Considered a total of : " << LnLikArray.size() << " samples" << std::endl;
+  vector<double> summedEntries; summedEntries.clear();
   for(int iFile = 0; iFile < LnLikArray.size(); iFile++){
     std::cout << " Considering : " << name[iFile] << std::endl;
     std::cout << " Stored a total of : " << LnLikArray[iFile].size() << " arrays " << std::endl;
     std::cout << " Each event array has " << LnLikArray[iFile][0].size() << " entries " << std::endl;
 
-    double summedEntries[] = {0};
+    vector<double> summedSampleEntries; summedSampleEntries.clear();
     for(int iEvt = 0; iEvt < LnLikArray[iFile].size(); iEvt++){
       for(int iConf = 0; iConf < LnLikArray[iFile][iEvt].size(); iConf++){
-        if( iEvt == 0){ summedEntries[iConf] = 0; }
-        summedEntries[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt]*Lumi*norm[iFile];
+        if(iEvt == 0){
+          summedSampleEntries.push_back(0);
+          std::cout << " " << iConf << ") Starting values for sample-specific entries is : " << summedSampleEntries[iConf] << std::endl;
+          if(iFile == 0){
+            summedEntries.push_back(0);
+            std::cout << " " << iConf << ") Starting values for total entries is : " << summedEntries[iConf] << std::endl;
+          }
+        }
+        summedSampleEntries[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt]*Lumi*norm[iFile];
+        //summedEntries[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt]*Lumi*norm[iFile];
+        if(iEvt == LnLikArray[iFile].size() -1){
+          std::cout << " " << iConf << ") Final entries (sample-specific) : " << summedSampleEntries[iConf] << std::endl;
+          if(iFile == 0) summedEntries[iConf] = summedSampleEntries[iConf];
+          else           summedEntries[iConf] += summedSampleEntries[iConf];
+          std::cout << " " << iConf << ") Final entries (all samples) : " << summedEntries[iConf] << std::endl;
+        }
       }
     }
 
-    TGraph* gr_graphSum = new TGraph(LnLikArray[iFile][0].size(), Var, summedEntries);
-    TF1* polFit_graphSum = new TF1(("polFit_SummedGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
-    gr_graphSum->Fit(polFit_graphSum,"Q","",polFit_graphSum->GetXmin(), polFit_graphSum->GetXmax());
-    std::cout << "\n Minimum for " << polFit_graphSum->GetName() << " is : " << polFit_graphSum->GetMinimumX() << " +- " << polFit_graphSum->GetX(polFit_graphSum->GetMinimum()+0.5, polFit_graphSum->GetMinimumX(),0.2) - polFit_graphSum->GetX(polFit_graphSum->GetMinimum()+0.5, -0.2, polFit_graphSum->GetMinimumX()) << endl;
+    double SampleEntries[100];
+    for(int i = 0; i < LnLikArray[iFile][0].size(); i++)
+      SampleEntries[i] = summedSampleEntries[i];
+
+    TGraph* gr_sampleSum = new TGraph(LnLikArray[iFile][0].size(), Var, SampleEntries);
+    TF1* polFit_sampleSum = new TF1(("polFit_SummedSampleGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
+    gr_sampleSum->Fit(polFit_sampleSum,"Q","",polFit_sampleSum->GetXmin(), polFit_sampleSum->GetXmax());
+    std::cout << "\n Minimum for " << polFit_sampleSum->GetName() << " is : " << polFit_sampleSum->GetMinimumX() << " +- " << polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX()) << endl;
 
     TDirectory* grdir = outFile->GetDirectory("graphs");   //Check whether directory already exists ..
     if(!grdir) grdir = outFile->mkdir("graphs");          // .. and otherwise create it!
     grdir->cd();
-    gr_graphSum->SetName(("FittedGraph_"+name[iFile]).c_str());
-    gr_graphSum->SetTitle(("Graph containing the summed events for "+name[iFile]).c_str());
-    gr_graphSum->Write();
+    gr_sampleSum->SetName(("FittedGraph_"+name[iFile]).c_str());
+    gr_sampleSum->SetTitle(("Graph containing the summed events for "+name[iFile]).c_str());
+    gr_sampleSum->Write();
   }
+  
+  double Entries[100];
+  for(int i = 0; i < LnLikArray[0][0].size(); i++)
+    Entries[i] = summedEntries[i];
+  TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+  TF1* polFit_totalSum = new TF1("polFit_SummedTotalGraph","pol2",FitMin, FitMax);
+  gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
+  std::cout << "\n Minimum for " << polFit_totalSum->GetName() << " is : " << polFit_totalSum->GetMinimumX() << " +- " << polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()) << endl;
+
+  gr_totalSum->SetName("FittedGraph_AllSamples");
+  gr_totalSum->SetTitle("Graph containing the summed events for all samples");
+  gr_totalSum->Write();
 }
 
 //------------------------------------------------------------------//
@@ -304,7 +335,7 @@ int main(int argc, char *argv[]){
         NormFactor = atof(sNormFactor.c_str());
         std::cout << " * What is sample name : " << sSampleName << std::endl;
         sampleName.push_back(sSampleName);
-        std::cout << " * What is norm-factor : " << NormFactor << std::endl;
+        std::cout << " * What is norm-factor : " << NormFactor << std::endl;    //To notice: 1/normFactor = lumi of sample!
         normFactor.push_back(NormFactor);
       }
     }
@@ -331,6 +362,21 @@ int main(int argc, char *argv[]){
     }
 
   }//End of looping over the different weight files
+
+  /*int nrRandomSamples = 10;
+  vector< vector< vector<double> > > pseudoDataLnLik;
+  for(int iSample = 0; iSample < indivLnLik.size(); iSample++){
+
+    vector< vector<double> > pseudoSampleLnLik; pseudoSampleLnLik.clear();
+    for(int iEvt = 0; iEvt < indivLnLik[iSample].size(); iEvt++){
+      double random = ((double) rand() / (RAND_MAX));
+      if(random <= Luminosity*normFactor[iSample]){
+        pseudoSampleLnLik.push_back(indivLnLik[iSample][iEvt]);
+      }
+    }
+    pseudoDataLnLik.push_back(pseudoSampleLnLik);
+    std::cout << " Stored for dataset " << sampleName[iSample] << " a total of " << pseudoDataLnLik[iSample].size() << std::endl;
+  }*/
 
   getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax);
 
