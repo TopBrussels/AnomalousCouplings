@@ -87,7 +87,6 @@ class Cluster(object):
         self.submitted = 0
         self.submitted_ids = []
         self.finish = 0
-	print "What is stored in opts ? : ", opts
         if 'cluster_queue' in opts:
             self.cluster_queue = opts['cluster_queue']
         else:
@@ -103,9 +102,8 @@ class Cluster(object):
         self.cluster_retry_wait = opts['cluster_retry_wait'] if 'cluster_retry_wait' in opts else 300
         self.options = dict(opts)
         self.retry_args = {}
-    	print "\n \n *********** --> Possible to collect info from MWinfo ... : ", MW_info.MW_info(pjoin(os.getcwd(),'Cards','MadWeight_card.dat')), "     ************* \n \n"
 	self.submit_name = MW_info.MW_info(pjoin(os.getcwd(),'Cards','MadWeight_card.dat'))['mw_run']['pbsname']
-	print "self.submit_name = ", self.submit_name
+	print "Name that will be used for the PBS submission is : ", self.submit_name
 
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, 
                log=None, required_output=[], nb_submit=0):
@@ -577,6 +575,7 @@ class MultiCore(Cluster):
         
         import thread
 
+	# .. Seems to be never accessed ... 
 	print "Wrong numbers obtained here? (in wait definition)"
         remaining = self.submitted - self.done
 	print " --> According to this definition the number of remaining is : ", remaining, "(", self.submitted, " - ", self.done
@@ -1009,13 +1008,15 @@ class PBSCluster(Cluster):
         """Submit a job prog to a PBS cluster"""
         
         me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
-        me_dir = misc.digest(me_dir)[-14:]
+        me_dir = self.submit_name    #misc.digest(me_dir)[-14:]
+	print " To what is me_dir set in beginning?? ", me_dir
 	CorrectMadWeightName = me_dir         #ADDED 21 JANUARY (Annik)
 	#print 'Name of me_dir after digest : ', me_dir, ' -- should be identical to CorrectMadWeightName = ', CorrectMadWeightName
         if not me_dir[0].isalpha():
             me_dir = 'a' + me_dir[1:]
 
 	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
+	print "Counters : ", self.submitted_ids, " vs ", self.maximum_submited_jobs
         if len(self.submitted_ids) >= self.maximum_submited_jobs or len(self.submitted_ids) > 2100:
             fct = lambda idle, run, finish: logger.info('[%s] Waiting for free slot (max nr = %s, nr subm = %s): %s %s %s' % (strftime("%d/%m/%y %H:%M"), self.maximum_submited_jobs, len(self.submitted_ids), idle, run, finish))
             me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
@@ -1053,7 +1054,7 @@ class PBSCluster(Cluster):
         
 
 	#print "Output from self.MWparam['mw_run']['pbsname'] is : ", self.MWparam['mw_run']['pbsname'] 
-	#print "self.submit_name still known here ??? --> ", self.submit_name
+	print "self.submit_name still known here ??? --> ", self.submit_name
 	me_dir = self.submit_name 
 	#self.
         command = ['qsub','-o', stdout,

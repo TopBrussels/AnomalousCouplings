@@ -1435,7 +1435,6 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
     def configure_run_mode(self, run_mode):
         """change the way to submit job 0: single core, 1: cluster, 2: multicore"""
 
-	print "Inside configure_run_mode!"
         self.cluster_mode = run_mode
 
         if run_mode == 2:
@@ -1448,20 +1447,16 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
 
 
 
-	print "Going to the cluster ... ?"
-	print " --> Stored options are : ", self.options
         if run_mode in [0, 2]:
             self.cluster = cluster.MultiCore(
                              **self.options)
             self.cluster.nb_core = nb_core
                              #cluster_temp_path=self.options['cluster_temp_path'],
 
-	print " Or only now? --> cluster mode is : ", self.cluster_mode
         if self.cluster_mode == 1:
             opt = self.options
             cluster_name = opt['cluster_type']
             self.cluster = cluster.from_name[cluster_name](**opt)
-	print "definition configure_run done ..."
 
     def check_param_card(self, path, run=True):
         """Check that all the width are define in the param_card.
@@ -1590,7 +1585,6 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
         """ assign all configuration variable from file
             ./Cards/mg5_configuration.txt. assign to default if not define """
 
-	print "Will be setting configuration !! " 
         if not hasattr(self, 'options') or not self.options:
             self.options = dict(self.options_configuration)
             self.options.update(self.options_madgraph)
@@ -1624,7 +1618,6 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
 
         # read the file and extract information
         logger.info('load configuration from %s ' % config_file.name)
-	print "Reading info from : ", config_file.name
         for line in config_file:
             if '#' in line:
                 line = line.split('#',1)[0]
