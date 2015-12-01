@@ -434,12 +434,15 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
         create_dir, launch_jobs = args[0], args[1]
 
         for nb_card in self.MWparam.actif_param:
+	    print "nb_card = ", nb_card
             for dirname in self.MWparam.MW_listdir:
                 nb_job = self.MWparam.nb_event_MW[dirname]
+		print "dirname = ", dirname, " with ", nb_job," jobs"
                 if self.MWparam['mw_run']['nb_event_by_node'] > 1:
                     nb_job = 1+ (nb_job-1) // self.MWparam['mw_run']['nb_event_by_node']
                                     
                 for event_sample in range(nb_job):
+		    print "Doing the submit_job"
                     self.submit_job(dirname, nb_card, event_sample)        
     
         starttime = time.time()
@@ -467,7 +470,9 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
     
     def submit_job(self, dirname, nb_card, sample_nb, evt_file=None, restrict_evt=[]):
         """launch on the cluster the job which creates the computation"""
-        
+       
+	print "What is the me_dir here ?", self.me_dir 
+	print " --> Difference with dirname ??", dirname
         input_files = [pjoin(self.me_dir, 'SubProcesses', dirname, 'comp_madweight'), 
                        pjoin(self.me_dir, 'Cards', 'param_card_%i.dat' % nb_card),
                        self.get_pdf_input_filename(),
