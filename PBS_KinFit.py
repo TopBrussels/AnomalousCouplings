@@ -180,7 +180,7 @@ class KinFitHandler:
         pbs.write("#PBS -N "+self.taskName+"\n")
         pbs.write("#PBS -j oe\n")
         pbs.write("#PBS -k oe\n") # dit zorgt voor realtime log uitspuwen
-        pbs.write("#PBS -l walltime=1:30:00\n")
+        pbs.write("#PBS -l walltime=2:00:00\n")
         
         pbs.write("echo \"dumping some info off the worker node\"\n")
         pbs.write("hostname\n")
@@ -463,7 +463,7 @@ for line in open("./inputSamples.txt"):
             log.output("Process: " + splitted[0] + "  " + splitted[1])
             pnfsPath = splitted[4].split("\n")[0]
                 
-            if (len(splitted[0].split("TT")) > 1 and not len(splitted[0].split("Hadronic")) > 1) or (len(splitted[1].split("InvertedIso")) > 1 and len(splitted[0].split("Data")) > 1) : 
+            if (len(splitted[0].split("TT")) > 1 and not len(splitted[0].split("Hadronic")) > 1) or (len(splitted[1].split("InvertedIso")) > 1 and len(splitted[0].split("Data")) > 1) or (len(splitted[0].split('WJets_4jets')) > 1) or (len(splitted[0].split('ZJets_4jets')) > 1):
                 # process only one inputFile per job
                 log.output(" *** Process 1 inputFile per job for " + splitted[0])
                 cmd = "ls -l "+pnfsPath+" | grep TopTree_Skimmed_ | grep root | wc -l"

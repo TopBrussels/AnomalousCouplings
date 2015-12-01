@@ -1,8 +1,8 @@
 # Nominal Data samples (Need 'Data_Mu' to get correct identifications in code ....)
-Data_Mu_Run2012A_22Jan2013:Nominal:1:874.840:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012A_22Jan2013_Prod_53X_v5_TopTreeId3427/22082015_155321/
-Data_Mu_Run2012B_22Jan2013:Nominal:1:4401:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012B_22Jan2013_Prod_53X_v5_TopTreeId3429/25082015_103219/
-Data_Mu_Run2012C_22Jan2013:Nominal:1:7125:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012C_22Jan2013_Prod_53X_v5_TopTreeId3446/22082015_103755/
-Data_Mu_Run2012D_22Jan2013:Nominal:1:7246:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012D_22Jan2013_Prod_53X_v5_TopTreeId3444/02092015_182940/
+#Data_Mu_Run2012A_22Jan2013:Nominal:1:874.840:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012A_22Jan2013_Prod_53X_v5_TopTreeId3427/22082015_155321/
+#Data_Mu_Run2012B_22Jan2013:Nominal:1:4401:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012B_22Jan2013_Prod_53X_v5_TopTreeId3429/25082015_103219/
+#Data_Mu_Run2012C_22Jan2013:Nominal:1:7125:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012C_22Jan2013_Prod_53X_v5_TopTreeId3446/22082015_103755/
+#Data_Mu_Run2012D_22Jan2013:Nominal:1:7246:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DATASKIM_SingleMu_2012D_22Jan2013_Prod_53X_v5_TopTreeId3444/02092015_182940/
 
 #Data_SingleElectron_Run2012A_22Jan2013:Nominal:1:875.734:/pnfs/iihe/cms/store/user/mmaes/Skimmed-TopTrees/DATASKIM_53X_ProdV5_TopTreeID_3438/30042013_233241/
 # newLumi:  864.525
@@ -14,18 +14,110 @@ Data_Mu_Run2012D_22Jan2013:Nominal:1:7246:/pnfs/iihe/cms/store/user/aolbrech/Ski
 # newLumi:  7344
 
 # Nominal MC Samples
-TTbarJets_SemiLept:Nominal:107.6722:226504.2973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/
-TTbarJets_FullLept:Nominal:25.80:488666.029:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v2_TopTreeId3413/27082015_214141/
-TTbarJets_FullHadr:Nominal:112.32:281744.526:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1_TopTreeId3426/28082015_115655/
+#TTbarJets_SemiLept:Nominal:107.6722:226504.2973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/
+#TTbarJets_FullLept:Nominal:25.80:488666.029:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v2_TopTreeId3413/27082015_214141/
+#TTbarJets_FullHadr:Nominal:112.32:281744.526:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1_TopTreeId3426/28082015_115655/
 
 # WJets background
-WJets_4jets:Nominal:264.0436:49926.55:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W4JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1/30082015_124242/
-WJets_3jets:Nominal:640.3675:21384.9134:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W3JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3412/31082015_101803/
-WJets_2jets:Nominal:2159.2352:15229.8707:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W2JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3417/02092015_095349/
-WJets_1jets:Nominal:6662.7829:3362.1936:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W1JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3425/02092015_105850/
+#WJets_4jets:Nominal:264.0436:49926.55:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W4JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1/30082015_124242/
+#WJets_3jets:Nominal:640.3675:21384.9134:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W3JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3412/31082015_101803/
+#WJets_2jets:Nominal:2159.2352:15229.8707:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W2JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3417/02092015_095349/
+#WJets_1jets:Nominal:6662.7829:3362.1936:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W1JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3425/02092015_105850/
 
 # DY background
-ZJets_4jets:Nominal:27.36:218672.5512:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3420/02092015_151854/
-ZJets_3jets:Nominal:60.69:174978.4973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3409/02092015_144354/
-ZJets_2jets:Nominal:214.97:10649.7883:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3397/02092015_142854/
-ZJets_1jets:Nominal:666.2987:35577.7236:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3418/02092015_134353/
+#ZJets_4jets:Nominal:27.36:218672.5512:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3420/02092015_151854/
+#ZJets_3jets:Nominal:60.69:174978.4973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3409/02092015_144354/
+#ZJets_2jets:Nominal:214.97:10649.7883:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3397/02092015_142854/
+#ZJets_1jets:Nominal:666.2987:35577.7236:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3418/02092015_134353/
+
+# Single top background
+#SingleTop_tChannel_t:Nominal:56.4:65624.6277:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3408/23112015_083555/
+#SingleTop_tChannel_tbar:Nominal:30.7:61813.7785:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3398/22112015_132037/
+#SingleTop_tWChannel_t:Nominal:11.1:44083.6937:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3407/22112015_144038/
+#SingleTop_tWChannel_tbar:Nominal:11.1:44455.6757:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3399/22112015_143038/
+#SingleTop_sChannel_t:Nominal:3.79:64633.2454:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3404/22112015_140538/
+#SingleTop_sChannel_tbar:Nominal:1.76:71007.9545:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3406/22112015_141538/
+
+# JESPlus MC Samples
+#TTbarJets_SemiLept:JESPlus:107.6722:226504.2973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/
+#TTbarJets_FullLept:JESPlus:25.80:488666.029:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v2_TopTreeId3413/27082015_214141/
+#TTbarJets_FullHadr:JESPlus:112.32:281744.526:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1_TopTreeId3426/28082015_115655/
+#WJets_4jets:JESPlus:264.0436:49926.55:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W4JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1/30082015_124242/
+#WJets_3jets:JESPlus:640.3675:21384.9134:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W3JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3412/31082015_101803/
+#WJets_2jets:JESPlus:2159.2352:15229.8707:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W2JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3417/02092015_095349/
+#WJets_1jets:JESPlus:6662.7829:3362.1936:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W1JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3425/02092015_105850/
+#ZJets_4jets:JESPlus:27.36:218672.5512:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3420/02092015_151854/
+#ZJets_3jets:JESPlus:60.69:174978.4973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3409/02092015_144354/
+#ZJets_2jets:JESPlus:214.97:10649.7883:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3397/02092015_142854/
+#ZJets_1jets:JESPlus:666.2987:35577.7236:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3418/02092015_134353/
+#SingleTop_tChannel_t:JESPlus:56.4:65624.6277:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3408/23112015_083555/
+#SingleTop_tChannel_tbar:JESPlus:30.7:61813.7785:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3398/22112015_132037/
+#SingleTop_tWChannel_t:JESPlus:11.1:44083.6937:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3407/22112015_144038/
+#SingleTop_tWChannel_tbar:JESPlus:11.1:44455.6757:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3399/22112015_143038/
+#SingleTop_sChannel_t:JESPlus:3.79:64633.2454:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3404/22112015_140538/
+#SingleTop_sChannel_tbar:JESPlus:1.76:71007.9545:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3406/22112015_141538/
+
+# JESMinus MC Samples
+#TTbarJets_SemiLept:JESMinus:107.6722:226504.2973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_ID3422_NoPreselection_6August2015/07082015_143412/
+#TTbarJets_FullLept:JESMinus:25.80:488666.029:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v2_TopTreeId3413/27082015_214141/
+#TTbarJets_FullHadr:JESMinus:112.32:281744.526:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1_TopTreeId3426/28082015_115655/
+#WJets_4jets:JESMinus:264.0436:49926.55:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W4JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1/30082015_124242/
+#WJets_3jets:JESMinus:640.3675:21384.9134:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W3JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3412/31082015_101803/
+#WJets_2jets:JESMinus:2159.2352:15229.8707:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W2JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3417/02092015_095349/
+#WJets_1jets:JESMinus:6662.7829:3362.1936:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W1JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3425/02092015_105850/
+#ZJets_4jets:JESMinus:27.36:218672.5512:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3420/02092015_151854/
+#ZJets_3jets:JESMinus:60.69:174978.4973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3409/02092015_144354/
+#ZJets_2jets:JESMinus:214.97:10649.7883:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3397/02092015_142854/
+#ZJets_1jets:JESMinus:666.2987:35577.7236:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3418/02092015_134353/
+#SingleTop_tChannel_t:JESMinus:56.4:65624.6277:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3408/23112015_083555/
+#SingleTop_tChannel_tbar:JESMinus:30.7:61813.7785:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3398/22112015_132037/
+#SingleTop_tWChannel_t:JESMinus:11.1:44083.6937:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3407/22112015_144038/
+#SingleTop_tWChannel_tbar:JESMinus:11.1:44455.6757:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3399/22112015_143038/
+#SingleTop_sChannel_t:JESMinus:3.79:64633.2454:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3404/22112015_140538/
+#SingleTop_sChannel_tbar:JESMinus:1.76:71007.9545:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3406/22112015_141538/
+
+# JERPlus MC Samples (Using TTbarJets HLT applied!)
+#TTbarJets_SemiLept:JERPlus:107.6722:226504.2973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_TopTreeId3422_HLTApplied/28112015_172801/
+#TTbarJets_FullLept:JERPlus:25.80:488666.029:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v2_TopTreeId3413/27082015_214141/
+#TTbarJets_FullHadr:JERPlus:112.32:281744.526:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1_TopTreeId3426/28082015_115655/
+#WJets_4jets:JERPlus:264.0436:49926.55:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W4JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1/30082015_124242/
+#WJets_3jets:JERPlus:640.3675:21384.9134:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W3JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3412/31082015_101803/
+#WJets_2jets:JERPlus:2159.2352:15229.8707:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W2JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3417/02092015_095349/
+#WJets_1jets:JERPlus:6662.7829:3362.1936:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W1JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3425/02092015_105850/
+#ZJets_4jets:JERPlus:27.36:218672.5512:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3420/02092015_151854/
+#ZJets_3jets:JERPlus:60.69:174978.4973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3409/02092015_144354/
+#ZJets_2jets:JERPlus:214.97:10649.7883:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3397/02092015_142854/
+#ZJets_1jets:JERPlus:666.2987:35577.7236:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3418/02092015_134353/
+#SingleTop_tChannel_t:JERPlus:56.4:65624.6277:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3408/23112015_083555/
+#SingleTop_tChannel_tbar:JERPlus:30.7:61813.7785:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3398/22112015_132037/
+#SingleTop_tWChannel_t:JERPlus:11.1:44083.6937:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3407/22112015_144038/
+#SingleTop_tWChannel_tbar:JERPlus:11.1:44455.6757:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3399/22112015_143038/
+#SingleTop_sChannel_t:JERPlus:3.79:64633.2454:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3404/22112015_140538/
+#SingleTop_sChannel_tbar:JERPlus:1.76:71007.9545:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3406/22112015_141538/
+
+# JERMinus MC Samples (Using TTbarJets HLT applied!)
+#TTbarJets_SemiLept:JERMinus:107.6722:226504.2973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v1_TopTreeId3422_HLTApplied/28112015_172801/
+#TTbarJets_FullLept:JERMinus:25.80:488666.029:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7C-v2_TopTreeId3413/27082015_214141/
+#TTbarJets_FullHadr:JERMinus:112.32:281744.526:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1_TopTreeId3426/28082015_115655/
+#WJets_4jets:JERMinus:264.0436:49926.55:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W4JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1/30082015_124242/
+#WJets_3jets:JERMinus:640.3675:21384.9134:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W3JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3412/31082015_101803/
+#WJets_2jets:JERMinus:2159.2352:15229.8707:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W2JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3417/02092015_095349/
+#WJets_1jets:JERMinus:6662.7829:3362.1936:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/W1JetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3425/02092015_105850/
+#ZJets_4jets:JERMinus:27.36:218672.5512:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3420/02092015_151854/
+#ZJets_3jets:JERMinus:60.69:174978.4973:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3409/02092015_144354/
+#ZJets_2jets:JERMinus:214.97:10649.7883:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3397/02092015_142854/
+#ZJets_1jets:JERMinus:666.2987:35577.7236:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3418/02092015_134353/
+#SingleTop_tChannel_t:JERMinus:56.4:65624.6277:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3408/23112015_083555/
+#SingleTop_tChannel_tbar:JERMinus:30.7:61813.7785:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3398/22112015_132037/
+#SingleTop_tWChannel_t:JERMinus:11.1:44083.6937:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3407/22112015_144038/
+#SingleTop_tWChannel_tbar:JERMinus:11.1:44455.6757:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3399/22112015_143038/
+#SingleTop_sChannel_t:JERMinus:3.79:64633.2454:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/T_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3404/22112015_140538/
+#SingleTop_sChannel_tbar:JERMinus:1.76:71007.9545:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3406/22112015_141538/
+
+# Scale up TTbarJets
+TTbarJets_scaleup:Nominal:225.197:22167.3202:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_scaleup_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3403/27112015_115732/
+TTbarJets_scaledown:Nominal:225.197:22167.3202:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_scaledown_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3414/27112015_120732/
+TTbarJets_matchingup:Nominal:225.197:22167.3202:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_matchingup_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3416/27112015_114732/
+TTbarJets_matchingdown:Nominal:225.197:22167.3202:/pnfs/iihe/cms/store/user/aolbrech/Skimmed-TopTrees/TTJets_matchingdown_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_TopTreeId3415/27112015_113232/
+
+
