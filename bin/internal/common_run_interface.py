@@ -513,7 +513,8 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
             (for this exact same directory) Please wait that this is instance is 
             closed. If no instance is running, you can delete the file
             %s and try again.''' % pjoin(me_dir,'RunWeb')
-            raise AlreadyRunning, message
+	    os.rename( pjoin(me_dir,'RunWeb'), pjoin(me_dir, 'RunWeb_First'))
+            #raise AlreadyRunning, message
         else:
             pid = os.getpid()
             fsock = open(pjoin(me_dir,'RunWeb'),'w')
@@ -1286,6 +1287,7 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
   
   
         try:
+	    print "Removing RunWeb"
             os.remove(pjoin(self.me_dir,'RunWeb'))
         except Exception, error:
             pass
@@ -1505,6 +1507,7 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
         """Not in help: exit """
 
         try:
+	    print "Removing RunWeb"
             os.remove(pjoin(self.me_dir,'RunWeb'))
         except Exception:
             pass
@@ -1538,7 +1541,7 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
                       print_log=True):
         """ update the index status """
 
-	print "status begin : ", status[0], " - ", status[1], " - ",status[2]
+	#print "status begin : ", status[0], " - ", status[1], " - ",status[2]
         if makehtml and not force:
             if hasattr(self, 'next_update') and time.time() < self.next_update:
                 return

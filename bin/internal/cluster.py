@@ -1010,16 +1010,16 @@ class PBSCluster(Cluster):
         
         me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
         me_dir = misc.digest(me_dir)[-14:]
-	print " To what is me_dir set in beginning?? ", me_dir
+	#print " To what is me_dir set in beginning?? ", me_dir
 	CorrectMadWeightName = me_dir         #ADDED 21 JANUARY (Annik)
 	#print 'Name of me_dir after digest : ', me_dir, ' -- should be identical to CorrectMadWeightName = ', CorrectMadWeightName
         if not me_dir[0].isalpha():
             me_dir = 'a' + me_dir[1:]
 
 	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
-	print "Counters : ", self.submitted_ids, " vs ", self.maximum_submited_jobs
+	#print "Counters : ", self.submitted_ids, " vs ", self.maximum_submited_jobs
         if len(self.submitted_ids) >= self.maximum_submited_jobs or len(self.submitted_ids) > 2100:
-	    print "Inside the if loop ??"
+	    #print "Inside the if loop ??"
             fct = lambda idle, run, finish: logger.info('[%s] Waiting for free slot (max nr = %s, nr subm = %s): %s %s %s' % (strftime("%d/%m/%y %H:%M"), self.maximum_submited_jobs, len(self.submitted_ids), idle, run, finish))
             me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
             #print 'Change name of me_dir in wait : '
@@ -1054,7 +1054,7 @@ class PBSCluster(Cluster):
 	#print 'Change name of qsub command just before sumbitting to : ',CorrectMadWeightName 
 	me_dir = CorrectMadWeightName         #ADDED 21 JANUARY (Annik)
         
-	print "self.submit_name still known here ??? --> ", self.submit_name
+	#print "self.submit_name still known here ??? --> ", self.submit_name
 	me_dir = self.submit_name 
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
