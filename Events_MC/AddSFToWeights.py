@@ -103,11 +103,14 @@ for iSample in range(len(sampleNames)):
 
 print " "
 # -- Now go into the different directories and change the weights.out file -- #
+normFactorAdded = False
 for mcDir in os.listdir("."):
     if (str(whichDir) == "-1" and not 'Combined' in mcDir and not '.' in mcDir) or \
             (str(whichDir) != "-1" and str(whichDir) in mcDir and not '.' in mcDir):
 
         print "Looking at directory : ", mcDir
+        if str(mcDir) == "TTbarJets":
+            combinedSemiMuWeights = open(mcDir+'/weights_CheckedEvts_CombinedSemiLeptEvts_SFAdded.out', 'w')
 
         for MCsubdir in os.listdir(mcDir):
             if (str(whichSample) == "-1" and MCsubdir.startswith('Reco_')) or \
@@ -156,13 +159,25 @@ for mcDir in os.listdir("."):
                                         arrayIndex = int(i)
 
                                 newWeightsTT.write(consSamples[arrayIndex] + ' ' + NormFactor[arrayIndex] + '\n')
+                                if not normFactorAdded:
+                                    combinedSemiMuWeights.write('TTbarJets_SemiLept '+ NormFactor[arrayIndex] + '\n')
+                                    normFactorAdded = True
+
                                 for line in origWeightsTT:
                                     word = line.split()
 
                                     if str(word[0]) != "#":
                                         newWeightsTT.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ' +
                                                            EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
+                                        if str(CWUChoice) == "-1":
+                                            combinedSemiMuWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+
+                                                                        word[4] + ' ' + EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
                                     #elif str(word[0]) == "#":
                                     #    newWeightsTT.write(line)
                                 origWeightsTT.close()
                                 newWeightsTT.close()
+
+        if str(mcDir) == "TTbarJets":
+            combinedSemiMuWeights.close()
+            if str(CWUChoice) != "-1":
+                os.remove(combinedSemiMuWeights.name)

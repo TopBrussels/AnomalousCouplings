@@ -8,8 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include "TFile.h"
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TGraph.h"
@@ -126,13 +125,13 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
 
 void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, bool getIndivSampleMin, std::string pseudoTitle = ""){
 
+  TH1D* h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
+
   if(pseudoTitle != "") Lumi = 1;
-  std::cout << "\n Considered a total of : " << LnLikArray.size() << " samples" << std::endl;
+  if(pseudoTitle == "") std::cout << "\n\n ** Calculating minimum for " << LnLikArray.size() << " samples ** " << std::endl;
   vector<double> summedEntries; summedEntries.clear();
   for(int iFile = 0; iFile < LnLikArray.size(); iFile++){
-    std::cout << " Considering : " << name[iFile] << std::endl;
-    std::cout << " Stored a total of : " << LnLikArray[iFile].size() << " arrays " << std::endl;
-    std::cout << " Each event array has " << LnLikArray[iFile][0].size() << " entries " << std::endl;
+    if(pseudoTitle == "") std::cout << "  - Considering : " << name[iFile] << " with " << LnLikArray[iFile].size() << " stored events " << std::endl;
 
     if(pseudoTitle != "") norm[iFile] = 1;
     vector<double> summedSampleEntries; summedSampleEntries.clear();
@@ -156,11 +155,17 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
     for(int i = 0; i < LnLikArray[iFile][0].size(); i++)
       SampleEntries[i] = summedSampleEntries[i];
 
-    if(getIndivSampleMin){
+    if(getIndivSampleMin && pseudoTitle == ""){
       TGraph* gr_sampleSum = new TGraph(LnLikArray[iFile][0].size(), Var, SampleEntries);
       TF1* polFit_sampleSum = new TF1(("polFit_SummedSampleGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
       gr_sampleSum->Fit(polFit_sampleSum,"Q","",polFit_sampleSum->GetXmin(), polFit_sampleSum->GetXmax());
-      std::cout << "\n Minimum for " << polFit_sampleSum->GetName() << " is : " << polFit_sampleSum->GetMinimumX() << " +- " << polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX()) << endl;
+      double Minimum = polFit_sampleSum->GetMinimumX();
+      double Error = polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX());
+      std::cout << "    --> Minimum for " << polFit_sampleSum->GetName() << " is : " << Minimum << " +- " << Error << endl;
+
+      h_MinComp->SetBinContent(iFile+1, Minimum);
+      h_MinComp->SetBinError(iFile+1, Error);
+      h_MinComp->GetXaxis()->SetBinLabel(iFile+1, name[iFile].c_str());
 
       TDirectory* grdir = outFile->GetDirectory("graphs");   //Check whether directory already exists ..
       if(!grdir) grdir = outFile->mkdir("graphs");          // .. and otherwise create it!
@@ -168,6 +173,8 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
       gr_sampleSum->SetName(("FittedGraph_"+name[iFile]).c_str());
       gr_sampleSum->SetTitle(("Graph containing the summed events for "+name[iFile]).c_str());
       gr_sampleSum->Write();
+
+      
     }
   }
   
@@ -181,11 +188,23 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
   TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
   TF1* polFit_totalSum = new TF1(("polFit_SummedTotalGraph"+pseudoTitle).c_str(),"pol2",FitMin, FitMax);
   gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
-  std::cout << "\n Minimum for " << polFit_totalSum->GetName() << " is : " << polFit_totalSum->GetMinimumX() << " +- " << polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()) << endl;
+  double MinimumComb = polFit_totalSum->GetMinimumX();
+  double ErrorComb = polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX());
+  std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " +- " << ErrorComb << endl;
 
   gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
   gr_totalSum->SetTitle("Graph containing the summed events for all samples");
   gr_totalSum->Write();
+
+  //Add the combined minimum and write out this minimum comparison histogram:
+  if(getIndivSampleMin && pseudoTitle == ""){
+    h_MinComp->SetBinContent(LnLikArray.size()+1, MinimumComb); 
+    h_MinComp->SetBinError(LnLikArray.size()+1, ErrorComb); 
+    h_MinComp->GetXaxis()->SetBinLabel(LnLikArray.size()+1, "Combined result"); 
+
+    outFile->cd();
+    h_MinComp->Write();
+  }
 }
 
 //------------------------------------------------------------------//
@@ -198,7 +217,7 @@ int main(int argc, char *argv[]){
   // 1) Likelihood cut value!
   // 2-..) Weight files which will be considered
 
-  double LikCut = 100;
+  double LikCut = 120;
   if( argc >= 2)
     LikCut = atoi(argv[1]);
   std::cout << " - Applied likelihood cut value is : " << LikCut << std::endl;
@@ -211,7 +230,8 @@ int main(int argc, char *argv[]){
     }
   }
 
-  TFile* outputFile = new TFile(("Events_MC/OutFile_"+timestamp()+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  //Store all information into a ROOT file:
+  TFile* outputFile = new TFile(("Events_MC/OutFile_LikelihoodCut"+string(argv[1])+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Considered values and corresponding XS-values
@@ -223,14 +243,14 @@ int main(int argc, char *argv[]){
   double FitMin = -0.15, FitMax = 0.15;
   double LnLik[NrConfigs] = {0.0};
 
-  //vector< vector<TH1F> > indivLnLik;
+  //vector< vector<TH1D> > indivLnLik;
   vector< vector< vector<double> > > indivLnLik;
   vector< std::string > sampleName; sampleName.clear();
   vector< double > normFactor;     normFactor.clear();
   vector< vector<double> > scaleFactor;
 
-  //Store the TH1Fs in a map such that they can easily be looped over!
-  std::map<string,TH1F*> histo1D;  
+  //Store the TH1Ds in a map such that they can easily be looped over!
+  std::map<string,TH1D*> histo1D;  
 
   //** Loop over the different input files and read out the necessary info **//
   double Luminosity = 19646.8;
@@ -259,19 +279,19 @@ int main(int argc, char *argv[]){
   
     int NrBins = 8; 
     double halfBinWidth = (Var[NrConfigs-1]- Var[0])/((double) NrBins*2.0);
-    float xLow = Var[0] - halfBinWidth, xHigh = Var[NrConfigs-1] + halfBinWidth; 
-    histo1D["SMLikValue"] = new TH1F("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
-    histo1D["SMLikValue_AfterCut"] = new TH1F("SMLikelihoodValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut of ..)",500,30,90);
-    histo1D["MCScaleFactor"] = new TH1F("MCScaleFactor","Scale factor for MC sample", 100,0,2);
-    histo1D["Luminosity"] = new TH1F("Luminosity","Luminosity used", 100,15000,23000);
-    histo1D["NormFactor"] = new TH1F("NormFactor","Norm factor for MC sample", 100,0,0.00001);
+    double xLow = Var[0] - halfBinWidth, xHigh = Var[NrConfigs-1] + halfBinWidth; 
+    histo1D["SMLikValue"] = new TH1D("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
+    histo1D["SMLikValue_AfterCut"] = new TH1D("SMLikelihoodValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut of ..)",500,30,90);
+    histo1D["MCScaleFactor"] = new TH1D("MCScaleFactor","Scale factor for MC sample", 100,0,2);
+    histo1D["Luminosity"] = new TH1D("Luminosity","Luminosity used", 100,15000,23000);
+    histo1D["NormFactor"] = new TH1D("NormFactor","Norm factor for MC sample", 100,0,0.00001);
 
     while( std::getline(ifs,line)){
       std::istringstream iss(line);
 
       if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor ){
 
-        if(config == 1 && (consEvts+1) % 2000 == 0) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
+        //if(config == 1 && (consEvts+1) % 2000 == 0) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
         stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
 
         //--- Initialize the event-per-event variables! ---//          
@@ -282,8 +302,8 @@ int main(int argc, char *argv[]){
           if(consEvts == 0){
             //Loop over all histo1Ds and add the sampleName!
             if(histo1D.size() > 0){
-              for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
-                TH1F *temp = it->second;
+              for(std::map<std::string,TH1D*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
+                TH1D *temp = it->second;
                 temp->SetName((string(temp->GetName())+"_"+sampleName[iWeightFile]).c_str());
               }
             }
@@ -311,7 +331,7 @@ int main(int argc, char *argv[]){
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
-          if( LnLik[SMConfig] > LikCut){ if(LikCut == 100) std::cout << " ******** \n ERROR: Should not reject any event when cut-value = 100 !!! \n ******** \n " << std::endl; continue; }
+          if( LnLik[SMConfig] > LikCut){ if(LikCut == 120) std::cout << " ******** \n ERROR: Should not reject any event when cut-value = 120 !!! \n ******** \n ---> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue; }
           consEvts++;   //Count the number of full events!
 
           vector<double> indivEvtLnLik;
@@ -332,14 +352,13 @@ int main(int argc, char *argv[]){
       }
       else{
         sampleNameSet = true;
-        std::cout << " In ELSE -> Line = " << line << std::endl;
+        std::cout << "\n In ELSE -> Line = " << line << std::endl;
         sSampleName = line.substr(0, line.find(" "));
         sNormFactor = line.substr(sSampleName.length(), line.length());
         NormFactor = atof(sNormFactor.c_str());
-        std::cout << " * What is sample name : " << sSampleName << std::endl;
         sampleName.push_back(sSampleName);
-        std::cout << " * What is norm-factor : " << NormFactor << std::endl;    //To notice: 1/normFactor = lumi of sample!
         normFactor.push_back(NormFactor);
+        std::cout << "  * Recovered sampleName = " << sSampleName << " and norm-factor = " << NormFactor << std::endl;
       }
     }
     ifs.close();
@@ -348,14 +367,12 @@ int main(int argc, char *argv[]){
     indivLnLik.push_back(indivSampleLnLik);
     scaleFactor.push_back(sampleSF);
 
-    std::cout << " Studied a total of " << consEvts << " events !" << std::endl;
-
     if(histo1D.size() > 0){
       TDirectory* th1dir = outputFile->GetDirectory(("1D_histo_"+sampleName[iWeightFile]).c_str());   //Check whether directory already exists ..
       if(!th1dir) th1dir = outputFile->mkdir(("1D_histo_"+sampleName[iWeightFile]).c_str());          // .. and otherwise create it!
       th1dir->cd();
-      for(std::map<std::string,TH1F*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
-        TH1F *temp = it->second;
+      for(std::map<std::string,TH1D*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
+        TH1D *temp = it->second;
         int N = temp->GetNbinsX();
         temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
         temp->SetBinContent(N+1,0);
@@ -365,8 +382,15 @@ int main(int argc, char *argv[]){
     }
 
   }//End of looping over the different weight files
+  
+  //Get the minimum!!
+  bool getMinForIndivSamples = true;
+  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples);
 
+  //Now do the pseudo-samples stuff!
   int nrRandomSamples = 10;
+  std::cout << "\n ** Pseudo-sample studies ** " << std::endl;
+  double weightSum = 0;
   vector< vector< vector<double> > > pseudoDataLnLik;
   vector< vector<double> > scaleFactorPD; 
   for(int iSample = 0; iSample < indivLnLik.size(); iSample++){
@@ -378,18 +402,17 @@ int main(int argc, char *argv[]){
       if(random <= Luminosity*normFactor[iSample]){
         pseudoSampleLnLik.push_back(indivLnLik[iSample][iEvt]);
         pseudoSF.push_back(scaleFactor[iSample][iEvt]);
+        weightSum += scaleFactor[iSample][iEvt];
       }
     }
     pseudoDataLnLik.push_back(pseudoSampleLnLik);
     scaleFactorPD.push_back(pseudoSF);
-    std::cout << " Stored for dataset " << sampleName[iSample] << " a total of " << pseudoDataLnLik[iSample].size() << std::endl;
+    std::cout << "  - Stored for dataset " << sampleName[iSample] << " a total of " << pseudoDataLnLik[iSample].size() << " (weighted sum of " << weightSum << ")" << std::endl;
   }
   getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, "_PseudoSample");
 
-  bool getMinForIndivSamples = false;
-  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples);
 
   outputFile->Close();
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
   return 0;
-  }
+}
