@@ -131,7 +131,7 @@ def treat_old_argument(argument):
          cmds.append('clean')
     if opt['clean']: # clean
          cmds.append('clean %s' % opt['clean'])         
-         
+        
     return cmds
 
 

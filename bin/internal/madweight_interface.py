@@ -265,7 +265,12 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
         
         
                   
+	print " \n \n ------  Any difference between self.me_dir and cwd ??"
+	print "    * self.me_dir = ", self.me_dir
+	print "    * os.cwd      = ", os.getcwd()
+	print "     ----------- \n \n"
         self.MWparam = MW_info.MW_info(pjoin(self.me_dir,'Cards','MadWeight_card.dat'))
+	print " --> Storing info in MWparam : ", self.MWparam
         run_card = pjoin(self.me_dir, 'Cards','run_card.dat')
         self.run_card = banner.RunCard(run_card)
         
@@ -312,7 +317,8 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
         """MadWeight Function:create the various param_card // compile input for the run_card"""
         self.configure()
         args = self.split_arg(line)
-        
+       
+	print "\n What is run_name : ", self.MWparam 
         create_param.Param_card(run_name=self.MWparam)
         self.MWparam.update_nb_card()
         Cards.create_include_file(self.MWparam)
@@ -431,7 +437,9 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
 
         for nb_card in self.MWparam.actif_param:
             for dirname in self.MWparam.MW_listdir:
+		print "Looking at which dirname ... ", dirname
                 nb_job = self.MWparam.nb_event_MW[dirname]
+		print " ... with ", nb_job, " jobs"
                 if self.MWparam['mw_run']['nb_event_by_node'] > 1:
                     nb_job = 1+ (nb_job-1) // self.MWparam['mw_run']['nb_event_by_node']
                                     
@@ -440,10 +448,13 @@ class MadWeightCmd(CmdExtended, HelpToCmd, CompleteForCmd, common_run.CommonRunC
     
         starttime = time.time()
         #logger.info('     Waiting for submitted jobs to complete')
+	print "Inside do_submit_jobs of madweight_interface"
         update_status = lambda i, r, f: self.update_status((i, r, f, 'madweight'), 
                       starttime=starttime, level='madweight', update_results=False)
+	print "update status done --> ", update_status
 
         try:
+	    print "Inside try?? -- me_dir = ", self.me_dir
             self.cluster.wait(self.me_dir, update_status)
         except Exception:
             self.cluster.remove()

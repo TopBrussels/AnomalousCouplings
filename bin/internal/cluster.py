@@ -25,11 +25,13 @@ logger = logging.getLogger('madgraph.cluster')
 try:
     from madgraph import MadGraph5Error
     import madgraph.various.misc as misc
+    import madgraph.madweight.MW_info as MW_info
 except Exception, error:
     if __debug__:
         print  str(error)
     from internal import MadGraph5Error
     import internal.misc as misc
+    import internal.madweight.MW_info as MW_info
 
 pjoin = os.path.join
    
@@ -85,6 +87,7 @@ class Cluster(object):
         self.submitted = 0
         self.submitted_ids = []
         self.finish = 0
+	print "What is stored in opts ? : ", opts
         if 'cluster_queue' in opts:
             self.cluster_queue = opts['cluster_queue']
         else:
@@ -100,7 +103,9 @@ class Cluster(object):
         self.cluster_retry_wait = opts['cluster_retry_wait'] if 'cluster_retry_wait' in opts else 300
         self.options = dict(opts)
         self.retry_args = {}
-
+    	print "\n \n *********** --> Possible to collect info from MWinfo ... : ", MW_info.MW_info(pjoin(os.getcwd(),'Cards','MadWeight_card.dat')), "     ************* \n \n"
+	self.submit_name = MW_info.MW_info(pjoin(os.getcwd(),'Cards','MadWeight_card.dat'))['mw_run']['pbsname']
+	print "self.submit_name = ", self.submit_name
 
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, 
                log=None, required_output=[], nb_submit=0):
@@ -214,17 +219,17 @@ class Cluster(object):
         while 1: 
             old_mode = mode
             nb_iter += 1
-	    #cmd = "qstat -u aolbrech @cream02 | grep "+ self.MWparam['mw_run']['pbsname'] + " | wc -l"
-	    cmd = "qstat -u aolbrech @cream02 | wc -l"
+	    cmd = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
+	    #cmd = "qstat -u aolbrech @cream02 | wc -l"
             NrRemainingEvts = os.popen(cmd).read()
             idle, run, finish, fail = self.control(me_dir)
             if int(NrRemainingEvts) != 0:
-              if idle+run == 0: logger.info('Still some jobs running on PBS ...')
+              if idle+run == 0: logger.info('Still some jobs running on PBS ...'+str(NrRemainingEvts))
             if fail:
                 raise ClusterManagmentError('Some Jobs are in a Hold/... state. Please try to investigate or contact the IT team')
             if idle + run == 0 and int(NrRemainingEvts) == 0:
                 #time.sleep(20) #security to ensure that the file are really written on the disk
-                logger.info('All jobs finished (double-checked using qstat)')
+                logger.info('All jobs finished (double-checked using qstat on '+self.submit_name+')')
                 break
             if idle + run < minimal_job:
                 return
@@ -572,8 +577,14 @@ class MultiCore(Cluster):
         
         import thread
 
+	print "Wrong numbers obtained here? (in wait definition)"
         remaining = self.submitted - self.done
+	print " --> According to this definition the number of remaining is : ", remaining, "(", self.submitted, " - ", self.done
 
+	print " Some output numbers : "
+	print "   * self.nb_used = ", self.nb_used
+	print "   * self.nb_core = ", self.nb_core
+	print "   * self.waiting_submission = ", self.waiting_submission
         while self.nb_used < self.nb_core:
             if self.waiting_submission:
                 arg = self.waiting_submission.pop(0)
@@ -1039,8 +1050,12 @@ class PBSCluster(Cluster):
 	#print 'Name used for qsub command : ', me_dir
 	#print 'Change name of qsub command just before sumbitting to : ',CorrectMadWeightName 
 	me_dir = CorrectMadWeightName         #ADDED 21 JANUARY (Annik)
+        
+
 	#print "Output from self.MWparam['mw_run']['pbsname'] is : ", self.MWparam['mw_run']['pbsname'] 
-	#me_dir = self.MWparam['mw_run']['pbsname']
+	#print "self.submit_name still known here ??? --> ", self.submit_name
+	me_dir = self.submit_name 
+	#self.
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,
