@@ -98,9 +98,9 @@ until($listpos>$#incard){
   if (! -e "SubProcesses/done"){
       print PAGE "<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"30\" > \n";
   }
-  if ( -e "RunWeb"){
-      print PAGE "<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"30\" > \n";
-  }
+#  if ( -e "RunWeb"){
+#      print PAGE "<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"30\" > \n";
+#  }
 
 
   print PAGE "<META HTTP-EQUIV=\"EXPIRES\" CONTENT=\"20\" >";
@@ -201,11 +201,11 @@ until($listpos>$#incard){
     print PAGE  "On-line Event Generation </a> \n";
     print PAGE "<td ALIGN=center> ";
 
-    if (!-e "./RunWeb") {
-      print PAGE "Available (access restricted)</td> \n";
-    }else { 
-      print PAGE "Running </td> \n";
-    }
+#    if (!-e "./RunWeb") {
+#      print PAGE "Available (access restricted)</td> \n";
+#    }else { 
+#      print PAGE "Running </td> \n";
+#    }
   }
   else {
     print PAGE "<td ALIGN=center> \n ";

@@ -1138,9 +1138,12 @@ class PBSCluster(Cluster):
 
         if me_dir.endswith('/'):
             me_dir = me_dir[:-1]    
-        me_dir = misc.digest(me_dir)[-14:]
-        if not me_dir[0].isalpha():
-            me_dir = 'a' + me_dir[1:]
+        #me_dir = misc.digest(me_dir)[-14:]
+        #if not me_dir[0].isalpha():
+        #    me_dir = 'a' + me_dir[1:]
+	
+	#For some reason the directory is not passed on correctly ... "
+	me_dir = self.submit_name
         ongoing = []
 
         idle, run, fail = 0, 0, 0

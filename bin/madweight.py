@@ -166,13 +166,13 @@ if '__main__' == __name__:
     except MW.AlreadyRunning, error:
         logging.error(str(error))
         sys.exit()
-    except Exception, error:
-        if os.path.exists(pjoin(root_path, 'RunWeb')): 
-            os.remove(pjoin(root_path, 'RunWeb'))
-        raise 
-                        
-    if os.path.exists(pjoin(root_path, 'RunWeb')): 
-        os.remove(pjoin(root_path, 'RunWeb'))      
+    #except Exception, error:
+    #    if os.path.exists(pjoin(root_path, 'RunWeb')): 
+    #        os.remove(pjoin(root_path, 'RunWeb'))
+    #    raise 
+    #                    
+    #if os.path.exists(pjoin(root_path, 'RunWeb')): 
+    #    os.remove(pjoin(root_path, 'RunWeb'))      
     
     
     # reconfigure path for the web 

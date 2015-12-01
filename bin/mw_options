@@ -202,6 +202,7 @@ except:
 
 try:
     # Remove lock file
+    print "Removing file in mw_options ..."
     os.remove(os.path.join(root_path,os.pardir, 'RunWeb'))
 except:
     pass

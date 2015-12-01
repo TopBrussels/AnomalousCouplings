@@ -508,21 +508,20 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
         self.dirbin = pjoin(self.me_dir, 'bin', 'internal')
 
         # Check that the directory is not currently running
-        if os.path.exists(pjoin(me_dir,'RunWeb')): 
-            message = '''Another instance of the program is currently running.
-            (for this exact same directory) Please wait that this is instance is 
-            closed. If no instance is running, you can delete the file
-            %s and try again.''' % pjoin(me_dir,'RunWeb')
-	    os.rename( pjoin(me_dir,'RunWeb'), pjoin(me_dir, 'RunWeb_First'))
-            #raise AlreadyRunning, message
-        else:
-            pid = os.getpid()
-            fsock = open(pjoin(me_dir,'RunWeb'),'w')
-            fsock.write(`pid`)
-            fsock.close()
-
-            misc.Popen([os.path.relpath(pjoin(self.dirbin, 'gen_cardhtml-pl'), me_dir)],
-                        cwd=me_dir)
+        #if os.path.exists(pjoin(me_dir,'RunWeb')): 
+        #    message = '''Another instance of the program is currently running.
+        #    (for this exact same directory) Please wait that this is instance is 
+        #    closed. If no instance is running, you can delete the file
+        #    %s and try again.''' % pjoin(me_dir,'RunWeb')
+	#    os.rename( pjoin(me_dir,'RunWeb'), pjoin(me_dir, 'RunWeb_First'))
+        #    #raise AlreadyRunning, message
+        #else:
+        #    pid = os.getpid()
+        #    fsock = open(pjoin(me_dir,'RunWeb'),'w')
+        #    fsock.write(`pid`)
+        #    fsock.close()
+	#
+        misc.Popen([os.path.relpath(pjoin(self.dirbin, 'gen_cardhtml-pl'), me_dir)], cwd=me_dir)
 
         self.to_store = []
         self.run_name = None
@@ -1287,8 +1286,8 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
   
   
         try:
-	    print "Removing RunWeb"
-            os.remove(pjoin(self.me_dir,'RunWeb'))
+	    print "Normally removing RunWeb was done here ..."
+            #os.remove(pjoin(self.me_dir,'RunWeb'))
         except Exception, error:
             pass
         
@@ -1507,8 +1506,8 @@ class CommonRunCmd(HelpToCmd, CheckValidForCmd, cmd.Cmd):
         """Not in help: exit """
 
         try:
-	    print "Removing RunWeb"
-            os.remove(pjoin(self.me_dir,'RunWeb'))
+	    print "Normally removing RunWeb was done here ..."
+            #os.remove(pjoin(self.me_dir,'RunWeb'))
         except Exception:
             pass
         try:
