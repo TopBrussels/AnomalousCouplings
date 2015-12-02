@@ -9,6 +9,7 @@
 #include <sstream>
 #include "TFile.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TGraph.h"
@@ -123,9 +124,10 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
   delete gr_LnLik;
 }
 
-void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, bool getIndivSampleMin, std::string pseudoTitle = ""){
+vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, bool getIndivSampleMin, std::string pseudoTitle = ""){
 
-  TH1D* h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
+  TH1D* h_MinComp = 0;
+  if(pseudoTitle == "") h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
 
   if(pseudoTitle != "") Lumi = 1;
   if(pseudoTitle == "") std::cout << "\n\n ** Calculating minimum for " << LnLikArray.size() << " samples ** " << std::endl;
@@ -190,7 +192,7 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
   gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
   double MinimumComb = polFit_totalSum->GetMinimumX();
   double ErrorComb = polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX());
-  std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " +- " << ErrorComb << endl;
+  if(pseudoTitle == "") std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " +- " << ErrorComb << endl;
 
   gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
   gr_totalSum->SetTitle("Graph containing the summed events for all samples");
@@ -205,6 +207,11 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
     outFile->cd();
     h_MinComp->Write();
   }
+  
+  vector<double> CombResult;
+  CombResult.push_back(MinimumComb);
+  CombResult.push_back(ErrorComb);
+  return CombResult;
 }
 
 //------------------------------------------------------------------//
@@ -234,6 +241,9 @@ int main(int argc, char *argv[]){
   TFile* outputFile = new TFile(("Events_MC/OutFile_LikelihoodCut"+string(argv[1])+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
+  //Decide whether the pseudo-samples should be processed!
+  bool doPseudoSamples = false;
+
   //Considered values and corresponding XS-values
   const int NrConfigs = 9; 
   std::stringstream ssNrConfigs; ssNrConfigs << NrConfigs; std::string sNrConfigs = ssNrConfigs.str();
@@ -251,6 +261,7 @@ int main(int argc, char *argv[]){
 
   //Store the TH1Ds in a map such that they can easily be looped over!
   std::map<string,TH1D*> histo1D;  
+  std::map<string,TH2D*> histo2D;  
 
   //** Loop over the different input files and read out the necessary info **//
   double Luminosity = 19646.8;
@@ -270,7 +281,8 @@ int main(int argc, char *argv[]){
     double SampleName;
     std::string sSampleName, sNormFactor;
     bool sampleNameSet = false;
-    int SMConfig = 99, consEvts = 0;
+    int SMConfig = 99, xOuterL = 99, xOuterR = 99;
+    int consEvts = 0;
     double MaxLik = 0, MinLik = 9999;
 
     vector<double> FitParametersFirstFit, FitParametersSecondFit;
@@ -286,6 +298,12 @@ int main(int argc, char *argv[]){
     histo1D["Luminosity"] = new TH1D("Luminosity","Luminosity used", 100,15000,23000);
     histo1D["NormFactor"] = new TH1D("NormFactor","Norm factor for MC sample", 100,0,0.00001);
 
+    histo2D["SMLik_vs_LeftDeltaLnLik"]  = new TH2D("SMLik_vs_LeftDeltaLnLik", "Scatter-plot of -ln(L) value at gR = 0 versus the difference of the -ln(L) at gR = 0 and gR = -0.2",200,48,85,100,-2,2);
+    histo2D["SMLik_vs_RightDeltaLnLik"] = new TH2D("SMLik_vs_RightDeltaLnLik","Scatter-plot of -ln(L) value at gR = 0 versus the difference of the -ln(L) at gR = 0 and gR = 0.2", 200,48,85,100,-2,2);
+    histo2D["SMLik_vs_MaxDelta"] = new TH2D("SMLik_vs_MaxDelta","Scatter-plot of -ln(L) value at gR = 0 versus the maximum difference in -ln(L) value", 200,48,85,150,-0.5,5);
+    histo2D["RightDelta_vs_MaxDelta"] = new TH2D("RightDelta_vs_MaxDelta","Scatter-plot of difference between right leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
+    histo2D["LeftDelta_vs_MaxDelta"] = new TH2D("LeftDelta_vs_MaxDelta","Scatter-plot of difference between left leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
+
     while( std::getline(ifs,line)){
       std::istringstream iss(line);
 
@@ -297,7 +315,7 @@ int main(int argc, char *argv[]){
         //--- Initialize the event-per-event variables! ---//          
         if(config == 1){
           MaxLik = 0; MinLik = 9999; //Reset this variable at the beginning of each event!
-          SMConfig = 99;
+          SMConfig = 99; xOuterL = 99; xOuterR = 99;
 
           if(consEvts == 0){
             //Loop over all histo1Ds and add the sampleName!
@@ -307,11 +325,20 @@ int main(int argc, char *argv[]){
                 temp->SetName((string(temp->GetName())+"_"+sampleName[iWeightFile]).c_str());
               }
             }
+            //Loop over all histo2Ds and add the sampleName!
+            if(histo1D.size() > 0){
+              for(std::map<std::string,TH2D*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){
+                TH2D *temp = it->second;
+                temp->SetName((string(temp->GetName())+"_"+sampleName[iWeightFile]).c_str());
+              }
+            }
           }
         }
 
         //Set the SMConfig:
-        if( Var[config-1] == 0.0) SMConfig = config-1;
+        if(Var[config-1] == 0.0) SMConfig = config-1;
+        if(Var[config-1] == -0.2) xOuterL = config-1;
+        if(Var[config-1] == 0.2) xOuterR = config-1;
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         LnLik[config-1] = (-log(weight)+log(MGXSCut[config-1]));
@@ -321,17 +348,22 @@ int main(int argc, char *argv[]){
         if(LnLik[config-1] < MinLik) MinLik = LnLik[config-1];
 
         //---  Only perform the fit after all configurations are considered!  ---//
-        if( config == NrConfigs){
+        if(config == NrConfigs){
 
           //Plot the SM likelihood value:
           histo1D["SMLikValue"]->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
           histo1D["MCScaleFactor"]->Fill(MCScaleFactor);
           histo1D["Luminosity"]->Fill(Luminosity);
           histo1D["NormFactor"]->Fill(NormFactor);
+          histo2D["SMLik_vs_LeftDeltaLnLik"]->Fill(LnLik[SMConfig], LnLik[SMConfig]-LnLik[xOuterL]);
+          histo2D["SMLik_vs_RightDeltaLnLik"]->Fill(LnLik[SMConfig], LnLik[SMConfig]-LnLik[xOuterR]);
+          histo2D["SMLik_vs_MaxDelta"]->Fill(LnLik[SMConfig], MaxLik - MinLik);
+          histo2D["RightDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterR], MaxLik - MinLik);
+          histo2D["LeftDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterL], MaxLik - MinLik);
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
-          if( LnLik[SMConfig] > LikCut){ if(LikCut == 120) std::cout << " ******** \n ERROR: Should not reject any event when cut-value = 120 !!! \n ******** \n ---> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue; }
+          if(LnLik[SMConfig] > LikCut || MaxLik - MinLik < 1.0){if(LikCut == 120) std::cout << " *****\n ERROR: Should not reject any event when cut-value = 120 !!! \n *****\n --> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue;}
           consEvts++;   //Count the number of full events!
 
           vector<double> indivEvtLnLik;
@@ -381,6 +413,15 @@ int main(int argc, char *argv[]){
       }
     }
 
+    if(histo2D.size() > 0){
+      TDirectory* th2dir = outputFile->GetDirectory(("2D_histo_"+sampleName[iWeightFile]).c_str());
+      if(!th2dir) th2dir = outputFile->mkdir(("2D_histo_"+sampleName[iWeightFile]).c_str());
+      th2dir->cd();
+      for(std::map<std::string,TH2D*>::const_iterator it = histo2D.begin(); it != histo2D.end(); it++){
+        TH2D *temp = it->second;
+        temp->Write();
+      }
+    }
   }//End of looping over the different weight files
   
   //Get the minimum!!
@@ -388,29 +429,70 @@ int main(int argc, char *argv[]){
   getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples);
 
   //Now do the pseudo-samples stuff!
-  int nrRandomSamples = 10;
-  std::cout << "\n ** Pseudo-sample studies ** " << std::endl;
-  double weightSum = 0;
-  vector< vector< vector<double> > > pseudoDataLnLik;
-  vector< vector<double> > scaleFactorPD; 
-  for(int iSample = 0; iSample < indivLnLik.size(); iSample++){
+  if(doPseudoSamples){
+    int nrRandomSamples = 1000;
+    std::map<string,TH1D*> histo1D_PS;  
+    std::cout << "\n ** Pseudo-sample studies ** " << std::endl;
 
-    vector< vector<double> > pseudoSampleLnLik; pseudoSampleLnLik.clear();
-    vector<double> pseudoSF;
-    for(int iEvt = 0; iEvt < indivLnLik[iSample].size(); iEvt++){
-      double random = ((double) rand() / (RAND_MAX));
-      if(random <= Luminosity*normFactor[iSample]){
-        pseudoSampleLnLik.push_back(indivLnLik[iSample][iEvt]);
-        pseudoSF.push_back(scaleFactor[iSample][iEvt]);
-        weightSum += scaleFactor[iSample][iEvt];
+    for(int i = 0; i < indivLnLik.size(); i++){
+      histo1D_PS["nrEntries_PS_"+sampleName[i]] = new TH1D(("nrEntries_PS_"+sampleName[i]).c_str(),("Number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
+      histo1D_PS["nrEntriesSF_PS_"+sampleName[i]] = new TH1D(("nrEntriesSF_PS_"+sampleName[i]).c_str(),("Weighted number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
+    }
+    histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",150,-0.15, 0.15);
+    histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",125,0., 0.1);
+    histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",100,-5,5);
+    double gRMeanPS = 0.0326056;
+    std::cout << "  --> Mean used for pull calculation is : " << gRMeanPS << std::endl;
+
+    for(int iPseudo = 0; iPseudo < nrRandomSamples; iPseudo++){
+      vector< vector< vector<double> > > pseudoDataLnLik;
+      vector< vector<double> > scaleFactorPD; 
+      for(int iSample = 0; iSample < indivLnLik.size(); iSample++){
+
+        double weightSum = 0;
+        vector< vector<double> > pseudoSampleLnLik; pseudoSampleLnLik.clear();
+        vector<double> pseudoSF;
+        for(int iEvt = 0; iEvt < indivLnLik[iSample].size(); iEvt++){
+          double random = ((double) rand() / (RAND_MAX));
+          if(random <= Luminosity*normFactor[iSample]){
+            pseudoSampleLnLik.push_back(indivLnLik[iSample][iEvt]);
+            pseudoSF.push_back(scaleFactor[iSample][iEvt]);
+            weightSum += scaleFactor[iSample][iEvt];
+          }
+        }
+        pseudoDataLnLik.push_back(pseudoSampleLnLik);
+        scaleFactorPD.push_back(pseudoSF);
+        histo1D_PS["nrEntries_PS_"+sampleName[iSample]]->Fill(pseudoDataLnLik[iSample].size());
+        histo1D_PS["nrEntriesSF_PS_"+sampleName[iSample]]->Fill(weightSum);
+      }
+      vector<double> result = getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, "_PseudoSample");
+      histo1D_PS["Minimum_PS"]->Fill(result[0]);
+      histo1D_PS["MinError_PS"]->Fill(result[1]);
+      histo1D_PS["Pull"]->Fill( (result[0] - gRMeanPS)/result[1]);
+    }
+
+    //Fit the Minimum histogram to check whether the used mean corresponds to this result
+    histo1D_PS["Minimum_PS"]->Fit("gaus","Q");
+    std::cout << "  --> Fit on minimum distribution gives: " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(1) << " +- " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(2) <<std::endl;
+
+    //Now fit the pull distribution with a gaussian to get the width of the pull:
+    histo1D_PS["Pull"]->Fit("gaus");
+    std::cout << " ****** Width of pull = " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParameter(2) << " ****** " << std::endl;
+
+    if(histo1D_PS.size() > 0){
+      TDirectory* th1dirPS = outputFile->GetDirectory("PseudoSample_1D_histo");   //Check whether directory already exists ..
+      if(!th1dirPS) th1dirPS = outputFile->mkdir("PseudoSample_1D_histo");          // .. and otherwise create it!
+      th1dirPS->cd();
+      for(std::map<std::string,TH1D*>::const_iterator it = histo1D_PS.begin(); it != histo1D_PS.end(); it++){
+        TH1D *temp = it->second;
+        int N = temp->GetNbinsX();
+        temp->SetBinContent(N,temp->GetBinContent(N)+temp->GetBinContent(N+1));
+        temp->SetBinContent(N+1,0);
+        temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
+        temp->Write();
       }
     }
-    pseudoDataLnLik.push_back(pseudoSampleLnLik);
-    scaleFactorPD.push_back(pseudoSF);
-    std::cout << "  - Stored for dataset " << sampleName[iSample] << " a total of " << pseudoDataLnLik[iSample].size() << " (weighted sum of " << weightSum << ")" << std::endl;
   }
-  getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, "_PseudoSample");
-
 
   outputFile->Close();
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;

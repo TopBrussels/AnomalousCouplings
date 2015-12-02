@@ -59,6 +59,7 @@ for iSample in range(len(sampleNames)):
             sampleSize = len(EvtNrMatchingArray)
             for evtNr in EvtNrMatching:
 
+		evtNrWord = evtNr.split()
                 # First get the lumi and the normFactor!
                 if re.search(r" * Lumi = ", evtNr):
                     Luminosity.append(evtNrWord[3])
