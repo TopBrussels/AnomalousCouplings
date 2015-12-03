@@ -50,10 +50,16 @@ struct sort_pred {
   }
 };
 
-void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector< vector<double> > likVal, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax){
+void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector< vector<double> > likVal, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, std::string GenOrReco){
 
   TH1D* h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
-  double LikCutOpt[10] = {60, 62, 65, 66, 67, 68, 69, 70, 71, 120};
+  double LikCutOpt[10]= {0};
+  double LikCutOptReco[10] = {60, 62, 65, 66, 67, 68, 69, 70, 71, 120};
+  double LikCutOptGen[10] =  {55, 57, 58, 59, 60, 61, 62, 63, 64, 120};
+  double likFitMin = 59, likFitMax = 69;
+  if(GenOrReco == "RECO"){for(int i = 0; i < 10; i++) LikCutOpt[i] = LikCutOptReco[i];}
+  else                   {for(int i = 0; i < 10; i++) LikCutOpt[i] = LikCutOptGen[i]; likFitMin = 54.5; likFitMax = 64;}
+
   const int NrCuts = 10;
   TLegend* leg = new TLegend(0.7, 0.1, 0.9, 0.3);
   TCanvas* canv = new TCanvas("canv","canv");
@@ -90,7 +96,7 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
       TF1* polFit_sampleSum = new TF1(("polFit_SummedSampleGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
       gr_sampleSum->Fit(polFit_sampleSum,"Q","",polFit_sampleSum->GetXmin(), polFit_sampleSum->GetXmax());
       double Minimum = polFit_sampleSum->GetMinimumX();
-      double Error = polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX());
+      double Error = (polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX()))/2.0;
       delete gr_sampleSum;
       delete polFit_sampleSum;
 
@@ -101,7 +107,7 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
       TF1* polFit_sampleSumUnw = new TF1(("polFit_SummedSampleGraphUnw_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
       gr_sampleSumUnw->Fit(polFit_sampleSumUnw,"Q","",polFit_sampleSumUnw->GetXmin(), polFit_sampleSumUnw->GetXmax());
       double MinimumUnw = polFit_sampleSumUnw->GetMinimumX();
-      double ErrorUnw = polFit_sampleSumUnw->GetX(polFit_sampleSumUnw->GetMinimum()+0.5, polFit_sampleSumUnw->GetMinimumX(),0.2) - polFit_sampleSumUnw->GetX(polFit_sampleSumUnw->GetMinimum()+0.5, -0.2, polFit_sampleSumUnw->GetMinimumX());
+      double ErrorUnw = (polFit_sampleSumUnw->GetX(polFit_sampleSumUnw->GetMinimum()+0.5, polFit_sampleSumUnw->GetMinimumX(),0.2) - polFit_sampleSumUnw->GetX(polFit_sampleSumUnw->GetMinimum()+0.5, -0.2, polFit_sampleSumUnw->GetMinimumX()))/2.0;
       delete gr_sampleSumUnw;
       delete polFit_sampleSumUnw;
 
@@ -144,6 +150,15 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
       canv->cd();    leg->Draw();    canv->Write();
       canvUnw->cd(); legUnw->Draw(); canvUnw->Write();
     }
+  
+    //Add a fit to decide on the optimal cut-value!
+    std::cout << " Will be doing a fit to determine the optimal cut value between " << likFitMin << " and " << likFitMax << std::endl;
+    TF1* minLikCut = new TF1("minLikCut_pol","pol3");  minLikCut->SetLineColor(LnLikArray.size()+1);
+    gr_MinCompUnw->Fit(minLikCut,"Q","",likFitMin,likFitMax);
+    std::cout << " Optimal cut position is : " << minLikCut->GetX(0, likFitMin, likFitMax) << " (from " << name[iFile] << " sample)" << std::endl;
+    gr_MinCompUnw->SetName(("LikCutFit_"+name[iFile]).c_str());
+    gr_MinCompUnw->Write();
+
   }
 }
 
@@ -154,25 +169,49 @@ int main(int argc, char *argv[]){
   clock_t start = clock();
 
   //Input variables will be:
-  // 1-..) Weight files which will be considered
+  // 1) MG or Reco
+  // 2-..) Weight files which will be considered
+
+  std::string MGorRECO = "RECO";
+  if( argc >= 2)
+    MGorRECO = string(argv[1]);
 
   vector<string> inputFiles;
-  if( argc >= 2 ){
-    for(int iFile = 1; iFile < argc; iFile++){
+  if( argc >= 3 ){
+    for(int iFile = 2; iFile < argc; iFile++){
       inputFiles.push_back(string(argv[iFile]).c_str());
       std::cout << " - Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
     }
   }
+  std::cout << " Size of inputFiles is : " << inputFiles.size() << std::endl;
   std::string consSamples;
 
   //Considered values and corresponding XS-values
-  const int NrConfigs = 9; 
+  const int NrConfigsReco = 9;
+  double VarReco[NrConfigsReco]     = {-0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2    };
+  double MGXSCutReco[NrConfigsReco] = {0.947244, 1.13624, 1.36448, 1.63952, 1.96892, 2.36027, 2.82111, 3.35903, 3.98157};
+  const int NrConfigsGen = 13;
+  double VarGen[NrConfigsGen]     = {-0.4,    -0.3,    -0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2,    0.3,      0.4     };
+  double MGXSCutGen[NrConfigsGen] = {0.93159, 1.27966, 1.825208, 2.194079, 2.6393, 3.17698, 3.80921, 4.5645, 5.45665, 6.47791, 7.66805, 10.63243, 14.46786};
+  std::cout << " Size of inputFiles is : " << inputFiles.size() << std::endl;
+  
+  //Now set the correct ones (Gen or Reco)
+  int NrConfigs = 0; 
+  vector<double> MGXSCut; MGXSCut.clear();
+  double Var[13] = {0};
+  if(MGorRECO == "RECO"){    NrConfigs = NrConfigsReco; for(int i = 0; i < NrConfigs; i++){ MGXSCut.push_back(MGXSCutReco[i]); Var[i] = VarReco[i];}}
+  else if(MGorRECO == "MG"){
+    NrConfigs = NrConfigsGen; 
+    for(int i = 0; i < NrConfigs; i++){ 
+      MGXSCut.push_back(MGXSCutGen[i]);
+      Var[i] = VarGen[i];
+    }
+  }
+  else{ std::cout << " ERROR: should specify whether it is MG or RECO ! " << std::endl; exit(-1);}
   std::stringstream ssNrConfigs; ssNrConfigs << NrConfigs; std::string sNrConfigs = ssNrConfigs.str();
-  double Var[NrConfigs]     = {-0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2    };
-  double MGXSCut[NrConfigs] = {0.947244, 1.13624, 1.36448, 1.63952, 1.96892, 2.36027, 2.82111, 3.35903, 3.98157};
 
   double FitMin = -0.15, FitMax = 0.15;
-  double LnLik[NrConfigs] = {0.0};
+  double LnLik[13] = {0.0};    //Should find a way to initialize this ... maybe use vector ...
 
   //vector< vector<TH1D> > indivLnLik;
   vector< vector< vector<double> > > indivLnLik;
@@ -216,7 +255,8 @@ int main(int argc, char *argv[]){
     while( std::getline(ifs,line)){
       std::istringstream iss(line);
 
-      if( iss >> evt >> config >> tf >> weight >> weightUnc >> MCScaleFactor ){
+      if( iss >> evt >> config >> tf >> weight >> weightUnc){
+        if(MGorRECO == "RECO"){ iss >> MCScaleFactor;}
 
         if(config == 1 && (consEvts+1) % 5000 == 0) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
         stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
@@ -290,7 +330,7 @@ int main(int argc, char *argv[]){
   //Store all information into a ROOT file:
   TFile* outputFile = new TFile(("Events_MC/OutFile_LikelihoodCutComparison_"+consSamples+".root").c_str(),"RECREATE");   //So what if also Data is added?
 
-  getMinimum(indivLnLik, scaleFactor, LnLikCutValue, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax);
+  getMinimum(indivLnLik, scaleFactor, LnLikCutValue, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, MGorRECO);
 
   outputFile->Close();
   cout << " Info stored in : " << outputFile->GetName() << std::endl;
