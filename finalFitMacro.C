@@ -129,15 +129,17 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   TH1D* h_MinComp = 0;
   if(pseudoTitle == "") h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
 
-  if(pseudoTitle != "") Lumi = 1;
+  if(pseudoTitle != "") Lumi = 1;  //Do not scale to data-lumi since you treat this sample as it was data!
   if(pseudoTitle == "") std::cout << "\n\n ** Calculating minimum for " << LnLikArray.size() << " samples ** " << std::endl;
   vector<double> summedEntries; summedEntries.clear();
   for(int iFile = 0; iFile < LnLikArray.size(); iFile++){
     if(pseudoTitle == "") std::cout << "  - Considering : " << name[iFile] << " with " << LnLikArray[iFile].size() << " stored events " << std::endl;
 
-    if(pseudoTitle != "") norm[iFile] = 1;
+    if(pseudoTitle != "") norm[iFile] = 1;   //Do not normalize the different sub-samples since it should be seen as one big data sample!
     vector<double> summedSampleEntries; summedSampleEntries.clear();
     for(int iEvt = 0; iEvt < LnLikArray[iFile].size(); iEvt++){
+
+      if(pseudoTitle != "") SF[iFile][iEvt] = 1;    //Do not apply the SF on the events since the combination of the pseudo-samples contains this SF info when selecting the number of events!
       for(int iConf = 0; iConf < LnLikArray[iFile][iEvt].size(); iConf++){
         if(iEvt == 0){
           summedSampleEntries.push_back(0);
@@ -162,7 +164,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       TF1* polFit_sampleSum = new TF1(("polFit_SummedSampleGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
       gr_sampleSum->Fit(polFit_sampleSum,"Q","",polFit_sampleSum->GetXmin(), polFit_sampleSum->GetXmax());
       double Minimum = polFit_sampleSum->GetMinimumX();
-      double Error = polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX());
+      double Error = (polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX()))/2.0;
       std::cout << "    --> Minimum for " << polFit_sampleSum->GetName() << " is : " << Minimum << " +- " << Error << endl;
 
       h_MinComp->SetBinContent(iFile+1, Minimum);
@@ -175,7 +177,6 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       gr_sampleSum->SetName(("FittedGraph_"+name[iFile]).c_str());
       gr_sampleSum->SetTitle(("Graph containing the summed events for "+name[iFile]).c_str());
       gr_sampleSum->Write();
-
       
     }
   }
@@ -191,23 +192,27 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   TF1* polFit_totalSum = new TF1(("polFit_SummedTotalGraph"+pseudoTitle).c_str(),"pol2",FitMin, FitMax);
   gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
   double MinimumComb = polFit_totalSum->GetMinimumX();
-  double ErrorComb = polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX());
-  if(pseudoTitle == "") std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " +- " << ErrorComb << endl;
+  double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
 
-  gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
-  gr_totalSum->SetTitle("Graph containing the summed events for all samples");
-  gr_totalSum->Write();
+  if(pseudoTitle == ""){
+    std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " +- " << ErrorComb << endl;
 
-  //Add the combined minimum and write out this minimum comparison histogram:
-  if(getIndivSampleMin && pseudoTitle == ""){
-    h_MinComp->SetBinContent(LnLikArray.size()+1, MinimumComb); 
-    h_MinComp->SetBinError(LnLikArray.size()+1, ErrorComb); 
-    h_MinComp->GetXaxis()->SetBinLabel(LnLikArray.size()+1, "Combined result"); 
+    gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
+    gr_totalSum->SetTitle("Graph containing the summed events for all samples");
+    gr_totalSum->Write();
 
-    outFile->cd();
-    h_MinComp->Write();
+    //Add the combined minimum and write out this minimum comparison histogram:
+    if(getIndivSampleMin){
+      h_MinComp->SetBinContent(LnLikArray.size()+1, MinimumComb); 
+      h_MinComp->SetBinError(LnLikArray.size()+1, ErrorComb); 
+      h_MinComp->GetXaxis()->SetBinLabel(LnLikArray.size()+1, "Combined result"); 
+
+      outFile->cd();
+      h_MinComp->Write();
+    }
   }
-  
+ 
+  //Store the minimum and uncertainty in a vector such that it can be passed on to the pseudo-sample study 
   vector<double> CombResult;
   CombResult.push_back(MinimumComb);
   CombResult.push_back(ErrorComb);
@@ -242,7 +247,7 @@ int main(int argc, char *argv[]){
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
-  bool doPseudoSamples = false;
+  bool doPseudoSamples = true; 
 
   //Considered values and corresponding XS-values
   const int NrConfigs = 9; 
@@ -363,7 +368,8 @@ int main(int argc, char *argv[]){
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
-          if(LnLik[SMConfig] > LikCut || MaxLik - MinLik < 1.0){if(LikCut == 120) std::cout << " *****\n ERROR: Should not reject any event when cut-value = 120 !!! \n *****\n --> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue;}
+          //if(LnLik[SMConfig] > LikCut || MaxLik - MinLik < 1.0){if(LikCut == 120) std::cout << " *****\n ERROR: Should not reject any event when cut-value = 120 !!! \n *****\n --> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue;}
+          if(LnLik[SMConfig] > LikCut){if(LikCut == 120) std::cout << " *****\n ERROR: Should not reject any event when cut-value = 120 !!! \n *****\n --> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue;}
           consEvts++;   //Count the number of full events!
 
           vector<double> indivEvtLnLik;
@@ -438,10 +444,10 @@ int main(int argc, char *argv[]){
       histo1D_PS["nrEntries_PS_"+sampleName[i]] = new TH1D(("nrEntries_PS_"+sampleName[i]).c_str(),("Number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
       histo1D_PS["nrEntriesSF_PS_"+sampleName[i]] = new TH1D(("nrEntriesSF_PS_"+sampleName[i]).c_str(),("Weighted number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
     }
-    histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",150,-0.15, 0.15);
-    histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",125,0., 0.1);
-    histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",100,-5,5);
-    double gRMeanPS = 0.0326056;
+    histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",150,-0.20, 0.20);
+    histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",125,0., 0.03);
+    histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",250,-35,35);
+    double gRMeanPS = 0.00894882; //0.0326056;
     std::cout << "  --> Mean used for pull calculation is : " << gRMeanPS << std::endl;
 
     for(int iPseudo = 0; iPseudo < nrRandomSamples; iPseudo++){
@@ -476,8 +482,8 @@ int main(int argc, char *argv[]){
     std::cout << "  --> Fit on minimum distribution gives: " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(1) << " +- " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(2) <<std::endl;
 
     //Now fit the pull distribution with a gaussian to get the width of the pull:
-    histo1D_PS["Pull"]->Fit("gaus");
-    std::cout << " ****** Width of pull = " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParameter(2) << " ****** " << std::endl;
+    histo1D_PS["Pull"]->Fit("gaus","Q");
+    std::cout << " ****** Width of pull = " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParameter(2) << " +- " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParError(2) << " ****** " << std::endl;
 
     if(histo1D_PS.size() > 0){
       TDirectory* th1dirPS = outputFile->GetDirectory("PseudoSample_1D_histo");   //Check whether directory already exists ..

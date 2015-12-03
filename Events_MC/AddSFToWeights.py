@@ -110,7 +110,7 @@ for mcDir in os.listdir("."):
             (str(whichDir) != "-1" and str(whichDir) in mcDir and not '.' in mcDir):
 
         print "Looking at directory : ", mcDir
-        if str(mcDir) == "TTbarJets":
+        if str(mcDir) == "TTbarJets" and str(CWUChoice) == "-1":
             combinedSemiMuWeights = open(mcDir+'/weights_CheckedEvts_CombinedSemiLeptEvts_SFAdded.out', 'w')
 
         for MCsubdir in os.listdir(mcDir):
@@ -160,7 +160,7 @@ for mcDir in os.listdir("."):
                                         arrayIndex = int(i)
 
                                 newWeightsTT.write(consSamples[arrayIndex] + ' ' + NormFactor[arrayIndex] + '\n')
-                                if not normFactorAdded:
+                                if not normFactorAdded and str(CWUChoice) == "-1":
                                     combinedSemiMuWeights.write('TTbarJets_SemiLept '+ NormFactor[arrayIndex] + '\n')
                                     normFactorAdded = True
 
@@ -178,7 +178,5 @@ for mcDir in os.listdir("."):
                                 origWeightsTT.close()
                                 newWeightsTT.close()
 
-        if str(mcDir) == "TTbarJets":
+        if str(mcDir) == "TTbarJets" and str(CWUChoice) == "-1":
             combinedSemiMuWeights.close()
-            if str(CWUChoice) != "-1":
-                os.remove(combinedSemiMuWeights.name)
