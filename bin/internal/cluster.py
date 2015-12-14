@@ -213,61 +213,43 @@ class Cluster(object):
         change_at = 5 # number of iteration from which we wait longer between update.
         #usefull shortcut for readibility
         longtime, shorttime = self.options['cluster_status_update']
-       
-	logger.info(' [%s] Inside wait ...' % strftime("%d/%m/%y %H:%M")) 
+        
         while 1: 
             old_mode = mode
             nb_iter += 1
+	    #cmd = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
+	    #cmd = "qstat -u aolbrech @cream02 | wc -l"
+            #NrRemainingEvts = os.popen(cmd).read()
             idle, run, finish, fail = self.control(me_dir)
-
-	    #Only need a safety in case idle or run is equal to zero
+	    
+	    #Double-check the number of idle events:
 	    if idle == 0:
-		time.sleep(60)
-		cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' Q ' | wc -l"
-		NrIdleEvts = os.popen(cmdIdle).read()
+	    	cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' Q ' | wc -l"
+	    	NrIdleEvts = os.popen(cmdIdle).read()
 		if not int(NrIdleEvts) == 0:
 		    idle = int(NrIdleEvts)
 		    logger.info('Qstat information was wrong, idle not 0 but : '+str(idle))
+	   
+	    #Double-check the number of running events:
 	    if run == 0:
-                time.sleep(60)
-                cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' R ' | wc -l"
-                NrRunEvts = os.popen(cmdRun).read()
-                if not int(NrRunEvts) == 0:
-                    run = int(NrRunEvts)
-                    logger.info('Qstat information was wrong, run not 0 but : '+str(run))
-
-	    logger.info('[%s] Waiting for free slot (max nr = %s): %s %s %s' % (strftime("%d/%m/%y %H:%M"), minimal_job, idle, run, finish))
-	    #time.sleep(60)
-	    #cmdTotal = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
-	    #cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep " Q " | wc -l"
-	    #cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep " R " | wc -l"
-            #NrRemainingEvts = os.popen(cmd).read()
-	    
+	    	cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' R ' | wc -l"
+	    	NrRunEvts = os.popen(cmdRun).read()
+		if not int(NrRunEvts) == 0:
+		    run = int(NrRunEvts)
+		    logger.info('Qstat information was wrong, run not 0 but : '+str(run))
+	   
             #if int(NrRemainingEvts) != 0:
             #  if idle+run == 0: logger.info('Still some jobs running on PBS ...'+str(NrRemainingEvts))
             if fail:
                 raise ClusterManagmentError('Some Jobs are in a Hold/... state. Please try to investigate or contact the IT team')
-            if idle + run == 0:
-                time.sleep(60) #security to ensure that the file are really written on the disk
-		cmdDoubleCheck = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
-		DoubleNrCheck = os.popen(cmdDoubleCheck).read()
-		if int(DoubleNrCheck) == 0:
-               	    logger.info('All jobs finished (double-checked using qstat on '+self.submit_name+'): '+str(DoubleNrCheck))
-                    break
+            if idle + run == 0: # and int(NrRemainingEvts) == 0:
+                #time.sleep(20) #security to ensure that the file are really written on the disk
+                #logger.info('All jobs finished (double-checked using qstat on '+self.submit_name+')')
+                break
             if idle + run < minimal_job:
-		#Only add a safety in case one of the values should still be 0 ...
-		if idle == 0 or run == 0:
-		    time.sleep(60)
-		    cmdTotal = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
-		    NrTotal = os.popen(cmdTotal).read()
-		    logger.info('Still found a wrong value for idle and running ('+idle + ' ' + running+'). Nr of total jobs is : '+NrTotal)
-		    if int(NrTotal) < minimal_job:
-			return
-		else:
-                    return
-
+                return
+            fct(idle, run, finish)
             #Determine how much we have to wait (mode=0->long time, mode=1->short time)
-	    #mode = 0
             if nb_iter < change_at:
                 mode = 1
             elif idle < run:
@@ -1036,7 +1018,7 @@ class PBSCluster(Cluster):
     running_tag = ['T','E','R']
     complete_tag = ['C']
     
-    maximum_submited_jobs = 500
+    maximum_submited_jobs = 1000
 
     @multiple_try()
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, log=None,
@@ -1052,8 +1034,7 @@ class PBSCluster(Cluster):
             me_dir = 'a' + me_dir[1:]
 
 	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
-	#print "Counters : ", len(self.submitted_ids), " vs ", self.maximum_submited_jobs
-	#logger.info('[%s] Counters are : %s %s' % (strftime("%d/%m/%y %H:%M"), str(len(self.submitted_ids)), str(self.maximum_submited_jobs)))
+	#print "Counters : ", self.submitted_ids, " vs ", self.maximum_submited_jobs
         if len(self.submitted_ids) >= self.maximum_submited_jobs or len(self.submitted_ids) > 2100:
 	    #print "Inside the if loop ??"
             fct = lambda idle, run, finish: logger.info('[%s] Waiting for free slot (max nr = %s, nr subm = %s): %s %s %s' % (strftime("%d/%m/%y %H:%M"), self.maximum_submited_jobs, len(self.submitted_ids), idle, run, finish))
@@ -1062,6 +1043,7 @@ class PBSCluster(Cluster):
             #me_dir = misc.digest(me_dir)[-14:]    --> Wrong result!! (Seems to be some kind of random generator)
 	    #print 'Name of me_dir after digest : ', me_dir
             self.wait(me_dir, fct, self.maximum_submited_jobs)
+
         
         text = ""
         if cwd is None:
