@@ -309,7 +309,7 @@ Press ctrl-C to force the update.''' % self.options['cluster_status_update'][0])
             else:
                 time.sleep(self.options['cluster_status_update'][1])
                     
-                    
+        logger.info('*** Seems that now the submitted_ids is set to empty ... (contained '+len(self.submitted_ids)+' jobs')            
         self.submitted = 0
         self.submitted_ids = []
         
@@ -1037,7 +1037,7 @@ class PBSCluster(Cluster):
     running_tag = ['T','E','R']
     complete_tag = ['C']
     
-    maximum_submited_jobs = 750
+    maximum_submited_jobs = 500
 
     @multiple_try()
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, log=None,
@@ -1055,8 +1055,7 @@ class PBSCluster(Cluster):
 	#if len(self.submitted_ids) % 100 == 0: print 'len(self.submitted_ids) = ',len(self.submitted_ids),' versus self.maximum_submited_jobs = ',self.maximum_submited_jobs
 	#print "Counters : ", len(self.submitted_ids), " vs ", self.maximum_submited_jobs
 	#logger.info('[%s] Counters are : %s %s' % (strftime("%d/%m/%y %H:%M"), str(len(self.submitted_ids)), str(self.maximum_submited_jobs)))
-        if len(self.submitted_ids) >= self.maximum_submited_jobs or len(self.submitted_ids) > 2100:
-	    #print "Inside the if loop ??"
+        if len(self.submitted_ids) >= self.maximum_submited_jobs: 
             fct = lambda idle, run, finish: logger.info('[%s] Waiting for free slot (max nr = %s, nr subm = %s): %s %s %s' % (strftime("%d/%m/%y %H:%M"), self.maximum_submited_jobs, len(self.submitted_ids), idle, run, finish))
             me_dir = os.path.realpath(os.path.join(cwd,prog)).rsplit('/SubProcesses',1)[0]
             #print 'Change name of me_dir in wait : '
@@ -1169,8 +1168,11 @@ class PBSCluster(Cluster):
     @multiple_try()    
     def control(self, me_dir):
         """ control the status of a single job with it's cluster id """
-        cmd = "qstat"
+        cmd = "qstat -u aolbrech | grep "+ self.submit_name   #Hopefully specifying name will reduce the crash ...
         status = misc.Popen([cmd], stdout=subprocess.PIPE)
+
+	#For some reason the directory is not passed on correctly ... "
+	me_dir = self.submit_name
 
         if me_dir.endswith('/'):
             me_dir = me_dir[:-1]    
@@ -1178,8 +1180,6 @@ class PBSCluster(Cluster):
         #if not me_dir[0].isalpha():
         #    me_dir = 'a' + me_dir[1:]
 	
-	#For some reason the directory is not passed on correctly ... "
-	me_dir = self.submit_name
         ongoing = []
 
         idle, run, fail = 0, 0, 0
@@ -1209,6 +1209,25 @@ class PBSCluster(Cluster):
                     run += 1
                 elif status2 == 'resubmit':
                     idle += 1
+
+	#In case zero-values are found, check them!!
+	if idle == 0:
+	    logger.info('Recalculating the idle number in control!')
+	    time.sleep(30)
+	    cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' Q ' | wc -l"
+	    NrIdleEvts = os.popen(cmdIdle).read()
+	    if not int(NrIdleEvts) == 0:
+		idle = int(NrIdleEvts)
+		logger.info('Qstat information in control was wrong, idle not 0 but : '+str(idle))
+
+	if run == 0:
+	    logger.info('Recalculating the run number in control!')
+	    time.sleep(30)
+	    cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' R' | wc -l"
+	    NrRunEvts = os.popen(cmdRun).read()
+	    if not int(NrRunEvts) == 0:
+		run = int(NrRunEvts)
+		logger.info('Qstat information in control was wrong, run not 0 but : '+str(run))
 
         return idle, run, self.submitted - (idle+run+fail), fail
 
