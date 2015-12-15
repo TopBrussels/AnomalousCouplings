@@ -139,7 +139,6 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     vector<double> summedSampleEntries; summedSampleEntries.clear();
     for(int iEvt = 0; iEvt < LnLikArray[iFile].size(); iEvt++){
 
-      if(pseudoTitle != "") SF[iFile][iEvt] = 1;    //Do not apply the SF on the events since the combination of the pseudo-samples contains this SF info when selecting the number of events!
       for(int iConf = 0; iConf < LnLikArray[iFile][iEvt].size(); iConf++){
         if(iEvt == 0){
           summedSampleEntries.push_back(0);
@@ -231,8 +230,11 @@ int main(int argc, char *argv[]){
 
   double LikCut = 120;
   if( argc >= 2)
-    LikCut = atoi(argv[1]);
+    LikCut = atof(argv[1]);
   std::cout << " - Applied likelihood cut value is : " << LikCut << std::endl;
+  //int iLikCut = atoi(argv[1]);
+  //std::string sLikCut = NumberToString(iLikCut);
+  std::string sLikCut = string(argv[1]);
 
   vector<string> inputFiles;
   if( argc >= 3){
@@ -243,7 +245,7 @@ int main(int argc, char *argv[]){
   }
 
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile(("Events_MC/OutFile_LikelihoodCut"+string(argv[1])+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_Nom/OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
@@ -252,8 +254,9 @@ int main(int argc, char *argv[]){
   //Considered values and corresponding XS-values
   const int NrConfigs = 9; 
   std::stringstream ssNrConfigs; ssNrConfigs << NrConfigs; std::string sNrConfigs = ssNrConfigs.str();
-  double Var[NrConfigs]     = {-0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2    };
-  double MGXSCut[NrConfigs] = {0.947244, 1.13624, 1.36448, 1.63952, 1.96892, 2.36027, 2.82111, 3.35903, 3.98157};
+  double Var[NrConfigs]     = {-0.2,     -0.15,   -0.1,      -0.05,   0.0,      0.05,    0.1,     0.15,    0.2    };
+  double MGXSCut[NrConfigs] = {0.450287, 0.540131, 0.648626, 0.77937, 0.935959, 1.12199, 1.34106, 1.59677, 1.8927};  //Updated with fine-tuning cuts!
+  //double MGXSCut[NrConfigs] = {0.947244, 1.13624,  1.36448,  1.63952, 1.96892,  2.36027, 2.82111, 3.35903, 3.98157};
 
   double FitMin = -0.15, FitMax = 0.15;
   double LnLik[NrConfigs] = {0.0};
@@ -289,6 +292,8 @@ int main(int argc, char *argv[]){
     int SMConfig = 99, xOuterL = 99, xOuterR = 99;
     int consEvts = 0;
     double MaxLik = 0, MinLik = 9999;
+    double ScdDer = 0;
+    int xOuterLFine = 99, xOuterRFine = 99;
 
     vector<double> FitParametersFirstFit, FitParametersSecondFit;
     FitParametersFirstFit.clear(); FitParametersSecondFit.clear();
@@ -306,6 +311,9 @@ int main(int argc, char *argv[]){
     histo2D["SMLik_vs_LeftDeltaLnLik"]  = new TH2D("SMLik_vs_LeftDeltaLnLik", "Scatter-plot of -ln(L) value at gR = 0 versus the difference of the -ln(L) at gR = 0 and gR = -0.2",200,48,85,100,-2,2);
     histo2D["SMLik_vs_RightDeltaLnLik"] = new TH2D("SMLik_vs_RightDeltaLnLik","Scatter-plot of -ln(L) value at gR = 0 versus the difference of the -ln(L) at gR = 0 and gR = 0.2", 200,48,85,100,-2,2);
     histo2D["SMLik_vs_MaxDelta"] = new TH2D("SMLik_vs_MaxDelta","Scatter-plot of -ln(L) value at gR = 0 versus the maximum difference in -ln(L) value", 200,48,85,150,-0.5,5);
+    histo2D["SMLik_vs_MaxDeltaRel"] = new TH2D("SMLik_vs_MaxDeltaRel","Scatter-plot of -ln(L) value at gR = 0 versus the relative maximum difference in -ln(L) value", 200,48,85,150,-0.01,0.2);
+    histo2D["SMLik_vs_ScdDerWide"] = new TH2D("SMLik_vs_ScdDerWide","Scatter-plot of -ln(L) value at gR = 0 versus the second derivative between (-0.2, 0.2)", 200,48,85,150,-25,25);
+    histo2D["SMLik_vs_ScdDerFine"] = new TH2D("SMLik_vs_ScdDerFine","Scatter-plot of -ln(L) value at gR = 0 versus the second derivative between (-0.1, 0.1)", 200,48,85,150,-25,25);
     histo2D["RightDelta_vs_MaxDelta"] = new TH2D("RightDelta_vs_MaxDelta","Scatter-plot of difference between right leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
     histo2D["LeftDelta_vs_MaxDelta"] = new TH2D("LeftDelta_vs_MaxDelta","Scatter-plot of difference between left leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
 
@@ -321,6 +329,7 @@ int main(int argc, char *argv[]){
         if(config == 1){
           MaxLik = 0; MinLik = 9999; //Reset this variable at the beginning of each event!
           SMConfig = 99; xOuterL = 99; xOuterR = 99;
+	  ScdDer = 0; xOuterLFine = 99; xOuterRFine = 99;
 
           if(consEvts == 0){
             //Loop over all histo1Ds and add the sampleName!
@@ -344,6 +353,8 @@ int main(int argc, char *argv[]){
         if(Var[config-1] == 0.0) SMConfig = config-1;
         if(Var[config-1] == -0.2) xOuterL = config-1;
         if(Var[config-1] == 0.2) xOuterR = config-1;
+        if(Var[config-1] == -0.1) xOuterLFine = config-1;
+        if(Var[config-1] == 0.1) xOuterRFine = config-1;
 
         //---  Fill the LnLik histograms for each event and for all events together  ---//
         LnLik[config-1] = (-log(weight)+log(MGXSCut[config-1]));
@@ -363,6 +374,9 @@ int main(int argc, char *argv[]){
           histo2D["SMLik_vs_LeftDeltaLnLik"]->Fill(LnLik[SMConfig], LnLik[SMConfig]-LnLik[xOuterL]);
           histo2D["SMLik_vs_RightDeltaLnLik"]->Fill(LnLik[SMConfig], LnLik[SMConfig]-LnLik[xOuterR]);
           histo2D["SMLik_vs_MaxDelta"]->Fill(LnLik[SMConfig], MaxLik - MinLik);
+          histo2D["SMLik_vs_MaxDeltaRel"]->Fill(LnLik[SMConfig], (MaxLik - MinLik)/LnLik[SMConfig]);
+          histo2D["SMLik_vs_ScdDerWide"]->Fill(LnLik[SMConfig], (LnLik[xOuterL] + LnLik[xOuterR] - 2*LnLik[SMConfig])/(0.2*0.2));
+          histo2D["SMLik_vs_ScdDerFine"]->Fill(LnLik[SMConfig], (LnLik[xOuterLFine] + LnLik[xOuterRFine] - 2*LnLik[SMConfig])/(0.2*0.2));
           histo2D["RightDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterR], MaxLik - MinLik);
           histo2D["LeftDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterL], MaxLik - MinLik);
 
@@ -446,8 +460,8 @@ int main(int argc, char *argv[]){
     }
     histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",150,-0.20, 0.20);
     histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",125,0., 0.03);
-    histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",250,-35,35);
-    double gRMeanPS = 0.00894882; //0.0326056;
+    histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",150,-5,5);
+    double gRMeanPS = -0.00172593; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
     std::cout << "  --> Mean used for pull calculation is : " << gRMeanPS << std::endl;
 
     for(int iPseudo = 0; iPseudo < nrRandomSamples; iPseudo++){
