@@ -20,24 +20,28 @@
 #|      -->                        A + B*E + C*E² + D*E³ + F*sqrt(E)
 #+--------------------------------------------------------------------------------------+
 BLOCK TF_bjet_E
-1     -1.20109     # Mean first gaussian
-2     0.633968     # Mean first gaussian
-3     -0.0392684     # Mean first gaussian
-4     1.03475     # Width first gaussian
-5     0.613434     # Width first gaussian
-6     0.0417924     # Width first gaussian
-7     5.20776     # Relative constant gaussians
-8     -0.261155     # Relative constant gaussians
-9     0.00470793     # Relative constant gaussians
-10     -3.67811e-05     # Relative constant gaussians
-11     1.30623e-07     # Relative constant gaussians
-12     -1.72967e-10     # Relative constant gaussians
-13     -26.8355     # Mean second gaussian
-14     4.12016     # Mean second gaussian
-15     -0.0814826     # Mean second gaussian
-16     16.492     # Width second gaussian
-17     -2.68075     # Width second gaussian
-18     0.311766     # Width second gaussian
+1     -129.941     # Mean first gaussian
+2     43.292     # Mean first gaussian
+3     -4.07167     # Mean first gaussian
+4     0.0126064     # Mean first gaussian
+5     -2.15066e-05     # Mean first gaussian
+6     -62.0149     # Width first gaussian
+7     18.976     # Width first gaussian
+8     -1.41431     # Width first gaussian
+9     0.00245217     # Width first gaussian
+10     31.499     # Relative constant gaussians
+11     -10.7034     # Relative constant gaussians
+12     1.03537     # Relative constant gaussians
+13     -0.00328778     # Relative constant gaussians
+14     5.64025e-06     # Relative constant gaussians
+15     -191.802     # Mean second gaussian
+16     46.9647     # Mean second gaussian
+17     -3.16011     # Mean second gaussian
+18     0.00452453     # Mean second gaussian
+19     -28.8155     # Width second gaussian
+20     10.0261     # Width second gaussian
+21     -0.66445     # Width second gaussian
+22     0.00158436     # Width second gaussian
  
 #+--------------------------------------------------------------------------------------+
 #|     Parameter for particles: nonbjet
@@ -46,20 +50,25 @@ BLOCK TF_bjet_E
 #|      -->                        A + B*E + C*E² + D*E³ + F*sqrt(E)
 #+--------------------------------------------------------------------------------------+
 BLOCK TF_nonbjet_E
-19    -25.8947     # Mean first gaussian
-20    5.57889     # Mean first gaussian
-21    -0.298786     # Mean first gaussian
-22    -3.6085     # Width first gaussian
-23    1.25895     # Width first gaussian
-24    0.0459679     # Width first gaussian
-25    0.0912852     # Relative constant gaussians
-26    0.00431374     # Relative constant gaussians
-27    -9.41154e-05     # Relative constant gaussians
-28     5.84594e-07     # Relative constant gaussians
-29     -22.3185     # Mean second gaussian
-30     1.39003     # Mean second gaussian
-31     0.0139642     # Mean second gaussian
-32     -7.746     # Width second gaussian
-33     2.7689     # Width second gaussian
-34     0.0567148     # Width second gaussian
+1     -98.1959     # Mean first gaussian
+2     33.7886     # Mean first gaussian
+3     -3.40091     # Mean first gaussian
+4     0.0128405     # Mean first gaussian
+5     -2.8402e-05     # Mean first gaussian
+6     -24.3034     # Width first gaussian
+7     7.08677     # Width first gaussian
+8     -0.401255     # Width first gaussian
+9     0.000664238     # Width first gaussian
+10     -0.0710284     # Relative constant gaussians
+11     0.168     # Relative constant gaussians
+12     -0.024174     # Relative constant gaussians
+13     9.92659e-05     # Relative constant gaussians
+14     -57.3264     # Mean second gaussian
+15     13.1036     # Mean second gaussian
+16     -0.9836     # Mean second gaussian
+17     0.00190859     # Mean second gaussian
+18     -70.9814     # Width second gaussian
+19     20.1048     # Width second gaussian
+20     -1.21168     # Width second gaussian
+21     0.0016677     # Width second gaussian
  
