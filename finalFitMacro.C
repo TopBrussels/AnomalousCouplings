@@ -226,7 +226,8 @@ int main(int argc, char *argv[]){
 
   //Input variables will be:
   // 1) Likelihood cut value!
-  // 2-..) Weight files which will be considered
+  // 2) Directory to store info
+  // 3-..) Weight files which will be considered
 
   double LikCut = 120;
   if( argc >= 2)
@@ -236,20 +237,24 @@ int main(int argc, char *argv[]){
   //std::string sLikCut = NumberToString(iLikCut);
   std::string sLikCut = string(argv[1]);
 
+  std::string whichDir = "";
+  if(argc >= 3)
+    whichDir = string(argv[2]);
+
   vector<string> inputFiles;
-  if( argc >= 3){
-    for(int iFile = 2; iFile < argc; iFile++){
+  if( argc >= 4){
+    for(int iFile = 3; iFile < argc; iFile++){
       inputFiles.push_back(string(argv[iFile]).c_str());
       std::cout << " - Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
     }
   }
 
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile(("Events_Nom/OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile((whichDir+"OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
-  bool doPseudoSamples = true; 
+  bool doPseudoSamples = false;
 
   //Considered values and corresponding XS-values
   const int NrConfigs = 9; 
@@ -458,10 +463,10 @@ int main(int argc, char *argv[]){
       histo1D_PS["nrEntries_PS_"+sampleName[i]] = new TH1D(("nrEntries_PS_"+sampleName[i]).c_str(),("Number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
       histo1D_PS["nrEntriesSF_PS_"+sampleName[i]] = new TH1D(("nrEntriesSF_PS_"+sampleName[i]).c_str(),("Weighted number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
     }
-    histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",150,-0.20, 0.20);
-    histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",125,0., 0.03);
-    histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",150,-5,5);
-    double gRMeanPS = -0.00172593; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
+    histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",50,-0.06, 0.06);
+    histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",50,0.005, 0.015);
+    histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",35,-4,4.5);
+    double gRMeanPS = -0.00153229; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
     std::cout << "  --> Mean used for pull calculation is : " << gRMeanPS << std::endl;
 
     for(int iPseudo = 0; iPseudo < nrRandomSamples; iPseudo++){

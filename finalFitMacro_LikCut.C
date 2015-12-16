@@ -329,7 +329,7 @@ int main(int argc, char *argv[]){
   }//End of looping over the different weight files
   
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile(("Events_MC/OutFile_LikelihoodCutComparison_"+consSamples+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_Nom/OutFile_LikelihoodCutComparison_"+consSamples+".root").c_str(),"RECREATE");   //So what if also Data is added?
 
   getMinimum(indivLnLik, scaleFactor, LnLikCutValue, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, MGorRECO);
 
