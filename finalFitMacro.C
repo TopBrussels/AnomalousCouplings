@@ -278,6 +278,7 @@ int main(int argc, char *argv[]){
 
   //** Loop over the different input files and read out the necessary info **//
   double Luminosity = 19646.8;
+  TH1D* h_SMLikValue_Sum = new TH1D("SMLikelihoodValue_Sum","Distribution of likelihood value at gR = 0.0 (all samples)",500,30,90);
   for(int iWeightFile = 0; iWeightFile < inputFiles.size(); iWeightFile++){
 
     //Make sure that for each dataset the vector storing the individual histograms is empty
@@ -373,6 +374,7 @@ int main(int argc, char *argv[]){
 
           //Plot the SM likelihood value:
           histo1D["SMLikValue"]->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
+          h_SMLikValue_Sum->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
           histo1D["MCScaleFactor"]->Fill(MCScaleFactor);
           histo1D["Luminosity"]->Fill(Luminosity);
           histo1D["NormFactor"]->Fill(NormFactor);
@@ -448,7 +450,10 @@ int main(int argc, char *argv[]){
       }
     }
   }//End of looping over the different weight files
-  
+ 
+  outputFile->cd();
+  h_SMLikValue_Sum->Write();
+ 
   //Get the minimum!!
   bool getMinForIndivSamples = true;
   getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples);
@@ -466,7 +471,7 @@ int main(int argc, char *argv[]){
     histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",50,-0.06, 0.06);
     histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",50,0.005, 0.015);
     histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",35,-4,4.5);
-    double gRMeanPS = -0.00153229; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
+    double gRMeanPS =-0.000969311; // 0.00229755; //-0.00153229; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
     std::cout << "  --> Mean used for pull calculation is : " << gRMeanPS << std::endl;
 
     for(int iPseudo = 0; iPseudo < nrRandomSamples; iPseudo++){

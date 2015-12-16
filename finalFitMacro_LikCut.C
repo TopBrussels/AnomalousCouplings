@@ -61,105 +61,108 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
   else                   {for(int i = 0; i < 10; i++) LikCutOpt[i] = LikCutOptGen[i]; likFitMin = 54.5; likFitMax = 64;}
 
   const int NrCuts = 10;
-  TLegend* leg = new TLegend(0.7, 0.1, 0.9, 0.3);
+  //TLegend* leg = new TLegend(0.7, 0.1, 0.9, 0.3);
   TCanvas* canv = new TCanvas("canv","canv");
-  TLegend* legUnw = new TLegend(0.7, 0.1, 0.9, 0.3);
+  //TLegend* legUnw = new TLegend(0.7, 0.1, 0.9, 0.3);
   TCanvas* canvUnw = new TCanvas("canvUnw","canvUnw");
 
   std::cout << "\n Considered a total of : " << LnLikArray.size() << " samples" << std::endl;
-  for(int iFile = 0; iFile < LnLikArray.size(); iFile++){
+  vector<double> summedEntries; summedEntries.clear();
+  vector<double> summedEntriesUnw; summedEntriesUnw.clear();
+  vector<double> minimum, error; minimum.clear(); error.clear();
+  vector<double> minimumUnw, errorUnw; minimumUnw.clear(); errorUnw.clear();
+  for(int iCut = 0; iCut < 10; iCut++){
 
-    vector<double> minimum, error; minimum.clear(); error.clear();
-    vector<double> minimumUnw, errorUnw; minimumUnw.clear(); errorUnw.clear();
-    for(int iCut = 0; iCut < 10; iCut++){
-
+    for(int iFile = 0; iFile < LnLikArray.size(); iFile++){
       vector<double> summedSampleEntries; summedSampleEntries.clear();
       vector<double> summedSampleEntriesUnw; summedSampleEntriesUnw.clear();
       for(int iEvt = 0; iEvt < LnLikArray[iFile].size(); iEvt++){
         for(int iConf = 0; iConf < LnLikArray[iFile][iEvt].size(); iConf++){
-          if(iEvt == 0){ summedSampleEntries.push_back(0); summedSampleEntriesUnw.push_back(0);}
+          if(iEvt == 0){ 
+            summedSampleEntries.push_back(0); 
+            summedSampleEntriesUnw.push_back(0);
+            if(iFile == 0){
+              summedEntries.push_back(0);
+              summedEntriesUnw.push_back(0);
+            }
+          }
           if(likVal[iFile][iEvt] < LikCutOpt[iCut]){
             summedSampleEntries[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt]*Lumi*norm[iFile];
             summedSampleEntriesUnw[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt];
           }  
+          if(iEvt == LnLikArray[iFile].size() -1){
+            if(iFile == 0){ summedEntries[iConf] = summedSampleEntries[iConf];  summedEntriesUnw[iConf] = summedSampleEntriesUnw[iConf]; }
+            else{           summedEntries[iConf] += summedSampleEntries[iConf]; summedEntriesUnw[iConf] += summedSampleEntriesUnw[iConf];}
+          }
         }
       }
-
-      //Do the calculations once all events have been processed:
-      double SampleEntries[50], SampleEntriesUnw[50];
-      for(int i = 0; i < LnLikArray[iFile][0].size(); i++){
-        SampleEntries[i] = summedSampleEntries[i];
-        SampleEntriesUnw[i] = summedSampleEntriesUnw[i];
-      }
-
-      TGraph* gr_sampleSum = new TGraph(LnLikArray[iFile][0].size(), Var, SampleEntries);
-      TF1* polFit_sampleSum = new TF1(("polFit_SummedSampleGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
-      gr_sampleSum->Fit(polFit_sampleSum,"Q","",polFit_sampleSum->GetXmin(), polFit_sampleSum->GetXmax());
-      double Minimum = polFit_sampleSum->GetMinimumX();
-      double Error = (polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX()))/2.0;
-      delete gr_sampleSum;
-      delete polFit_sampleSum;
-
-      minimum.push_back(Minimum);
-      error.push_back(Error);
-
-      TGraph* gr_sampleSumUnw = new TGraph(LnLikArray[iFile][0].size(), Var, SampleEntriesUnw);
-      TF1* polFit_sampleSumUnw = new TF1(("polFit_SummedSampleGraphUnw_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
-      gr_sampleSumUnw->Fit(polFit_sampleSumUnw,"Q","",polFit_sampleSumUnw->GetXmin(), polFit_sampleSumUnw->GetXmax());
-      double MinimumUnw = polFit_sampleSumUnw->GetMinimumX();
-      double ErrorUnw = (polFit_sampleSumUnw->GetX(polFit_sampleSumUnw->GetMinimum()+0.5, polFit_sampleSumUnw->GetMinimumX(),0.2) - polFit_sampleSumUnw->GetX(polFit_sampleSumUnw->GetMinimum()+0.5, -0.2, polFit_sampleSumUnw->GetMinimumX()))/2.0;
-      delete gr_sampleSumUnw;
-      delete polFit_sampleSumUnw;
-
-      minimumUnw.push_back(MinimumUnw);
-      errorUnw.push_back(ErrorUnw);
     }
 
-    //Now create the TGraphErrors for the sample
-    double Min[50], Err[50], MinUnw[50], ErrUnw[50];
-    for(int i = 0; i < minimum.size(); i++){
-      Min[i] = minimum[i]; MinUnw[i] = minimumUnw[i];
-      Err[i] = error[i];   ErrUnw[i] = errorUnw[i];
-    }
-  
-    outFile->cd();
-    TGraphErrors* gr_MinComp = new TGraphErrors(NrCuts, LikCutOpt, Min, 0, Err);
-    gr_MinComp->SetName(("MinComp_"+name[iFile]).c_str()); gr_MinComp->SetTitle(("Minimum comparison for "+name[iFile]).c_str());
-    gr_MinComp->SetLineColor(iFile+1);    gr_MinComp->SetMarkerStyle(22+iFile);    gr_MinComp->SetMarkerColor(iFile+1);
-    gr_MinComp->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value");    gr_MinComp->GetYaxis()->SetTitle("Obtained minimum for gR");
-    gr_MinComp->Write();
-    leg->AddEntry(gr_MinComp,(name[iFile]+" events").c_str(),"p");
-   
-    TGraphErrors* gr_MinCompUnw = new TGraphErrors(NrCuts, LikCutOpt, MinUnw, 0, ErrUnw);
-    gr_MinCompUnw->SetName(("MinCompUnw_"+name[iFile]).c_str()); gr_MinCompUnw->SetTitle(("Minimum comparison for "+name[iFile]).c_str());
-    gr_MinCompUnw->SetLineColor(iFile+1); gr_MinCompUnw->SetMarkerStyle(22+iFile); gr_MinCompUnw->SetMarkerColor(iFile+1);
-    gr_MinCompUnw->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value"); gr_MinCompUnw->GetYaxis()->SetTitle("Obtained minimum for gR");
-    gr_MinCompUnw->Write();
-    legUnw->AddEntry(gr_MinCompUnw,(name[iFile]+" events (unw)").c_str(),"p");
-
-    if(iFile == 0){
-      canv->cd();    gr_MinComp->Draw("AP");
-      canvUnw->cd(); gr_MinCompUnw->Draw("AP");
-    }
-    else{
-      canv->cd();    gr_MinComp->Draw("P");
-      canvUnw->cd(); gr_MinCompUnw->Draw("P");
+    //Do the calculations once all events have been processed:
+    double Entries[50], EntriesUnw[50];
+    for(int i = 0; i < LnLikArray[0][0].size(); i++){   //Just loop over the (9) configurations!
+      Entries[i] = summedEntries[i];
+      EntriesUnw[i] = summedEntriesUnw[i];
     }
 
-    if(iFile == LnLikArray.size()-1){
-      canv->cd();    leg->Draw();    canv->Write();
-      canvUnw->cd(); legUnw->Draw(); canvUnw->Write();
-    }
-  
-    //Add a fit to decide on the optimal cut-value!
-    std::cout << " Will be doing a fit to determine the optimal cut value between " << likFitMin << " and " << likFitMax << std::endl;
-    TF1* minLikCut = new TF1("minLikCut_pol","pol3");  minLikCut->SetLineColor(LnLikArray.size()+1);
-    gr_MinCompUnw->Fit(minLikCut,"Q","",likFitMin,likFitMax);
-    std::cout << " Optimal cut position is : " << minLikCut->GetX(0, likFitMin, likFitMax) << " (from " << name[iFile] << " sample)" << std::endl;
-    gr_MinCompUnw->SetName(("LikCutFit_"+name[iFile]).c_str());
-    gr_MinCompUnw->Write();
+    TGraph* gr_Sum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+    TF1* polFit_Sum = new TF1("polFit_SummedGraph","pol2",FitMin, FitMax);
+    gr_Sum->Fit(polFit_Sum,"Q","",polFit_Sum->GetXmin(), polFit_Sum->GetXmax());
+    double Minimum = polFit_Sum->GetMinimumX();
+    double Error = (polFit_Sum->GetX(polFit_Sum->GetMinimum()+0.5, polFit_Sum->GetMinimumX(),0.2) - polFit_Sum->GetX(polFit_Sum->GetMinimum()+0.5, -0.2, polFit_Sum->GetMinimumX()))/2.0;
+    delete gr_Sum;
+    delete polFit_Sum;
 
+    minimum.push_back(Minimum);
+    error.push_back(Error);
+
+    TGraph* gr_SumUnw = new TGraph(LnLikArray[0][0].size(), Var, EntriesUnw);
+    TF1* polFit_SumUnw = new TF1("polFit_SummedGraphUnw","pol2",FitMin, FitMax);
+    gr_SumUnw->Fit(polFit_SumUnw,"Q","",polFit_SumUnw->GetXmin(), polFit_SumUnw->GetXmax());
+    double MinimumUnw = polFit_SumUnw->GetMinimumX();
+    double ErrorUnw = (polFit_SumUnw->GetX(polFit_SumUnw->GetMinimum()+0.5, polFit_SumUnw->GetMinimumX(),0.2) - polFit_SumUnw->GetX(polFit_SumUnw->GetMinimum()+0.5,-0.2,polFit_SumUnw->GetMinimumX()))/2.0;
+    delete gr_SumUnw;
+    delete polFit_SumUnw;
+
+    minimumUnw.push_back(MinimumUnw);
+    errorUnw.push_back(ErrorUnw);
   }
+
+  //Now create the TGraphErrors for all the samples and cuts!
+  double Min[50], Err[50], MinUnw[50], ErrUnw[50];
+  for(int i = 0; i < minimum.size(); i++){
+    Min[i] = minimum[i]; MinUnw[i] = minimumUnw[i];
+    Err[i] = error[i];   ErrUnw[i] = errorUnw[i];
+  }
+  
+  outFile->cd();
+  TGraphErrors* gr_MinComp = new TGraphErrors(NrCuts, LikCutOpt, Min, 0, Err);
+  gr_MinComp->SetName("MinComp"); gr_MinComp->SetTitle("Minimum comparison for all samples");
+  gr_MinComp->SetLineColor(1);    gr_MinComp->SetMarkerStyle(22);    gr_MinComp->SetMarkerColor(1);
+  gr_MinComp->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value");    gr_MinComp->GetYaxis()->SetTitle("Obtained minimum for gR");
+  gr_MinComp->Write();
+  //leg->AddEntry(gr_MinComp,(name[iFile]+" events").c_str(),"p");
+   
+  TGraphErrors* gr_MinCompUnw = new TGraphErrors(NrCuts, LikCutOpt, MinUnw, 0, ErrUnw);
+  gr_MinCompUnw->SetName("MinCompUnw"); gr_MinCompUnw->SetTitle("Minimum comparison for all samples");
+  gr_MinCompUnw->SetLineColor(1); gr_MinCompUnw->SetMarkerStyle(22); gr_MinCompUnw->SetMarkerColor(1);
+  gr_MinCompUnw->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value"); gr_MinCompUnw->GetYaxis()->SetTitle("Obtained minimum for gR");
+  gr_MinCompUnw->Write();
+  //legUnw->AddEntry(gr_MinCompUnw,(name[iFile]+" events (unw)").c_str(),"p");
+
+  canv->cd();    gr_MinComp->Draw("AP");
+  canvUnw->cd(); gr_MinCompUnw->Draw("AP");
+  canv->Write();
+  canvUnw->Write();
+  
+  //Add a fit to decide on the optimal cut-value!
+  std::cout << " Will be doing a fit to determine the optimal cut value between " << likFitMin << " and " << likFitMax << std::endl;
+  TF1* minLikCut = new TF1("minLikCut_pol","pol3");  minLikCut->SetLineColor(LnLikArray.size()+1);
+  gr_MinComp->Fit(minLikCut,"Q","",likFitMin,likFitMax);
+  std::cout << " Optimal cut position is : " << minLikCut->GetX(0, likFitMin, likFitMax) << std::endl;
+  gr_MinComp->SetName("LikCutFit");
+  gr_MinComp->Write();
+
 }
 
 //------------------------------------------------------------------//
@@ -183,7 +186,6 @@ int main(int argc, char *argv[]){
       std::cout << " - Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
     }
   }
-  std::cout << " Size of inputFiles is : " << inputFiles.size() << std::endl;
   std::string consSamples;
 
   //Considered values and corresponding XS-values
@@ -194,7 +196,6 @@ int main(int argc, char *argv[]){
   const int NrConfigsGen = 13;
   double VarGen[NrConfigsGen]     = {-0.4,    -0.3,    -0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2,    0.3,      0.4     };
   double MGXSCutGen[NrConfigsGen] = {0.93159, 1.27966, 1.825208, 2.194079, 2.6393, 3.17698, 3.80921, 4.5645, 5.45665, 6.47791, 7.66805, 10.63243, 14.46786};
-  std::cout << " Size of inputFiles is : " << inputFiles.size() << std::endl;
   
   //Now set the correct ones (Gen or Reco)
   int NrConfigs = 0; 
