@@ -42,9 +42,11 @@ if len(sys.argv) > 2:
             print "   - ", subdir
 
 sampleNames = ['TTbarJets_FullHadr', 'TTbarJets_FullLept', 'TTbarJets_SemiLept', 'SingleTop_tWChannel_t',
-               'SingleTop_tWChannel_tbar', 'SingleTop_tChannel_t', 'SingleTop_tChannel_tbar', 'SingleTop_sChannel_t',
-               'SingleTop_sChannel_tbar', 'WJets_1jets', 'WJets_2jets', 'WJets_3jets', 'WJets_4jets', 'ZJets_1jets',
-               'ZJets_2jets', 'ZJets_3jets', 'ZJets_4jets']
+               'SingleTop_tWChannel_tbar', 'SingleTop_tChannel_t', 'SingleTop_tChannel_tbar', 'WJets_4jets', 'ZJets_4jets']
+#sampleNames = ['TTbarJets_FullHadr', 'TTbarJets_FullLept', 'TTbarJets_SemiLept', 'SingleTop_tWChannel_t',
+#               'SingleTop_tWChannel_tbar', 'SingleTop_tChannel_t', 'SingleTop_tChannel_tbar', 'SingleTop_sChannel_t',
+#               'SingleTop_sChannel_tbar', 'WJets_1jets', 'WJets_2jets', 'WJets_3jets', 'WJets_4jets', 'ZJets_1jets',
+#               'ZJets_2jets', 'ZJets_3jets', 'ZJets_4jets']
 whichSample = "-1"
 if len(sys.argv) > 3:
     whichSample = sys.argv[3]
@@ -63,7 +65,7 @@ Luminosity, NormFactor, NrEvts, consSamples = [], [], [], []
 EvtNrMatchingArray = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
 for iSample in range(len(sampleNames)):
     print "Looking at : ", sampleNames[iSample]
-    if (str(whichSample) == "-1") or (str(whichSample) != "-1" and str(whichSample) in sampleNames[iSample]):
+    if (str(whichSample) == "-1" and str(sampleNames[iSample]).startswith(whichDir)) or (str(whichSample) != "-1" and str(whichSample) in sampleNames[iSample]):
         print " --> Will continue with this one ! \n"
 
         if str(sampleNames[iSample]) != "TTbarJets_SemiLept":
@@ -157,9 +159,7 @@ for mcDir in os.listdir("."):
                         if str(word[0]) != "#" and int(word[0]) <= 117658:
                             newWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ' +
                                              EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
-                            if str(whichSample) == "-1":
-                                combinedSampleWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' '
-                                                            + EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
+
                         #elif str(word[0]) == "#":
                         #    newWeights.write(line)
                     origWeights.close()
