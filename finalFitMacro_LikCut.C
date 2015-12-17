@@ -21,6 +21,7 @@
 #include <map>
 #include "TGraphErrors.h"
 #include "TLegend.h"
+#include "THStack.h"
 
 using namespace std;
 
@@ -87,7 +88,7 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
             }
           }
           if(likVal[iFile][iEvt] < LikCutOpt[iCut]){
-            summedSampleEntries[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt]*Lumi*norm[iFile];
+            summedSampleEntries[iConf]    += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt]*Lumi*norm[iFile];
             summedSampleEntriesUnw[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt];
           }  
           if(iEvt == LnLikArray[iFile].size() -1){

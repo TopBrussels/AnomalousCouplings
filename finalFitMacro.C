@@ -20,6 +20,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <map>
+#include "THStack.h"
+#include "TLegend.h"
 
 using namespace std;
 
@@ -226,8 +228,9 @@ int main(int argc, char *argv[]){
 
   //Input variables will be:
   // 1) Likelihood cut value!
-  // 2) Directory to store info
-  // 3-..) Weight files which will be considered
+  // 2) Which systematic (is also the directory where info will be stored)
+  // 3) Which combination of files to considerd (DataMC, MC, TTbarJets, file)
+  // 4-..) Weight files which will be considered (only if 3rd argument is equal to file!!)
 
   double LikCut = 120;
   if( argc >= 2)
@@ -237,20 +240,51 @@ int main(int argc, char *argv[]){
   //std::string sLikCut = NumberToString(iLikCut);
   std::string sLikCut = string(argv[1]);
 
-  std::string whichDir = "";
+  std::string syst = "Nom";
   if(argc >= 3)
-    whichDir = string(argv[2]);
+    syst = string(argv[2]);
 
   vector<string> inputFiles;
+  int subSamples[4] = {0, 0, 0, 0};    //Store the number of subSamples which have to be combined in the StackPlot (0 = TT, 1 = ST, 2 = W, 3 =  Z)
+  std::string sampleTitle[4] = {"t#bar{t}", "Single top", "W#rightarrowl#nu", "Z/#gamma*#rightarrowl^{+}l^{-}"};
+  int fillColor[4] = {kRed+1, kMagenta, kGreen-3, kAzure+2};
+  std::cout << " Colors are : " << kRed+1 << ", " << kMagenta << ", " << kGreen-3 << " & " << kAzure+2 << std::endl;
   if( argc >= 4){
-    for(int iFile = 3; iFile < argc; iFile++){
-      inputFiles.push_back(string(argv[iFile]).c_str());
-      std::cout << " - Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
+    if(argc >= 5 && string(argv[3]) == "file"){
+      for(int iFile = 4; iFile < argc; iFile++)
+        inputFiles.push_back(string(argv[iFile]).c_str());
+    }
+    if(string(argv[3]) == "DataMC") 
+      inputFiles.push_back("Events_Data/Data_SemiMu_RgR_AllEvents_LatestEvtSel_Nov24/weights_SFAdded.out");
+    if(string(argv[3]) == "DataMC" || string(argv[3]) == "MC"){
+      inputFiles.push_back("Events_"+syst+"/ZJets/"+syst+"_ZJets_4jets/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/WJets/"+syst+"_WJets_4jets/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tChannel_t/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tChannel_tbar/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tWChannel_t/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tWChannel_tbar/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_FullLept/weights_CheckedEvts_SFAdded.out");
+    }
+    if(string(argv[3]) == "DataMC" || string(argv[3]) == "MC" || string(argv[3]) == "Signal"){
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_CorrectEvts/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_UnmatchedEvts/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_WrongEvts/weights_CheckedEvts_SFAdded.out");
     }
   }
 
+  //Now loop over all the stored inputFiles and extract information (sampleName)
+  for(int iSample = 0; iSample < inputFiles.size(); iSample++){
+    int nameSize = inputFiles[iSample].size();
+    std::cout << " - Stored file name is : " << inputFiles[iSample] << std::endl;
+    if(inputFiles[iSample].find("TTbarJets") != 0 && inputFiles[iSample].find("TTbarJets") <= nameSize ){ subSamples[0]++; }
+    if(inputFiles[iSample].find("SingleTop") != 0 && inputFiles[iSample].find("SingleTop") <= nameSize ){ subSamples[1]++; }
+    if(inputFiles[iSample].find("WJets") != 0 && inputFiles[iSample].find("WJets") <= nameSize ){ subSamples[2]++; } 
+    if(inputFiles[iSample].find("ZJets") != 0 && inputFiles[iSample].find("ZJets") <= nameSize ){ subSamples[3]++; }
+  }
+  std::cout << "  ==> Stored a total of " << subSamples[0] << " ttbar samples, " << subSamples[1] << " single-top ones, " << subSamples[2] << " W-jets ones and " << subSamples[3] << " Z-jets ones!" << std::endl;
+
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile((whichDir+"OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_"+syst+"OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
@@ -279,6 +313,11 @@ int main(int argc, char *argv[]){
   //** Loop over the different input files and read out the necessary info **//
   double Luminosity = 19646.8;
   TH1D* h_SMLikValue_Sum = new TH1D("SMLikelihoodValue_Sum","Distribution of likelihood value at gR = 0.0 (all samples)",500,30,90);
+  TH1D* h_SMLikValue_SampleSum[4] = {0}; // = new TH1D("SMLikelihoodValue_SampleSum","Distribution of likelihood value at gR = 0.0 (sum of sample type)",500,30,90);
+  THStack* hs = new THStack("hs","Stacked SMLikelihoodValue");
+  TLegend* leg = new TLegend(0.7, 0.6, 0.9, 0.9);
+  int consSample[4] = {0, 0, 0, 0};
+  std::string PosSamples[4] = {"TTbarJets","SingleTop","WJets","ZJets"};
   for(int iWeightFile = 0; iWeightFile < inputFiles.size(); iWeightFile++){
 
     //Make sure that for each dataset the vector storing the individual histograms is empty
@@ -338,6 +377,13 @@ int main(int argc, char *argv[]){
 	  ScdDer = 0; xOuterLFine = 99; xOuterRFine = 99;
 
           if(consEvts == 0){
+            //Keep track of the number of considerd samples of the same type!
+            for(int iOpt = 0; iOpt < 4; iOpt++){
+              if(inputFiles[iWeightFile].find(PosSamples[iOpt]) != 0 && inputFiles[iWeightFile].find(PosSamples[iOpt]) < inputFiles[iWeightFile].size()) consSample[iOpt]++;
+              if(consSample[iOpt] == 1)
+                h_SMLikValue_SampleSum[iOpt] = new TH1D(("SumLikValue_Sum"+PosSamples[iOpt]).c_str(),("Sum of likelihood values (for "+PosSamples[iOpt]+")").c_str(), 500, 30, 90);
+            }
+
             //Loop over all histo1Ds and add the sampleName!
             if(histo1D.size() > 0){
               for(std::map<std::string,TH1D*>::const_iterator it = histo1D.begin(); it != histo1D.end(); it++){
@@ -438,6 +484,19 @@ int main(int argc, char *argv[]){
         temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
         temp->Write();
       }
+      for(int iOpt = 0; iOpt < 4; iOpt++){
+        histo1D["SMLikValue"]->SetFillColor(1+iWeightFile);
+        if(consSample[iOpt] != 0 && consSample[iOpt] < subSamples[iOpt] ){
+          h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
+        }
+        else if(consSample[iOpt] == subSamples[iOpt]){
+          leg->AddEntry(h_SMLikValue_SampleSum[iOpt],sampleTitle[iOpt].c_str(),"F");
+          h_SMLikValue_SampleSum[iOpt]->SetFillColor(fillColor[iOpt]);
+          std::cout << " Setting fillColor " << fillColor[iOpt] << " for sample " << sampleTitle[iOpt] << std::endl;
+          hs->Add(h_SMLikValue_SampleSum[iOpt]);
+          consSample[iOpt] = 0;
+        }
+      }
     }
 
     if(histo2D.size() > 0){
@@ -453,6 +512,11 @@ int main(int argc, char *argv[]){
  
   outputFile->cd();
   h_SMLikValue_Sum->Write();
+  TCanvas* canv_Stack = new TCanvas("CanvasStack","CanvasStack");
+  canv_Stack->cd();
+  hs->Draw();
+  leg->Draw();
+  canv_Stack->Write();
  
   //Get the minimum!!
   bool getMinForIndivSamples = true;
