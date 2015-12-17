@@ -245,10 +245,9 @@ int main(int argc, char *argv[]){
     syst = string(argv[2]);
 
   vector<string> inputFiles;
-  int subSamples[4] = {0, 0, 0, 0};    //Store the number of subSamples which have to be combined in the StackPlot (0 = TT, 1 = ST, 2 = W, 3 =  Z)
-  std::string sampleTitle[4] = {"t#bar{t}", "Single top", "W#rightarrowl#nu", "Z/#gamma*#rightarrowl^{+}l^{-}"};
-  int fillColor[4] = {kRed+1, kMagenta, kGreen-3, kAzure+2};
-  std::cout << " Colors are : " << kRed+1 << ", " << kMagenta << ", " << kGreen-3 << " & " << kAzure+2 << std::endl;
+  int subSamples[5] = {0, 0, 0, 0, 0};    //Store the number of subSamples which have to be combined in the StackPlot (0 = TT, 1 = ST, 2 = W, 3 =  Z, 4 = Data)
+  std::string sampleTitle[5] = {"t#bar{t}", "Single top", "W#rightarrowl#nu", "Z/#gamma*#rightarrowl^{+}l^{-}","Data"};
+  int fillColor[5] = {kRed+1, kMagenta, kGreen-3, kAzure+2, 1};
   if( argc >= 4){
     if(argc >= 5 && string(argv[3]) == "file"){
       for(int iFile = 4; iFile < argc; iFile++)
@@ -280,11 +279,13 @@ int main(int argc, char *argv[]){
     if(inputFiles[iSample].find("SingleTop") != 0 && inputFiles[iSample].find("SingleTop") <= nameSize ){ subSamples[1]++; }
     if(inputFiles[iSample].find("WJets") != 0 && inputFiles[iSample].find("WJets") <= nameSize ){ subSamples[2]++; } 
     if(inputFiles[iSample].find("ZJets") != 0 && inputFiles[iSample].find("ZJets") <= nameSize ){ subSamples[3]++; }
+    if(inputFiles[iSample].find("Data") != 0 && inputFiles[iSample].find("Data") <= nameSize){ subSamples[4]++;}
   }
   std::cout << "  ==> Stored a total of " << subSamples[0] << " ttbar samples, " << subSamples[1] << " single-top ones, " << subSamples[2] << " W-jets ones and " << subSamples[3] << " Z-jets ones!" << std::endl;
+  if(subSamples[4] != 0) std::cout << "  ==> Also stored " << subSamples[4] << " data samples! " << std::endl;
 
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile(("Events_"+syst+"OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_"+syst+"/OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
@@ -309,15 +310,19 @@ int main(int argc, char *argv[]){
   //Store the TH1Ds in a map such that they can easily be looped over!
   std::map<string,TH1D*> histo1D;  
   std::map<string,TH2D*> histo2D;  
+  
+  //----------------------//
+  //----  Luminosity  ----//
+  //----------------------//
+  double Luminosity = 19646.8;
 
   //** Loop over the different input files and read out the necessary info **//
-  double Luminosity = 19646.8;
-  TH1D* h_SMLikValue_Sum = new TH1D("SMLikelihoodValue_Sum","Distribution of likelihood value at gR = 0.0 (all samples)",500,30,90);
-  TH1D* h_SMLikValue_SampleSum[4] = {0}; // = new TH1D("SMLikelihoodValue_SampleSum","Distribution of likelihood value at gR = 0.0 (sum of sample type)",500,30,90);
+  TH1D* h_SMLikValue_Sum = new TH1D("SMLikelihoodValue_Sum","Distribution of likelihood value at gR = 0.0 (all samples)",85,40,85);
+  TH1D* h_SMLikValue_SampleSum[5] = {0}; 
   THStack* hs = new THStack("hs","Stacked SMLikelihoodValue");
-  TLegend* leg = new TLegend(0.7, 0.6, 0.9, 0.9);
-  int consSample[4] = {0, 0, 0, 0};
-  std::string PosSamples[4] = {"TTbarJets","SingleTop","WJets","ZJets"};
+  TLegend* leg = new TLegend(0.6, 0.6, 0.9, 0.9);
+  int consSample[5] = {0, 0, 0, 0, 0};
+  std::string PosSamples[5] = {"TTbarJets","SingleTop","WJets","ZJets","Data"};
   for(int iWeightFile = 0; iWeightFile < inputFiles.size(); iWeightFile++){
 
     //Make sure that for each dataset the vector storing the individual histograms is empty
@@ -347,8 +352,8 @@ int main(int argc, char *argv[]){
     int NrBins = 8; 
     double halfBinWidth = (Var[NrConfigs-1]- Var[0])/((double) NrBins*2.0);
     double xLow = Var[0] - halfBinWidth, xHigh = Var[NrConfigs-1] + halfBinWidth; 
-    histo1D["SMLikValue"] = new TH1D("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",500,30,90);
-    histo1D["SMLikValue_AfterCut"] = new TH1D("SMLikelihoodValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut of ..)",500,30,90);
+    histo1D["SMLikValue"] = new TH1D("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",85,40,85);
+    histo1D["SMLikValue_AfterCut"] = new TH1D("SMLikelihoodValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut of ..)",85,40,85);
     histo1D["MCScaleFactor"] = new TH1D("MCScaleFactor","Scale factor for MC sample", 100,0,2);
     histo1D["Luminosity"] = new TH1D("Luminosity","Luminosity used", 100,15000,23000);
     histo1D["NormFactor"] = new TH1D("NormFactor","Norm factor for MC sample", 100,0,0.00001);
@@ -378,10 +383,10 @@ int main(int argc, char *argv[]){
 
           if(consEvts == 0){
             //Keep track of the number of considerd samples of the same type!
-            for(int iOpt = 0; iOpt < 4; iOpt++){
+            for(int iOpt = 0; iOpt < 5; iOpt++){
               if(inputFiles[iWeightFile].find(PosSamples[iOpt]) != 0 && inputFiles[iWeightFile].find(PosSamples[iOpt]) < inputFiles[iWeightFile].size()) consSample[iOpt]++;
               if(consSample[iOpt] == 1)
-                h_SMLikValue_SampleSum[iOpt] = new TH1D(("SumLikValue_Sum"+PosSamples[iOpt]).c_str(),("Sum of likelihood values (for "+PosSamples[iOpt]+")").c_str(), 500, 30, 90);
+                h_SMLikValue_SampleSum[iOpt] = new TH1D(("SumLikValue_Sum"+PosSamples[iOpt]).c_str(),("Sum of likelihood values (for "+PosSamples[iOpt]+")").c_str(), 85, 40, 85);
             }
 
             //Loop over all histo1Ds and add the sampleName!
@@ -484,16 +489,24 @@ int main(int argc, char *argv[]){
         temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
         temp->Write();
       }
-      for(int iOpt = 0; iOpt < 4; iOpt++){
-        histo1D["SMLikValue"]->SetFillColor(1+iWeightFile);
+      for(int iOpt = 0; iOpt < 5; iOpt++){
         if(consSample[iOpt] != 0 && consSample[iOpt] < subSamples[iOpt] ){
           h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
         }
         else if(consSample[iOpt] == subSamples[iOpt]){
-          leg->AddEntry(h_SMLikValue_SampleSum[iOpt],sampleTitle[iOpt].c_str(),"F");
-          h_SMLikValue_SampleSum[iOpt]->SetFillColor(fillColor[iOpt]);
-          std::cout << " Setting fillColor " << fillColor[iOpt] << " for sample " << sampleTitle[iOpt] << std::endl;
-          hs->Add(h_SMLikValue_SampleSum[iOpt]);
+          if(sampleTitle[iOpt] != "Data"){
+            h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
+            leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"F");
+            h_SMLikValue_SampleSum[iOpt]->SetFillColor(fillColor[iOpt]);
+            h_SMLikValue_SampleSum[iOpt]->SetLineColor(fillColor[iOpt]);
+            hs->Add(h_SMLikValue_SampleSum[iOpt]);
+          }
+          else if(sampleTitle[iOpt] == "Data" && string(argv[3]) == "DataMC"){
+            h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
+            leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"LEP");
+            h_SMLikValue_SampleSum[iOpt]->SetMarkerColor(fillColor[iOpt]);
+            h_SMLikValue_SampleSum[iOpt]->SetMarkerStyle(20);                 //As is the case in MultiSamplePlots!
+          }
           consSample[iOpt] = 0;
         }
       }
@@ -515,6 +528,7 @@ int main(int argc, char *argv[]){
   TCanvas* canv_Stack = new TCanvas("CanvasStack","CanvasStack");
   canv_Stack->cd();
   hs->Draw();
+  if(string(argv[3]) == "DataMC") h_SMLikValue_SampleSum[4]->Draw("samepe");
   leg->Draw();
   canv_Stack->Write();
  
