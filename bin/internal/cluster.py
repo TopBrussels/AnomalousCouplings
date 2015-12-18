@@ -225,26 +225,21 @@ class Cluster(object):
 		time.sleep(30)
 		cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' Q ' | wc -l"
 		NrIdleEvts = os.popen(cmdIdle).read()
+		logger.info('* Checked the idle counter in wait! --> Is '+str(NrIdleEvts))
 		if not int(NrIdleEvts) == 0:
-		    idle = int(NrIdleEvts)
-		    logger.info('Qstat information was wrong, idle not 0 but : '+str(idle))
+		    logger.info('* Qstat information was wrong, idle not 0 but : '+str(NrIdleEvts))
+		    idle, run, finish, fail = self.control(me_dir)
+		    logger.info(' --> Redetermined idle, is now = '+str(idle))
 	    if run == 0:
                 time.sleep(30)
                 cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' R ' | wc -l"
                 NrRunEvts = os.popen(cmdRun).read()
+		logger.info('* Checked the run counter in wait! --> Is '+str(NrRunEvts))
                 if not int(NrRunEvts) == 0:
-                    run = int(NrRunEvts)
-                    logger.info('Qstat information was wrong, run not 0 but : '+str(run))
+                    logger.info('* Qstat information was wrong, run not 0 but : '+str(NrRunEvts))
+		    idle, run, finish, fail = self.control(me_dir)
+		    logger.info(' --> Redetermined run, is now = '+str(run))
 
-	    #logger.info('[%s] Waiting for free slot (max nr = %s): %s %s %s' % (strftime("%d/%m/%y %H:%M"), minimal_job, idle, run, finish))
-	    #time.sleep(60)
-	    #cmdTotal = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
-	    #cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep " Q " | wc -l"
-	    #cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep " R " | wc -l"
-            #NrRemainingEvts = os.popen(cmd).read()
-	    
-            #if int(NrRemainingEvts) != 0:
-            #  if idle+run == 0: logger.info('Still some jobs running on PBS ...'+str(NrRemainingEvts))
             if fail:
                 raise ClusterManagmentError('Some Jobs are in a Hold/... state. Please try to investigate or contact the IT team')
             if idle + run == 0:
@@ -252,7 +247,7 @@ class Cluster(object):
 		cmdDoubleCheck = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
 		DoubleNrCheck = os.popen(cmdDoubleCheck).read()
 		if int(DoubleNrCheck) == 0:
-               	    logger.info('All jobs finished (double-checked using qstat on '+self.submit_name+'): '+str(DoubleNrCheck))
+               	    logger.info('* All jobs finished (double-checked using qstat on '+self.submit_name+'): '+str(DoubleNrCheck))
                     break
             if idle + run < minimal_job:
 		#Only add a safety in case one of the values should still be 0 ...
@@ -260,7 +255,7 @@ class Cluster(object):
 		    time.sleep(30)
 		    cmdTotal = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | wc -l"
 		    NrTotal = os.popen(cmdTotal).read()
-		    logger.info('Still found a wrong value for idle and running ('+idle + ' ' + running+'). Nr of total jobs is : '+NrTotal)
+		    logger.info('* Still found a zero value for idle or running ('+str(idle) + ' ' + str(run)+'). Nr of total jobs is : '+str(NrTotal))
 		    if int(NrTotal) < minimal_job:
 			return
 		else:
@@ -309,7 +304,7 @@ Press ctrl-C to force the update.''' % self.options['cluster_status_update'][0])
             else:
                 time.sleep(self.options['cluster_status_update'][1])
                     
-        logger.info('*** Seems that now the submitted_ids is set to empty ... (contained '+len(self.submitted_ids)+' jobs')            
+        logger.info('*** Seems that now the submitted_ids is set to empty ... (contained '+str(len(self.submitted_ids))+' jobs')            
         self.submitted = 0
         self.submitted_ids = []
         
@@ -1037,7 +1032,7 @@ class PBSCluster(Cluster):
     running_tag = ['T','E','R']
     complete_tag = ['C']
     
-    maximum_submited_jobs = 500
+    maximum_submited_jobs = 1200
 
     @multiple_try()
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, log=None,
@@ -1168,7 +1163,10 @@ class PBSCluster(Cluster):
     @multiple_try()    
     def control(self, me_dir):
         """ control the status of a single job with it's cluster id """
-        cmd = "qstat -u aolbrech | grep "+ self.submit_name   #Hopefully specifying name will reduce the crash ...
+        #cmd = "qstat -u aolbrech | grep "+ self.submit_name   #Hopefully specifying name will reduce the crash ...
+	#print "Should now do: ", cmd
+	cmd = "qstat"
+	#print "--> Changed this to : ", cmd
         status = misc.Popen([cmd], stdout=subprocess.PIPE)
 
 	#For some reason the directory is not passed on correctly ... "
@@ -1209,25 +1207,32 @@ class PBSCluster(Cluster):
                     run += 1
                 elif status2 == 'resubmit':
                     idle += 1
+	#print "Output of qstat (idle, run) : ", idle, " & ", run
 
 	#In case zero-values are found, check them!!
-	if idle == 0:
-	    logger.info('Recalculating the idle number in control!')
-	    time.sleep(30)
-	    cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' Q ' | wc -l"
-	    NrIdleEvts = os.popen(cmdIdle).read()
-	    if not int(NrIdleEvts) == 0:
-		idle = int(NrIdleEvts)
-		logger.info('Qstat information in control was wrong, idle not 0 but : '+str(idle))
+	#if idle == 0:
+	#    time.sleep(30)
+	#    cmdIdle = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' Q ' | wc -l"
+	#    NrIdleEvts = os.popen(cmdIdle).read()
+	#    logger.info('* Recalculating the idle number in control! --> Is '+str(NrIdleEvts))
+	#    if not int(NrIdleEvts) == 0:
+	#	#int(idle) = int(NrIdleEvts)
+	#	logger.info('* Qstat information in control was wrong, idle not 0 but : '+str(NrIdleEvts))
+	#	for iEvt in range(len(int(NrIdleEvts))):
+	#	    idle += 1
+	#	logger.info('* Now calculated a value of '+str(idle))
 
-	if run == 0:
-	    logger.info('Recalculating the run number in control!')
-	    time.sleep(30)
-	    cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' R' | wc -l"
-	    NrRunEvts = os.popen(cmdRun).read()
-	    if not int(NrRunEvts) == 0:
-		run = int(NrRunEvts)
-		logger.info('Qstat information in control was wrong, run not 0 but : '+str(run))
+	#if run == 0:
+	#    time.sleep(30)
+	#    cmdRun = "qstat -u aolbrech @cream02 | grep "+ self.submit_name + " | grep ' R' | wc -l"
+	#    NrRunEvts = os.popen(cmdRun).read()
+	#    logger.info('* Recalculating the run number in control! --> Is '+str(NrRunEvts))
+	#    if not int(NrRunEvts) == 0:
+	#	int(run) = int(NrRunEvts)
+	#	logger.info('* Qstat information in control was wrong, run not 0 but : '+str(run))
+	#	#for iEvt in range((int(NrRunEvts)):
+	#	#    run +=1
+	#	#logger.info('* Now calculated a value for run = '+str(run))
 
         return idle, run, self.submitted - (idle+run+fail), fail
 
