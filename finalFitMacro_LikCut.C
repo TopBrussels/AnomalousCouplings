@@ -22,6 +22,7 @@
 #include "TGraphErrors.h"
 #include "TLegend.h"
 #include "THStack.h"
+#include "TLine.h"
 
 using namespace std;
 
@@ -51,59 +52,54 @@ struct sort_pred {
   }
 };
 
-void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector< vector<double> > likVal, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, std::string GenOrReco){
+TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector< vector<double> > likVal, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, std::string GenOrReco, std::string MCorData = "MC"){
 
-  TH1D* h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
+  TH1D* h_MinComp = new TH1D(("MinimumComparison_"+MCorData).c_str(),("Comparison of obtained minimum for the different considered samples ("+MCorData+")").c_str(),LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
   double LikCutOpt[10]= {0};
-  double LikCutOptReco[10] = {60, 62, 63, 64, 65, 66, 67, 68, 69, 120};
-  double LikCutOptGen[10] =  {55, 57, 58, 59, 60, 61, 62, 63, 64, 120};
+  double LikCutOptReco[10] = {60, 61, 62, 63, 64, 65, 66, 67, 68, 69};
+  double LikCutOptGen[10] =  {55, 56, 57, 58, 59, 60, 61, 62, 63, 64};
   double likFitMin = 59, likFitMax = 68.5;
   if(GenOrReco == "RECO"){for(int i = 0; i < 10; i++) LikCutOpt[i] = LikCutOptReco[i];}
   else                   {for(int i = 0; i < 10; i++) LikCutOpt[i] = LikCutOptGen[i]; likFitMin = 54.5; likFitMax = 64;}
 
   const int NrCuts = 10;
-  //TLegend* leg = new TLegend(0.7, 0.1, 0.9, 0.3);
-  TCanvas* canv = new TCanvas("canv","canv");
-  //TLegend* legUnw = new TLegend(0.7, 0.1, 0.9, 0.3);
-  TCanvas* canvUnw = new TCanvas("canvUnw","canvUnw");
+  //if(MCorData == "MC") Lumi = 226504.2973;
 
-  std::cout << "\n Considered a total of : " << LnLikArray.size() << " samples" << std::endl;
   vector<double> summedEntries; summedEntries.clear();
-  vector<double> summedEntriesUnw; summedEntriesUnw.clear();
   vector<double> minimum, error; minimum.clear(); error.clear();
-  vector<double> minimumUnw, errorUnw; minimumUnw.clear(); errorUnw.clear();
+  int nrSamples = 0;
   for(int iCut = 0; iCut < 10; iCut++){
 
     for(int iFile = 0; iFile < LnLikArray.size(); iFile++){
+      if(iFile == 0) nrSamples = 0;
+      if(MCorData == "MC" && name[iFile] == "Data") continue;
+      if(MCorData == "Data" && name[iFile] != "Data") continue;
+
+      nrSamples++;
       vector<double> summedSampleEntries; summedSampleEntries.clear();
-      vector<double> summedSampleEntriesUnw; summedSampleEntriesUnw.clear();
       for(int iEvt = 0; iEvt < LnLikArray[iFile].size(); iEvt++){
         for(int iConf = 0; iConf < LnLikArray[iFile][iEvt].size(); iConf++){
           if(iEvt == 0){ 
             summedSampleEntries.push_back(0); 
-            summedSampleEntriesUnw.push_back(0);
-            if(iFile == 0){
+            if(nrSamples == 1){
               summedEntries.push_back(0);
-              summedEntriesUnw.push_back(0);
             }
           }
           if(likVal[iFile][iEvt] < LikCutOpt[iCut]){
             summedSampleEntries[iConf]    += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt]*Lumi*norm[iFile];
-            summedSampleEntriesUnw[iConf] += LnLikArray[iFile][iEvt][iConf]*SF[iFile][iEvt];
           }  
-          if(iEvt == LnLikArray[iFile].size() -1){
-            if(iFile == 0){ summedEntries[iConf] = summedSampleEntries[iConf];  summedEntriesUnw[iConf] = summedSampleEntriesUnw[iConf]; }
-            else{           summedEntries[iConf] += summedSampleEntries[iConf]; summedEntriesUnw[iConf] += summedSampleEntriesUnw[iConf];}
+          if(iEvt == LnLikArray[iFile].size()-1){
+            if(nrSamples == 1){ summedEntries[iConf] = summedSampleEntries[iConf]; }
+            else{               summedEntries[iConf] += summedSampleEntries[iConf];}
           }
         }
       }
     }
 
     //Do the calculations once all events have been processed:
-    double Entries[50], EntriesUnw[50];
+    double Entries[50];
     for(int i = 0; i < LnLikArray[0][0].size(); i++){   //Just loop over the (9) configurations!
       Entries[i] = summedEntries[i];
-      EntriesUnw[i] = summedEntriesUnw[i];
     }
 
     TGraph* gr_Sum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
@@ -116,54 +112,41 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
 
     minimum.push_back(Minimum);
     error.push_back(Error);
-
-    TGraph* gr_SumUnw = new TGraph(LnLikArray[0][0].size(), Var, EntriesUnw);
-    TF1* polFit_SumUnw = new TF1("polFit_SummedGraphUnw","pol2",FitMin, FitMax);
-    gr_SumUnw->Fit(polFit_SumUnw,"Q","",polFit_SumUnw->GetXmin(), polFit_SumUnw->GetXmax());
-    double MinimumUnw = polFit_SumUnw->GetMinimumX();
-    double ErrorUnw = (polFit_SumUnw->GetX(polFit_SumUnw->GetMinimum()+0.5, polFit_SumUnw->GetMinimumX(),0.2) - polFit_SumUnw->GetX(polFit_SumUnw->GetMinimum()+0.5,-0.2,polFit_SumUnw->GetMinimumX()))/2.0;
-    delete gr_SumUnw;
-    delete polFit_SumUnw;
-
-    minimumUnw.push_back(MinimumUnw);
-    errorUnw.push_back(ErrorUnw);
   }
 
+  std::cout << "\n Considered a total of : " << nrSamples << " samples" << std::endl;
+
   //Now create the TGraphErrors for all the samples and cuts!
-  double Min[50], Err[50], MinUnw[50], ErrUnw[50];
+  double Min[50], Err[50];
   for(int i = 0; i < minimum.size(); i++){
-    Min[i] = minimum[i]; MinUnw[i] = minimumUnw[i];
-    Err[i] = error[i];   ErrUnw[i] = errorUnw[i];
+    Min[i] = minimum[i];
+    Err[i] = error[i];  
   }
   
   outFile->cd();
   TGraphErrors* gr_MinComp = new TGraphErrors(NrCuts, LikCutOpt, Min, 0, Err);
-  gr_MinComp->SetName("MinComp"); gr_MinComp->SetTitle("Minimum comparison for all samples");
-  gr_MinComp->SetLineColor(1);    gr_MinComp->SetMarkerStyle(22);    gr_MinComp->SetMarkerColor(1);
+  gr_MinComp->SetName(("MinComp_"+MCorData).c_str()); gr_MinComp->SetTitle(("Minimum comparison for all samples ("+MCorData+")").c_str());
+  if(MCorData == "Data"){    gr_MinComp->SetLineColor(1); gr_MinComp->SetMarkerStyle(20); gr_MinComp->SetMarkerColor(1); }
+  else if(MCorData == "MC"){ gr_MinComp->SetLineColor(4); gr_MinComp->SetMarkerStyle(22); gr_MinComp->SetMarkerColor(4); }
   gr_MinComp->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value");    gr_MinComp->GetYaxis()->SetTitle("Obtained minimum for gR");
   gr_MinComp->Write();
   //leg->AddEntry(gr_MinComp,(name[iFile]+" events").c_str(),"p");
+  
    
-  TGraphErrors* gr_MinCompUnw = new TGraphErrors(NrCuts, LikCutOpt, MinUnw, 0, ErrUnw);
-  gr_MinCompUnw->SetName("MinCompUnw"); gr_MinCompUnw->SetTitle("Minimum comparison for all samples");
-  gr_MinCompUnw->SetLineColor(1); gr_MinCompUnw->SetMarkerStyle(22); gr_MinCompUnw->SetMarkerColor(1);
-  gr_MinCompUnw->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value"); gr_MinCompUnw->GetYaxis()->SetTitle("Obtained minimum for gR");
-  gr_MinCompUnw->Write();
-  //legUnw->AddEntry(gr_MinCompUnw,(name[iFile]+" events (unw)").c_str(),"p");
-
-  canv->cd();    gr_MinComp->Draw("AP");
-  canvUnw->cd(); gr_MinCompUnw->Draw("AP");
-  canv->Write();
-  canvUnw->Write();
+  TCanvas* canv = new TCanvas(("canv_"+MCorData).c_str(),("canv_"+MCorData).c_str());
+  canv->cd();    gr_MinComp->Draw("AP");    canv->Write();
   
   //Add a fit to decide on the optimal cut-value!
   std::cout << " Will be doing a fit to determine the optimal cut value between " << likFitMin << " and " << likFitMax << std::endl;
-  TF1* minLikCut = new TF1("minLikCut_pol","pol3");  minLikCut->SetLineColor(LnLikArray.size()+1);
+  TF1* minLikCut = new TF1("minLikCut_pol","pol3");  
+  if(MCorData == "Data")    minLikCut->SetLineColor(LnLikArray.size()+1);
+  else if(MCorData == "MC") minLikCut->SetLineColor(4);
   gr_MinComp->Fit(minLikCut,"Q","",likFitMin,likFitMax);
   std::cout << " Optimal cut position is : " << minLikCut->GetX(0, likFitMin, likFitMax) << std::endl;
-  gr_MinComp->SetName("LikCutFit");
+  gr_MinComp->SetName(("LikCutFit_"+MCorData).c_str());
   gr_MinComp->Write();
 
+  return gr_MinComp;
 }
 
 //------------------------------------------------------------------//
@@ -180,15 +163,35 @@ int main(int argc, char *argv[]){
   if( argc >= 2)
     MGorRECO = string(argv[1]);
 
+  std::string syst = "Nom";    //Possible input: Nom, JESMinus, JESPlus, JERMinus, JERPlus, ...
+  if(argc >= 3)
+    syst = string(argv[2]);
+
   vector<string> inputFiles;
-  if( argc >= 3 ){
-    for(int iFile = 2; iFile < argc; iFile++){
-      inputFiles.push_back(string(argv[iFile]).c_str());
-      std::cout << " - Stored file name is : " << inputFiles[inputFiles.size()-1] << std::endl;
+  if( argc >= 4){
+    if(argc >= 5 && string(argv[3]) == "file"){
+      for(int iFile = 4; iFile < argc; iFile++)
+        inputFiles.push_back(string(argv[iFile]).c_str());
+    }
+    if(string(argv[3]) == "DataMC")
+      inputFiles.push_back("Events_Data/Data_SemiMu_RgR_AllEvents_LatestEvtSel_Nov24/weights_SFAdded.out");
+    if(string(argv[3]) == "DataMC" || string(argv[3]) == "MC"){
+      inputFiles.push_back("Events_"+syst+"/ZJets/"+syst+"_ZJets_4jets/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/WJets/"+syst+"_WJets_4jets/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tChannel_t/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tChannel_tbar/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tWChannel_t/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tWChannel_tbar/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_FullLept/weights_CheckedEvts_SFAdded.out");
+    }
+    if(string(argv[3]) == "DataMC" || string(argv[3]) == "MC" || string(argv[3]) == "Signal"){
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_CorrectEvts/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_UnmatchedEvts/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_WrongEvts/weights_CheckedEvts_SFAdded.out");
     }
   }
-  std::string consSamples;
 
+  std::string consSamples;
   //Considered values and corresponding XS-values
   const int NrConfigsReco = 9;
   double VarReco[NrConfigsReco]     = {-0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2    };
@@ -331,12 +334,41 @@ int main(int argc, char *argv[]){
   }//End of looping over the different weight files
   
   //Store all information into a ROOT file:
+  if(string(argv[3]) != "file") consSamples = string(argv[3]);
   TFile* outputFile = new TFile(("Events_Nom/OutFile_LikelihoodCutComparison_"+consSamples+".root").c_str(),"RECREATE");   //So what if also Data is added?
 
-  getMinimum(indivLnLik, scaleFactor, LnLikCutValue, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, MGorRECO);
+  if(string(argv[3]) == "DataMC"){
+    TGraphErrors* MC = getMinimum(indivLnLik, scaleFactor, LnLikCutValue, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, MGorRECO,"MC");
+    TGraphErrors* Data = getMinimum(indivLnLik, scaleFactor, LnLikCutValue, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, MGorRECO,"Data");
+    TCanvas* canv_MSPlot = new TCanvas("MinComp_MSPlot","MinComp_MSPlot");
+    canv_MSPlot->cd();
+    MC->SetTitle("");
+    MC->Draw("AP");
+    Data->Draw("P");
+    TF1 *line = new TF1("line","0",58,70);
+    line->SetLineColor(2);
+    line->Draw("same");
+    MC->Draw("P");
+    Data->Draw("P");
+    canv_MSPlot->Write();
+    canv_MSPlot->SaveAs("Events_Nom/MinComp_MSPlot_StraightLineAtZero.pdf");
+  }
+  else{
+    TGraphErrors* MC = getMinimum(indivLnLik, scaleFactor, LnLikCutValue, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, MGorRECO);
+    TCanvas* canv_MC = new TCanvas("MinComp_MCOnly","MinComp_MCOnly");
+    canv_MC->cd();
+    MC->SetTitle("");
+    MC->Draw("AP");
+    TF1 *line = new TF1("line","0",58,70);
+    line->SetLineColor(2);
+    line->Draw("same");
+    MC->Draw("P");
+    canv_MC->Write();
+    canv_MC->SaveAs("Events_Nom/MinComp_MCOnly_StraightLineAtZero.pdf"); 
+  }
 
   outputFile->Close();
-  cout << " Info stored in : " << outputFile->GetName() << std::endl;
+  cout << "\n Info stored in : " << outputFile->GetName() << std::endl;
 
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
   return 0;
