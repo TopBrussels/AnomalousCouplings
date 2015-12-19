@@ -240,7 +240,7 @@ int main(int argc, char *argv[]){
   //std::string sLikCut = NumberToString(iLikCut);
   std::string sLikCut = string(argv[1]);
 
-  std::string syst = "Nom";
+  std::string syst = "Nom";    //Possible input: Nom, JESMinus, JESPlus, JERMinus, JERPlus, ...
   if(argc >= 3)
     syst = string(argv[2]);
 
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]){
   std::string sampleTitle[5] = {"t#bar{t}", "Single top", "W#rightarrowl#nu", "Z/#gamma*#rightarrowl^{+}l^{-}","Data"};
   int fillColor[5] = {kRed+1, kMagenta, kGreen-3, kAzure+2, 1};
   if( argc >= 4){
-    if(argc >= 5 && string(argv[3]) == "file"){
+    if(argc >= 5 && string(argv[3]) == "file"){                 //Possible input for 3rd argument: DataMC, MC, Signal, file
       for(int iFile = 4; iFile < argc; iFile++)
         inputFiles.push_back(string(argv[iFile]).c_str());
     }
@@ -342,6 +342,7 @@ int main(int argc, char *argv[]){
     int SMConfig = 99, xOuterL = 99, xOuterR = 99;
     int consEvts = 0;
     double MaxLik = 0, MinLik = 9999;
+    double MingR = 99;
     double ScdDer = 0;
     int xOuterLFine = 99, xOuterRFine = 99;
 
@@ -366,6 +367,8 @@ int main(int argc, char *argv[]){
     histo2D["SMLik_vs_ScdDerFine"] = new TH2D("SMLik_vs_ScdDerFine","Scatter-plot of -ln(L) value at gR = 0 versus the second derivative between (-0.1, 0.1)", 200,48,85,150,-25,25);
     histo2D["RightDelta_vs_MaxDelta"] = new TH2D("RightDelta_vs_MaxDelta","Scatter-plot of difference between right leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
     histo2D["LeftDelta_vs_MaxDelta"] = new TH2D("LeftDelta_vs_MaxDelta","Scatter-plot of difference between left leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
+    histo2D["SMLik_vs_MinCoef"] = new TH2D("SMLik_vs_MinCoef","Scatter-plot of -ln(L) value at gR = 0 versus the minimum x-position of the -ln(L) distribution for this event",200,48,85,150,-0.25,0.25);
+    histo2D["SMLik_vs_MinCoef_AfterCut"] = new TH2D("SMLik_vs_MinCoef_AfterCut","Scatter-plot of -ln(L) value at gR = 0 versus the minimum x-position of the -ln(L) distribution for this event",200,48,85,150,-0.25,0.25);
 
     while( std::getline(ifs,line)){
       std::istringstream iss(line);
@@ -378,6 +381,7 @@ int main(int argc, char *argv[]){
         //--- Initialize the event-per-event variables! ---//          
         if(config == 1){
           MaxLik = 0; MinLik = 9999; //Reset this variable at the beginning of each event!
+          MingR = 99;
           SMConfig = 99; xOuterL = 99; xOuterR = 99;
 	  ScdDer = 0; xOuterLFine = 99; xOuterRFine = 99;
 
@@ -418,7 +422,7 @@ int main(int argc, char *argv[]){
 
         //Get the maximum and minimum likelihood value
         if(LnLik[config-1] > MaxLik) MaxLik = LnLik[config-1];
-        if(LnLik[config-1] < MinLik) MinLik = LnLik[config-1];
+        if(LnLik[config-1] < MinLik){ MinLik = LnLik[config-1]; MingR = Var[config-1];}
 
         //---  Only perform the fit after all configurations are considered!  ---//
         if(config == NrConfigs){
@@ -435,6 +439,7 @@ int main(int argc, char *argv[]){
           histo2D["SMLik_vs_MaxDeltaRel"]->Fill(LnLik[SMConfig], (MaxLik - MinLik)/LnLik[SMConfig]);
           histo2D["SMLik_vs_ScdDerWide"]->Fill(LnLik[SMConfig], (LnLik[xOuterL] + LnLik[xOuterR] - 2*LnLik[SMConfig])/(0.2*0.2));
           histo2D["SMLik_vs_ScdDerFine"]->Fill(LnLik[SMConfig], (LnLik[xOuterLFine] + LnLik[xOuterRFine] - 2*LnLik[SMConfig])/(0.2*0.2));
+          histo2D["SMLik_vs_MinCoef"]->Fill(LnLik[SMConfig], MingR);
           histo2D["RightDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterR], MaxLik - MinLik);
           histo2D["LeftDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterL], MaxLik - MinLik);
 
@@ -453,6 +458,7 @@ int main(int argc, char *argv[]){
           sampleSF.push_back(MCScaleFactor);
 
           histo1D["SMLikValue_AfterCut"]->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
+          histo2D["SMLik_vs_MinCoef_AfterCut"]->Fill(LnLik[SMConfig], MingR);
 
           //-- Send the array containing the ln(weights) to the predefined function to define the TGraph, fit this, detect the deviation points and fit again! --//
           if(doFits){
@@ -489,25 +495,27 @@ int main(int argc, char *argv[]){
         temp->SetEntries(temp->GetEntries()-2); // necessary since each SetBinContent adds +1 to the number of entries...
         temp->Write();
       }
-      for(int iOpt = 0; iOpt < 5; iOpt++){
-        if(consSample[iOpt] != 0 && consSample[iOpt] < subSamples[iOpt] ){
-          h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
-        }
-        else if(consSample[iOpt] == subSamples[iOpt]){
-          if(sampleTitle[iOpt] != "Data"){
+      if(subSamples[0]+subSamples[1]+subSamples[2]+subSamples[3] > 1){
+        for(int iOpt = 0; iOpt < 5; iOpt++){
+          if(consSample[iOpt] != 0 && consSample[iOpt] < subSamples[iOpt] ){
             h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
-            leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"F");
-            h_SMLikValue_SampleSum[iOpt]->SetFillColor(fillColor[iOpt]);
-            h_SMLikValue_SampleSum[iOpt]->SetLineColor(fillColor[iOpt]);
-            hs->Add(h_SMLikValue_SampleSum[iOpt]);
           }
-          else if(sampleTitle[iOpt] == "Data" && string(argv[3]) == "DataMC"){
-            h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
-            leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"LEP");
-            h_SMLikValue_SampleSum[iOpt]->SetMarkerColor(fillColor[iOpt]);
-            h_SMLikValue_SampleSum[iOpt]->SetMarkerStyle(20);                 //As is the case in MultiSamplePlots!
+          else if(consSample[iOpt] == subSamples[iOpt]){
+            if(sampleTitle[iOpt] != "Data"){
+              h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
+              leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"F");
+              h_SMLikValue_SampleSum[iOpt]->SetFillColor(fillColor[iOpt]);
+              h_SMLikValue_SampleSum[iOpt]->SetLineColor(fillColor[iOpt]);
+              hs->Add(h_SMLikValue_SampleSum[iOpt]);
+            }
+            else if(sampleTitle[iOpt] == "Data" && string(argv[3]) == "DataMC"){
+              h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
+              leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"LEP");
+              h_SMLikValue_SampleSum[iOpt]->SetMarkerColor(fillColor[iOpt]);
+              h_SMLikValue_SampleSum[iOpt]->SetMarkerStyle(20);                 //As is the case in MultiSamplePlots!
+            }
+            consSample[iOpt] = 0;
           }
-          consSample[iOpt] = 0;
         }
       }
     }
@@ -525,12 +533,19 @@ int main(int argc, char *argv[]){
  
   outputFile->cd();
   h_SMLikValue_Sum->Write();
-  TCanvas* canv_Stack = new TCanvas("CanvasStack","CanvasStack");
-  canv_Stack->cd();
-  hs->Draw();
-  if(string(argv[3]) == "DataMC") h_SMLikValue_SampleSum[4]->Draw("samepe");
-  leg->Draw();
-  canv_Stack->Write();
+
+  if(subSamples[0]+subSamples[1]+subSamples[2]+subSamples[3] > 1){
+    TCanvas* canv_Stack = new TCanvas("CanvasStack","CanvasStack");
+    canv_Stack->cd();
+    hs->Draw();
+    hs->SetTitle("");
+    hs->GetXaxis()->SetTitle("Matrix Element method -ln(L) value evaluated at SM configuration"); hs->GetXaxis()->SetTitleOffset(1.2);
+    hs->GetYaxis()->SetTitle("# events");                                                         hs->GetYaxis()->SetTitleOffset(1.2);
+    if(string(argv[3]) == "DataMC") h_SMLikValue_SampleSum[4]->Draw("samepe");
+    leg->Draw();
+    leg->SetFillColor(0);
+    canv_Stack->Write();
+  }
  
   //Get the minimum!!
   bool getMinForIndivSamples = true;
