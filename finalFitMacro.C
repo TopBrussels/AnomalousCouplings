@@ -157,16 +157,37 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     }
 
     double SampleEntries[100];
-    for(int i = 0; i < LnLikArray[iFile][0].size(); i++)
+    double ySM_sample = 0, yNeg_sample = 0, yPos_sample = 0;
+    for(int i = 0; i < LnLikArray[iFile][0].size(); i++){
       SampleEntries[i] = summedSampleEntries[i];
+      if(Var[i] == -0.05) yNeg_sample = summedSampleEntries[i];
+      if(Var[i] == 0.0)   ySM_sample  = summedSampleEntries[i];
+      if(Var[i] == 0.05)  yPos_sample = summedSampleEntries[i];
+    }
 
     if(getIndivSampleMin && pseudoTitle == ""){
       TGraph* gr_sampleSum = new TGraph(LnLikArray[iFile][0].size(), Var, SampleEntries);
+      gr_sampleSum->SetMarkerStyle(22);
+
+      //Use a fit through the entire TGraph to get the minimum
       TF1* polFit_sampleSum = new TF1(("polFit_SummedSampleGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
       gr_sampleSum->Fit(polFit_sampleSum,"Q","",polFit_sampleSum->GetXmin(), polFit_sampleSum->GetXmax());
       double Minimum = polFit_sampleSum->GetMinimumX();
       double Error = (polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX()))/2.0;
       std::cout << "    --> Minimum for " << polFit_sampleSum->GetName() << " is : " << Minimum << " +- " << Error << endl;
+
+      //Using the three points around zero as parabola!
+      TF1* pol_sampleSum = new TF1(("pol_SummedSampleGraph_"+name[iFile]).c_str(),"pol2", FitMin, FitMax);
+      pol_sampleSum->SetParameter(0, ySM_sample );
+      pol_sampleSum->SetParameter(1, (yPos_sample-yNeg_sample)/(2.0*0.05) );
+      pol_sampleSum->SetParameter(2, (((yPos_sample+yNeg_sample)/2.0)-ySM_sample)*(1/(0.05*0.05)) );
+      pol_sampleSum->SetLineColor(3);
+      double MinParabola3 = pol_sampleSum->GetMinimumX();
+      double ErrParabola3 = (pol_sampleSum->GetX(pol_sampleSum->GetMinimum()+0.5, pol_sampleSum->GetMinimumX(),0.2) - pol_sampleSum->GetX(pol_sampleSum->GetMinimum()+0.5, -0.2, pol_sampleSum->GetMinimumX()))/2.0;
+      std::cout << "    --> Minimum using the parabola gives: " << MinParabola3 << " \\pm " << ErrParabola3 << std::endl;
+      TCanvas *canv_pol_sampleSum = new TCanvas(("pol_sumSample_"+name[iFile]).c_str(),("pol_sumSample_"+name[iFile]).c_str()); canv_pol_sampleSum->cd();
+      gr_sampleSum->Draw("AP");
+      pol_sampleSum->Draw("same");
 
       h_MinComp->SetBinContent(iFile+1, Minimum);
       h_MinComp->SetBinError(iFile+1, Error);
@@ -179,28 +200,52 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       gr_sampleSum->SetTitle(("Graph containing the summed events for "+name[iFile]).c_str());
       gr_sampleSum->Write();
       
+      canv_pol_sampleSum->Write();
     }
   }
   
   double Entries[100];
-  for(int i = 0; i < LnLikArray[0][0].size(); i++)
+  double ySM = 0, yNeg = 0, yPos = 0;
+  for(int i = 0; i < LnLikArray[0][0].size(); i++){
     Entries[i] = summedEntries[i];
+    if(Var[i] == -0.05) yNeg = summedEntries[i];
+    if(Var[i] == 0.0)   ySM  = summedEntries[i];
+    if(Var[i] == 0.05)  yPos = summedEntries[i];
+  }
+  TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+  gr_totalSum->SetMarkerStyle(22);
 
   TDirectory* grdir = outFile->GetDirectory("graphs");   //Check whether directory already exists ..
   if(!grdir) grdir = outFile->mkdir("graphs");          // .. and otherwise create it!
   grdir->cd();
-  TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+
+  //Fit through the entire TGraph!
   TF1* polFit_totalSum = new TF1(("polFit_SummedTotalGraph"+pseudoTitle).c_str(),"pol2",FitMin, FitMax);
   gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
   double MinimumComb = polFit_totalSum->GetMinimumX();
   double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
 
+  //Using the three points around zero as parabola!
+  TF1* pol_totalSum = new TF1(("pol_SummedTotalGraph_"+pseudoTitle).c_str(),"pol2", FitMin, FitMax);
+  pol_totalSum->SetParameter(0, ySM );
+  pol_totalSum->SetParameter(1, (yPos-yNeg)/(2.0*0.05) );
+  pol_totalSum->SetParameter(2, (((yPos+yNeg)/2.0)-ySM)*(1/(0.05*0.05)) );
+  pol_totalSum->SetLineColor(3);
+  double MinParabola3_Comb = pol_totalSum->GetMinimumX();
+  double ErrParabola3_Comb = (pol_totalSum->GetX(pol_totalSum->GetMinimum()+0.5, pol_totalSum->GetMinimumX(),0.2) - pol_totalSum->GetX(pol_totalSum->GetMinimum()+0.5, -0.2, pol_totalSum->GetMinimumX()))/2.0;
+
   if(pseudoTitle == ""){
     std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " +- " << ErrorComb << endl;
+    std::cout << " * Minimum using the parabola gives: " << MinParabola3_Comb << " \\pm " << ErrParabola3_Comb << std::endl;
 
     gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
     gr_totalSum->SetTitle("Graph containing the summed events for all samples");
     gr_totalSum->Write();
+  
+    TCanvas *canv_pol_totalSum = new TCanvas(("pol_sumTotal_"+pseudoTitle).c_str(),("pol_sumTotal_"+pseudoTitle).c_str()); canv_pol_totalSum->cd();
+    gr_totalSum->Draw("AP");
+    pol_totalSum->Draw("same");
+    canv_pol_totalSum->Write();
 
     //Add the combined minimum and write out this minimum comparison histogram:
     if(getIndivSampleMin){
