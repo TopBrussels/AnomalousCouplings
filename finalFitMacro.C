@@ -126,7 +126,7 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
   delete gr_LnLik;
 }
 
-vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, bool getIndivSampleMin, std::string pseudoTitle = ""){
+vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, bool getIndivSampleMin, std::string systematic, std::string pseudoTitle = ""){
 
   TH1D* h_MinComp = 0;
   if(pseudoTitle == "") h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
@@ -168,6 +168,9 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     if(getIndivSampleMin && pseudoTitle == ""){
       TGraph* gr_sampleSum = new TGraph(LnLikArray[iFile][0].size(), Var, SampleEntries);
       gr_sampleSum->SetMarkerStyle(22);
+      gr_sampleSum->GetXaxis()->SetTitle("g_{R} coefficient");
+      gr_sampleSum->GetYaxis()->SetTitle("-ln(L_{MEM}) output");
+      gr_sampleSum->GetYaxis()->SetTitleOffset(1.3);
 
       //Use a fit through the entire TGraph to get the minimum
       TF1* polFit_sampleSum = new TF1(("polFit_SummedSampleGraph_"+name[iFile]).c_str(),"pol2",FitMin, FitMax);
@@ -188,6 +191,15 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       TCanvas *canv_pol_sampleSum = new TCanvas(("pol_sumSample_"+name[iFile]).c_str(),("pol_sumSample_"+name[iFile]).c_str()); canv_pol_sampleSum->cd();
       gr_sampleSum->Draw("AP");
       pol_sampleSum->Draw("same");
+      
+      //Add a legend for this fit vs parabola comparison!
+      TLegend* leg = new TLegend(0.35,0.7,0.65,0.9);
+      leg->SetFillColor(0);
+      leg->SetHeader((name[iFile]).c_str());
+      leg->AddEntry(gr_sampleSum,"Output from the MEM","p");
+      leg->AddEntry(polFit_sampleSum,"Polynomial fit through all points","l");
+      leg->AddEntry(pol_sampleSum,"Parabola through three inner points","l");
+      leg->Draw();
 
       h_MinComp->SetBinContent(iFile+1, Minimum);
       h_MinComp->SetBinError(iFile+1, Error);
@@ -201,6 +213,9 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       gr_sampleSum->Write();
       
       canv_pol_sampleSum->Write();
+      //gr_sampleSum->SetTitle("");   //Set this when saving the histo!
+      //canv_pol_sampleSum->SaveAs(("Events_"+systematic+"/MinimumExtractionMethod_"+name[iFile]+".pdf").c_str());
+      delete leg;
     }
   }
   
@@ -214,6 +229,9 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   }
   TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
   gr_totalSum->SetMarkerStyle(22);
+  gr_totalSum->GetXaxis()->SetTitle("g_{R} coefficient");
+  gr_totalSum->GetYaxis()->SetTitle("-ln(L_{MEM}) output");
+  gr_totalSum->GetYaxis()->SetTitleOffset(1.5);
 
   TDirectory* grdir = outFile->GetDirectory("graphs");   //Check whether directory already exists ..
   if(!grdir) grdir = outFile->mkdir("graphs");          // .. and otherwise create it!
@@ -245,7 +263,18 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     TCanvas *canv_pol_totalSum = new TCanvas(("pol_sumTotal_"+pseudoTitle).c_str(),("pol_sumTotal_"+pseudoTitle).c_str()); canv_pol_totalSum->cd();
     gr_totalSum->Draw("AP");
     pol_totalSum->Draw("same");
+    //Add a legend for this fit vs parabola comparison!
+    TLegend* leg = new TLegend(0.35,0.7,0.65,0.9);
+    leg->SetFillColor(0);
+    leg->AddEntry(gr_totalSum,"Output from the MEM","p");
+    leg->AddEntry(polFit_totalSum,"Polynomial fit through all points","l");
+    leg->AddEntry(pol_totalSum,"Parabola through three inner points","l");
+    leg->Draw();
+
     canv_pol_totalSum->Write();
+    gr_totalSum->SetTitle("");   //Set this when saving the histo!
+    canv_pol_totalSum->SaveAs(("Events_"+systematic+"/MinimumExtractionMethod_"+pseudoTitle+".pdf").c_str());
+    delete leg;
 
     //Add the combined minimum and write out this minimum comparison histogram:
     if(getIndivSampleMin){
@@ -594,7 +623,7 @@ int main(int argc, char *argv[]){
  
   //Get the minimum!!
   bool getMinForIndivSamples = true;
-  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples);
+  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples, syst);
 
   //Now do the pseudo-samples stuff!
   if(doPseudoSamples){
@@ -633,7 +662,7 @@ int main(int argc, char *argv[]){
         histo1D_PS["nrEntries_PS_"+sampleName[iSample]]->Fill(pseudoDataLnLik[iSample].size());
         histo1D_PS["nrEntriesSF_PS_"+sampleName[iSample]]->Fill(weightSum);
       }
-      vector<double> result = getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, "_PseudoSample");
+      vector<double> result = getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, syst, "_PseudoSample");
       histo1D_PS["Minimum_PS"]->Fill(result[0]);
       histo1D_PS["MinError_PS"]->Fill(result[1]);
       histo1D_PS["Pull"]->Fill( (result[0] - gRMeanPS)/result[1]);
