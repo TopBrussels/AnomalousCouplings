@@ -177,7 +177,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       gr_sampleSum->Fit(polFit_sampleSum,"Q","",polFit_sampleSum->GetXmin(), polFit_sampleSum->GetXmax());
       double Minimum = polFit_sampleSum->GetMinimumX();
       double Error = (polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, polFit_sampleSum->GetMinimumX(),0.2) - polFit_sampleSum->GetX(polFit_sampleSum->GetMinimum()+0.5, -0.2, polFit_sampleSum->GetMinimumX()))/2.0;
-      std::cout << "    --> Minimum for " << polFit_sampleSum->GetName() << " is : " << Minimum << " +- " << Error << endl;
+      std::cout << "    --> Minimum for " << polFit_sampleSum->GetName() << " is : " << Minimum << " \\pm " << Error << endl;
 
       //Using the three points around zero as parabola!
       TF1* pol_sampleSum = new TF1(("pol_SummedSampleGraph_"+name[iFile]).c_str(),"pol2", FitMin, FitMax);
@@ -253,7 +253,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   double ErrParabola3_Comb = (pol_totalSum->GetX(pol_totalSum->GetMinimum()+0.5, pol_totalSum->GetMinimumX(),0.2) - pol_totalSum->GetX(pol_totalSum->GetMinimum()+0.5, -0.2, pol_totalSum->GetMinimumX()))/2.0;
 
   if(pseudoTitle == ""){
-    std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " +- " << ErrorComb << endl;
+    std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " \\pm " << ErrorComb << endl;
     std::cout << " * Minimum using the parabola gives: " << MinParabola3_Comb << " \\pm " << ErrParabola3_Comb << std::endl;
 
     gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
@@ -307,8 +307,10 @@ int main(int argc, char *argv[]){
   // 4-..) Weight files which will be considered (only if 3rd argument is equal to file!!)
 
   double LikCut = 120;
-  if( argc >= 2)
-    LikCut = atof(argv[1]);
+  if( argc >= 2){
+    if( string(argv[1]) == "opt") LikCut = 63.869;
+    else                          LikCut = atof(argv[1]);
+  }
   std::cout << " - Applied likelihood cut value is : " << LikCut << std::endl;
   //int iLikCut = atoi(argv[1]);
   //std::string sLikCut = NumberToString(iLikCut);
@@ -317,31 +319,46 @@ int main(int argc, char *argv[]){
   std::string syst = "Nom";    //Possible input: Nom, JESMinus, JESPlus, JERMinus, JERPlus, ...
   if(argc >= 3)
     syst = string(argv[2]);
+  std::string systDir = syst;
+  if(syst.find("Tag") >= 0 && syst.find("Tag") < syst.size()) systDir = "BTagSF";
+  if( (syst.find("Matching") >= 0 && syst.find("Maching") < syst.size()) || (syst.find("Scaling") >= 0 && syst.find("Scaling") < syst.size()) ) systDir = "MatchingAndScaling";
+
+  //Also give the luminosity from the command line (easy to change between ttbar (semi-lept) and data lumi!
+  double Luminosity = 19646.8;
+  if(argc >= 4){
+    if(string(argv[3]) == "MCLumi")        Luminosity = 226504.2973;
+    else if(string(argv[3]) == "DataLumi") Luminosity = 19646.8;
+    else                                   Luminosity = atof(argv[3]);
+  }
+  std::cout << " - Applied luminisoty is : " << Luminosity << std::endl;
 
   vector<string> inputFiles;
   int subSamples[5] = {0, 0, 0, 0, 0};    //Store the number of subSamples which have to be combined in the StackPlot (0 = TT, 1 = ST, 2 = W, 3 =  Z, 4 = Data)
   std::string sampleTitle[5] = {"t#bar{t}", "Single top", "W#rightarrowl#nu", "Z/#gamma*#rightarrowl^{+}l^{-}","Data"};
   int fillColor[5] = {kRed+1, kMagenta, kGreen-3, kAzure+2, 1};
-  if( argc >= 4){
-    if(argc >= 5 && string(argv[3]) == "file"){                 //Possible input for 3rd argument: DataMC, MC, Signal, file
-      for(int iFile = 4; iFile < argc; iFile++)
+  if( argc >= 5){
+    if(argc >= 6 && string(argv[4]) == "file"){                 //Possible input for 3rd argument: Data, DataMC, MC, systMC, Signal, file
+      for(int iFile = 5; iFile < argc; iFile++)
         inputFiles.push_back(string(argv[iFile]).c_str());
     }
-    if(string(argv[3]) == "DataMC") 
+    if(string(argv[4]) == "DataMC" || string(argv[4]) == "Data") 
       inputFiles.push_back("Events_Data/Data_SemiMu_RgR_AllEvents_LatestEvtSel_Nov24/weights_SFAdded.out");
-    if(string(argv[3]) == "DataMC" || string(argv[3]) == "MC"){
-      inputFiles.push_back("Events_"+syst+"/ZJets/"+syst+"_ZJets_4jets/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/WJets/"+syst+"_WJets_4jets/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tChannel_t/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tChannel_tbar/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tWChannel_t/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/SingleTop/"+syst+"_SingleTop_tWChannel_tbar/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_FullLept/weights_CheckedEvts_SFAdded.out");
+    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC"){
+      inputFiles.push_back("Events_"+systDir+"/ZJets/"+syst+"_ZJets_4jets/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+systDir+"/WJets/"+syst+"_WJets_4jets/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tChannel_t/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tChannel_tbar/weights_CheckedEvts_SFAdded.out");
     }
-    if(string(argv[3]) == "DataMC" || string(argv[3]) == "MC" || string(argv[3]) == "Signal"){
-      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_CorrectEvts/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_UnmatchedEvts/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+syst+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_WrongEvts/weights_CheckedEvts_SFAdded.out");
+    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC"){
+      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tWChannel_t/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tWChannel_tbar/weights_CheckedEvts_SFAdded.out");
+    }
+    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC" || string(argv[4]) == "AllTT")
+      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_FullLept/weights_CheckedEvts_SFAdded.out");
+    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC"|| string(argv[4]) == "AllTT" || string(argv[4]) == "Signal" ){
+      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_CorrectEvts/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_UnmatchedEvts/weights_CheckedEvts_SFAdded.out");
+      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_WrongEvts/weights_CheckedEvts_SFAdded.out");
     }
   }
 
@@ -359,7 +376,7 @@ int main(int argc, char *argv[]){
   if(subSamples[4] != 0) std::cout << "  ==> Also stored " << subSamples[4] << " data samples! " << std::endl;
 
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile(("Events_"+syst+"/OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_"+systDir+"/OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
@@ -385,10 +402,6 @@ int main(int argc, char *argv[]){
   std::map<string,TH1D*> histo1D;  
   std::map<string,TH2D*> histo2D;  
   
-  //----------------------//
-  //----  Luminosity  ----//
-  //----------------------//
-  double Luminosity = 19646.8;
 
   //** Loop over the different input files and read out the necessary info **//
   TH1D* h_SMLikValue_Sum = new TH1D("SMLikelihoodValue_Sum","Distribution of likelihood value at gR = 0.0 (all samples)",85,40,85);
@@ -574,7 +587,7 @@ int main(int argc, char *argv[]){
           if(consSample[iOpt] != 0 && consSample[iOpt] < subSamples[iOpt] ){
             h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
           }
-          else if(consSample[iOpt] == subSamples[iOpt]){
+          else if(consSample[iOpt] == subSamples[iOpt] && subSamples[iOpt] > 0){
             if(sampleTitle[iOpt] != "Data"){
               h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
               leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"F");
@@ -623,7 +636,7 @@ int main(int argc, char *argv[]){
  
   //Get the minimum!!
   bool getMinForIndivSamples = true;
-  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples, syst);
+  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples, systDir);
 
   //Now do the pseudo-samples stuff!
   if(doPseudoSamples){
@@ -638,7 +651,7 @@ int main(int argc, char *argv[]){
     histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",50,-0.06, 0.06);
     histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",50,0.005, 0.015);
     histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",35,-4,4.5);
-    double gRMeanPS =-0.000969311; // 0.00229755; //-0.00153229; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
+    double gRMeanPS = -0.00182966; // -0.000969311; // 0.00229755; //-0.00153229; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
     std::cout << "  --> Mean used for pull calculation is : " << gRMeanPS << std::endl;
 
     for(int iPseudo = 0; iPseudo < nrRandomSamples; iPseudo++){
@@ -662,7 +675,7 @@ int main(int argc, char *argv[]){
         histo1D_PS["nrEntries_PS_"+sampleName[iSample]]->Fill(pseudoDataLnLik[iSample].size());
         histo1D_PS["nrEntriesSF_PS_"+sampleName[iSample]]->Fill(weightSum);
       }
-      vector<double> result = getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, syst, "_PseudoSample");
+      vector<double> result = getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, systDir, "_PseudoSample");
       histo1D_PS["Minimum_PS"]->Fill(result[0]);
       histo1D_PS["MinError_PS"]->Fill(result[1]);
       histo1D_PS["Pull"]->Fill( (result[0] - gRMeanPS)/result[1]);
@@ -670,11 +683,12 @@ int main(int argc, char *argv[]){
 
     //Fit the Minimum histogram to check whether the used mean corresponds to this result
     histo1D_PS["Minimum_PS"]->Fit("gaus","Q");
-    std::cout << "  --> Fit on minimum distribution gives: " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(1) << " +- " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(2) <<std::endl;
+    std::cout << "  --> Fit on minimum distribution gives: " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(1) << " \\pm " << histo1D_PS["Minimum_PS"]->GetFunction("gaus")->GetParameter(2) <<std::endl;
 
     //Now fit the pull distribution with a gaussian to get the width of the pull:
     histo1D_PS["Pull"]->Fit("gaus","Q");
-    std::cout << " ****** Width of pull = " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParameter(2) << " +- " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParError(2) << " ****** " << std::endl;
+    std::cout << " ****** Mean of pull  = " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParameter(1) << " \\pm " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParError(1) << " ****** " << std::endl;
+    std::cout << " ****** Width of pull = " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParameter(2) << " \\pm " << histo1D_PS["Pull"]->GetFunction("gaus")->GetParError(2) << " ****** " << std::endl;
 
     if(histo1D_PS.size() > 0){
       TDirectory* th1dirPS = outputFile->GetDirectory("PseudoSample_1D_histo");   //Check whether directory already exists ..
