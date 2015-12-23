@@ -120,6 +120,7 @@ int main(int argc, char *argv[]){
     TF1* pol_Sum = h_SummedWeights->GetFunction("polFit_Acc_SummedHist");
 
     Min_HistSum[iDir] = pol_Sum->GetMinimumX(); 
+    std::cout << " Looking at variable " << consVar << " which has minimum = " << pol_Sum->GetMinimumX() << std::endl;
     Min_FstFit[iDir] = pol_FstFit->GetMinimumX();
     Min_ScdFit[iDir] = pol_ScdFit->GetMinimumX();
     Err_HistSum[iDir] = pol_Sum->GetX(pol_Sum->GetMinimum()+0.5, pol_Sum->GetMinimumX(), 0.4) - pol_Sum->GetX(pol_Sum->GetMinimum()+0.5, -0.4, pol_Sum->GetMinimumX());
@@ -183,6 +184,7 @@ int main(int argc, char *argv[]){
   //Now draw the individual TGraphs, each fitted with a straight line!
   canv->cd();
   gr_HistSum->Draw("AP");
+  gr_StraightLine->Draw("C");
   polFit_Line->SetLineColor(1);  
   //gr_HistSum->Fit(polFit_Line,"Q","",-0.25,0.25);
   gr_HistSum->Fit(polFit_Line,"Q","",-0.17,0.17);    //Exclude the point at +- 0.2 since this is often not well reconstructed (especially when outer bins are excluded)
@@ -200,6 +202,7 @@ int main(int argc, char *argv[]){
 
   canv->cd();
   gr_FstFit->Draw("AP");
+  gr_StraightLine->Draw("C");
   polFit_Line->SetLineColor(2);
   //gr_FstFit->Fit(polFit_Line,"Q","",-0.25,0.25); 
   gr_FstFit->Fit(polFit_Line,"Q","",-0.17,0.17);    //Exclude the point at +- 0.2 since this is often not well reconstructed (especially when outer bins are excluded)
@@ -216,6 +219,7 @@ int main(int argc, char *argv[]){
 
   canv->cd();
   gr_ScdFit->Draw("AP");
+  gr_StraightLine->Draw("C");
   polFit_Line->SetLineColor(4);
   //gr_ScdFit->Fit(polFit_Line,"Q","",-0.25,0.25);
   gr_ScdFit->Fit(polFit_Line,"Q","",-0.17,0.17);    //Exclude the point at +- 0.2 since this is often not well reconstructed (especially when outer bins are excluded)
