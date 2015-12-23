@@ -173,9 +173,14 @@ class Cluster(object):
         new_prog = pjoin(cwd, temp_file_name)
         open(new_prog, 'w').write(text % dico)
         misc.Popen(['chmod','+x',new_prog],cwd=cwd)
-        
-        return self.submit(new_prog, argument, cwd, stdout, stderr, log, 
-                               required_output=required_output, nb_submit=nb_submit)
+       
+	while True:
+	    try:
+		result = self.submit(new_prog, argument, cwd, stdout, stderr, log, required_output=required_output, nb_submit=nb_submit)
+		return result
+	    except Exception as e: 
+		logger.info('Submission failed with: '+str(e)+'. Trying again after 1 minute.') 
+		time.sleep(60)	
         
 
     def control(self, me_dir=None):
@@ -1032,7 +1037,7 @@ class PBSCluster(Cluster):
     running_tag = ['T','E','R']
     complete_tag = ['C']
     
-    maximum_submited_jobs = 1200
+    maximum_submited_jobs = 1900
 
     @multiple_try()
     def submit(self, prog, argument=[], cwd=None, stdout=None, stderr=None, log=None,
@@ -1089,7 +1094,7 @@ class PBSCluster(Cluster):
         command = ['qsub','-o', stdout,
                    '-N', me_dir, 
                    '-e', stderr,
-		   '-l walltime=02:30:00',
+		   '-l walltime=05:00:00',
                    '-V']
 
         if self.cluster_queue and self.cluster_queue != 'None':
@@ -1126,8 +1131,8 @@ class PBSCluster(Cluster):
             #        if retry < 4: retry+=1
             #        elif retry == 4: 
 	    #            raise ClusterManagmentError, 'fail to submit to the cluster (3): \n%s' \
-	    raise ClusterManagmentError, 'fail to submit to the cluster (3): \n%s' \
-                                                                                    % output
+	    logger.info('PBSCluster: fail to submit to the cluster: id.isdigit = '+str(id.isdigit())+', a.returncode = '+str(a.returncode))
+	    raise ClusterManagmentError, 'fail to submit to the cluster (3): \n%s' % output
             
         self.submitted += 1
         self.submitted_ids.append(id)
