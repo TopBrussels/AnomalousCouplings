@@ -110,9 +110,8 @@ void ExtraEvtSelCuts::StoreCutInfluence(TFile* outfile){
       }
     }
 
-
     ofstream CutInfl;
-    CutInfl.open(("EventSelectionResults/AnalyzerOutput/ExtraEventSelectionCuts"+dataSetName_+".tex").c_str());
+    CutInfl.open(("EventSelectionResults/AnalyzerOutput/ExtraEventSelectionCuts_"+dataSetName_+".tex").c_str());
 
     //Initialize the tex document
     CutInfl << "\\documentclass{article} \n\\usepackage[margin=0.5in]{geometry} \n\\begin{document} \n" << endl;

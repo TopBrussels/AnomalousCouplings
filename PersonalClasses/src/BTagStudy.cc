@@ -61,8 +61,10 @@ void BTagStudy::InitializeDataSet(std::string datasetName){
     histo1D["Mlb_CorrectCombiChiSq_"+TitleInfo] = new TH1F(("Mlb_CorrectCombiChiSq_"+TitleInfo).c_str(),("#chi^{2}_{mlb} for correct b-jet choice -- "+TitleInfo).c_str(),150,0,10);
     histo1D["Mlb_WrongCombiChiSq_"+TitleInfo]   = new TH1F(("Mlb_WrongCombiChiSq_"+TitleInfo).c_str(),("#chi^{2}_{mlb} for wrong b-jet choice -- "+TitleInfo).c_str(),150,0,10);
 
-    histo1D["LowestChiSq_"+TitleInfo] = new TH1F(("LowestChiSq_"+TitleInfo).c_str(), ("#chi^{2} distribution for chosen jet-combination -- "+TitleInfo).c_str(), 150,0,80);
-    histo1D["WrongChiSq_"+TitleInfo] = new TH1F(("WrongChiSq_"+TitleInfo).c_str(), ("#chi^{2} distribution for the non-chosen jet combination -- "+TitleInfo).c_str(), 150,0,80);
+    histo1D["LowestChiSq_4Jets_"+TitleInfo] = new TH1F(("LowestChiSq_4Jets_"+TitleInfo).c_str(), ("#chi^{2} distribution for chosen jet-combination -- "+TitleInfo).c_str(), 50,0,25);
+    histo1D["WrongChiSq_4Jets_"+TitleInfo] = new TH1F(("WrongChiSq_4Jets_"+TitleInfo).c_str(), ("#chi^{2} distribution for the non-chosen jet combination -- "+TitleInfo).c_str(), 50,0,25);
+    histo1D["LowestChiSq_"+TitleInfo] = new TH1F(("LowestChiSq_"+TitleInfo).c_str(), ("#chi^{2} distribution for chosen jet-combination -- "+TitleInfo).c_str(), 50,0,25);
+    histo1D["WrongChiSq_"+TitleInfo] = new TH1F(("WrongChiSq_"+TitleInfo).c_str(), ("#chi^{2} distribution for the non-chosen jet combinations -- "+TitleInfo).c_str(), 50,0,25);
   }
 }   
 
@@ -156,6 +158,12 @@ int BTagStudy::getLowestMlbMqqbChiSquared(int bTagNr, vector<TLorentzVector> Jet
   ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[0]]).M())/S_Mlb,2)+pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[1]]+Jets[(LightJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[1]]).M())/S_Mqqb,2)));
   ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[1]]).M())/S_Mlb,2)+pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[1]]).M())/S_Mqqb,2)));
 
+  //Sort the elements of the pair on ascending order (using the second value)!
+  //--> This way the first value still remains the original index and is not changed!
+  std::sort(ChiSq.begin(), ChiSq.end(), sort_pred());
+  histo1D["LowestChiSq_4Jets_"+BTitle[bTagNr]+"_"+dataSetName_]->Fill(ChiSq[0].second);
+  histo1D["WrongChiSq_4Jets_"+BTitle[bTagNr]+"_"+dataSetName_]->Fill(ChiSq[1].second);
+
   //Continue adding elements in the case more than 4 jets should be considered (and they are actually present!)
   if(use5Jets_ && LightJetNr[bTagNr].size() > 2){
     ChiSq.push_back(std::make_pair(ChiSq.size(), pow((Mlb-(lept+Jets[(bTagJetNr[bTagNr])[0]]).M())/S_Mlb,2)+pow((Mqqb-(Jets[(bTagJetNr[bTagNr])[1]]+Jets[(LightJetNr[bTagNr])[0]]+Jets[(LightJetNr[bTagNr])[2]]).M())/S_Mqqb,2)));
@@ -236,6 +244,24 @@ void BTagStudy::CreateHistograms(TFile* outfile, bool savePDF, std::string pathP
       temp->Write(outfile, name, savePDF, (pathPNG+"/MSPlots_BTagStudy/").c_str(), "pdf", "MSPlots_BTagStudy");
     }
   }
+
+  //TCanvas* canv_Low = new TCanvas("canv_LowestChiSq","canv_LowestChiSq");
+  //canv_Low->cd();
+  //histo1D["LowestChiSq_4Jets_TightTags_TTbarJets_SemiLept_Nominal"]->SetLineColor(1);
+  //histo1D["LowestChiSq_TightTags_TTbarJets_SemiLept_Nominal"]->SetLineColor(3);
+  //histo1D["LowestChiSq_TightTags_TTbarJets_SemiLept_Nominal"]->Draw();
+  //histo1D["LowestChiSq_TightTags_TTbarJets_SemiLept_Nominal"]->GetXaxis()->SetTitle("#chi^{2} value");
+  //histo1D["LowestChiSq_4Jets_TightTags_TTbarJets_SemiLept_Nominal"]->Draw("same");
+  //canv_Low->SaveAs("LowestChiSqComparison.pdf");
+
+  //TCanvas* canv_Wrong = new TCanvas("canv_WrongChiSq","canv_WrongChiSq");
+  //canv_Wrong->cd();
+  //histo1D["WrongChiSq_4Jets_TightTags_TTbarJets_SemiLept_Nominal"]->SetLineColor(1);
+  //histo1D["WrongChiSq_TightTags_TTbarJets_SemiLept_Nominal"]->SetLineColor(3);
+  //histo1D["WrongChiSq_TightTags_TTbarJets_SemiLept_Nominal"]->DrawNormalized();
+  //histo1D["WrongChiSq_TightTags_TTbarJets_SemiLept_Nominal"]->GetXaxis()->SetTitle("#chi^{2} value");
+  //histo1D["WrongChiSq_4Jets_TightTags_TTbarJets_SemiLept_Nominal"]->DrawNormalized("same");
+  //canv_Wrong->SaveAs("WrongChiSqComparison.pdf");
 
   //Histo1D's
   if(histo1D.size() > 0){

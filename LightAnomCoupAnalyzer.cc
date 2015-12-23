@@ -107,7 +107,8 @@ int main (int argc, char *argv[])
   //---------------------------//
   //  Run specific parts only  //
   //---------------------------//
-  bool getLHCOOutput = true; 
+  bool getLHCOOutput = true;
+  bool getEvtNrInfo = false;
   bool splitLeptonChargeLHCO = false;
   bool getCorrectAndWrongLHCO = true; 
   bool savePDF = false;
@@ -119,6 +120,10 @@ int main (int argc, char *argv[])
   bool onlyTTbar = false;
   bool onlyMuonChannel = true;       //Set this to true in order to reject all electron channel events!
   bool runLocally = false;           //Differentiate between local and m-machines running for the location of the input samples
+
+  //In case the matching or scaling systematics are considered, only the ttbar sample should be considered
+  if(nTupleSyst == "matchingdown_Nominal" || nTupleSyst == "matchingup_Nominal" || nTupleSyst == "scaledown_Nominal" || nTupleSyst == "scaleup_Nominal") onlyTTbar = true;
+  if(systematic != "Nominal"){ getLHCOOutput = false; getEvtNrInfo = true;}
 
   //Give correct name to TF light ntuples!
   std::string tfFill = "";
@@ -176,7 +181,7 @@ int main (int argc, char *argv[])
   //-------------------------//
   std::string doLeptonSFShift = "Nominal";   //Other options are "Minus" and "Plus" (Capital letters are needed!)
   std::string doLumiWeightShift = "Nominal"; //Other options are "Minus" and "Plus"
-  if(systematic != "Nominal" && systematic != "bTagMinus" && systematic != "bTagPlus" && systematic != "MuonSFMinus" && systematic != "MuonSFPlus" && systematic != "ElecSFMinus" && systematic != "ElecSFPlus"){
+  if(systematic != "Nominal" && systematic != "bTagMinus" && systematic != "bTagPlus" && systematic != "misTagMinus" && systematic != "misTagPlus" && systematic != "MuonSFMinus" && systematic != "MuonSFPlus" && systematic != "ElecSFMinus" && systematic != "ElecSFPlus"){
     std::cout << "   *****  Given systematic is not allowed! " << std::endl;
     std::cout << "   *****  Possibilities are : Nominal, bTagMinus, bTagPlus, MuonSFMinus, MuonSFPlus, ElecSFMinus and ElecSFPlus " << std::endl;
     exit(-1);
@@ -203,19 +208,25 @@ int main (int argc, char *argv[])
   //----------------------------//
   //ROOT file for storing plots
   string pathPNG = "PlotsMacro_Light";
-  TFile* outputFile = new TFile((pathPNG+"/AnomCoup_Analysis"+nTupleSyst+""+onlyTTbarTitle+"_"+systematic+"_"+whichBTags+"_"+time+".root").c_str(),"RECREATE");
+  TFile* outputFile = new TFile((pathPNG+"/AnomCoup_Analysis_"+nTupleSyst+""+onlyTTbarTitle+"_"+systematic+"_"+whichBTags+"_"+time+".root").c_str(),"RECREATE");
 
   //Which datasets should be considered
   vector<string> inputFiles;
   vector<Dataset*> datasets;
   std::string inputFileDir = "/user/aolbrech/PBS_ScriptRunning/";
   if(onlyTTbar){
-    if(!runLocally) inputFiles.push_back((inputFileDir+"AnomCoupLight_TTbarJets_SemiLept_Nominal.root").c_str());
-    else            inputFiles.push_back("LightTree/AnomCoupLight_TTbarJets_SemiLept_Nominal.root");
+    if(nTupleSyst == "Nominal" && systematic == "Nominal"){
+      if(!runLocally) inputFiles.push_back((inputFileDir+""+nTupleSyst+"/AnomCoupLight_TTbarJets_SemiLept_"+nTupleSyst+".root").c_str());
+      else            inputFiles.push_back("LightTree/AnomCoupLight_TTbarJets_SemiLept_Nominal.root");
+    }
+    else{    //This corresponds to matching & scaling which is all TTbar (not only SemiLept)!
+      if(!runLocally) inputFiles.push_back((inputFileDir+""+nTupleSyst+"/AnomCoupLight_TTbarJets_"+nTupleSyst+".root").c_str());
+      else            inputFiles.push_back("LightTree/AnomCoupLight_TTbarJets_Nominal.root");
+    }
   }
   else{ 
     if(!runLocally){
-      if(nTupleSyst == "Nominal"){
+      if(nTupleSyst == "Nominal" && systematic == "Nominal"){
         inputFiles.push_back((inputFileDir+"DATA/AnomCoupLight_Data_Mu_Merged_22Jan2013_Nominal.root").c_str());                                                  //Winter14_v8
         //inputFiles.push_back("/user/aolbrech/PBS_ScriptRunning/Results/RESULTS_AnomCoup_13112015_121239/AnomCoupLight_Data_Mu_Merged_22Jan2013_Nominal.root");  //Winter14_v5
       }
@@ -350,13 +361,14 @@ int main (int argc, char *argv[])
     MSPlot["BJetPt_partFlavGluon_BTagSF"+leptFlav]  = new MultiSamplePlot(datasets, "BJetPt_partFlavGluon_BTagSF"+leptFlav,  120, 0, 350, "Jet p_T for b-tagged jets with gluon parton flavour");
     MSPlot["BJetPt_partFlavGluon_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "BJetPt_partFlavGluon_AllCuts"+leptFlav, 120, 0, 350, "Jet p_T for b-tagged jets with gluon parton flavour");
 
-    MSPlot["LeptonPt_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_BeforePU"+leptFlav, 100, 0, 200,"Lepton p_{T} (GeV)");
-    MSPlot["LeptonPt_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_PU_NoLeptonSF"+leptFlav, 100, 0, 200,"Lepton p_{T} (GeV)");
-    MSPlot["LeptonPt_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_BeforeBTag"+leptFlav, 100, 0, 200,"Lepton p_{T} (GeV)");
-    MSPlot["LeptonPt"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt"+leptFlav, 100, 0, 200,"Lepton p_{T} (GeV)");
-    MSPlot["LeptonPt_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_BTagSF"+leptFlav, 100, 0, 200,"Lepton p_{T} (GeV)");
-    MSPlot["LeptonPt_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_AllCuts"+leptFlav, 100, 0, 200,"Lepton p_{T} (GeV)");
-    MSPlot["LeptonMass_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "LeptonMass_AllCuts"+leptFlav, 100, 0, 2,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonPt_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_BeforePU"+leptFlav, 60, 20, 150,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonPt_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_PU_NoLeptonSF"+leptFlav, 60, 20, 150,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonPt_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_BeforeBTag"+leptFlav, 60, 20, 150,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonPt"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt"+leptFlav, 60, 20, 150,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonPt_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_BTagSF"+leptFlav, 60, 20, 150,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonPt_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_AllCuts"+leptFlav, 60, 20, 150,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonPt_AllCuts_noMuSF"+leptFlav] = new MultiSamplePlot(datasets, "LeptonPt_AllCuts_noMuSF"+leptFlav, 60, 20, 150,"Lepton p_{T} (GeV)");
+    MSPlot["LeptonMass_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "LeptonMass_AllCuts"+leptFlav, 100, 0, 2,"Lepton Mass (GeV)");
     MSPlot["LeptonEta"+leptFlav] = new MultiSamplePlot(datasets, "LeptonEta"+leptFlav, 50, -2.6, 2.6,"Lepton #eta");
     MSPlot["LeptonEta_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "LeptonEta_BTagSF"+leptFlav, 50, -2.6, 2.6,"Lepton #eta");
     MSPlot["LeptonEta_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "LeptonEta_AllCuts"+leptFlav, 50, -2.6, 2.6,"Lepton #eta");
@@ -364,52 +376,55 @@ int main (int argc, char *argv[])
     MSPlot["LeptonCharge_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "LeptonCharge_BTagSF"+leptFlav, 10, -2, 2,"Lepton charge");
     MSPlot["LeptonCharge_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "LeptonCharge_AllCuts"+leptFlav, 10, -2, 2,"Lepton charge");
 
-    MSPlot["JetPt_LeadingJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_BeforePU"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_LeadingJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_PU_NoLeptonSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_LeadingJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_BeforeBTag"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_LeadingJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_LeadingJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_AllCuts"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_LeadingJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_BTagSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_LeadingJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_BeforePU"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_LeadingJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_PU_NoLeptonSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_LeadingJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_BeforeBTag"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_LeadingJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_LeadingJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_BTagSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_LeadingJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_AllCuts"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_LeadingJet_AllCuts_noBTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_LeadingJet_AllCuts_noBTagSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
 
-    MSPlot["JetPt_SecondJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_BeforePU"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_SecondJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_PU_NoLeptonSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_SecondJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_BeforeBTag"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_SecondJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_SecondJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_AllCuts"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_SecondJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_BTagSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_SecondJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_BeforePU"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_SecondJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_PU_NoLeptonSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_SecondJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_BeforeBTag"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_SecondJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_SecondJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_AllCuts"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_SecondJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_SecondJet_BTagSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
 
-    MSPlot["JetPt_ThirdJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_BeforePU"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_ThirdJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_PU_NoLeptonSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_ThirdJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_BeforeBTag"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_ThirdJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_ThirdJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_AllCuts"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_ThirdJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_BTagSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_ThirdJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_BeforePU"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_ThirdJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_PU_NoLeptonSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_ThirdJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_BeforeBTag"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_ThirdJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_ThirdJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_AllCuts"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_ThirdJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_ThirdJet_BTagSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
 
-    MSPlot["JetPt_FourthJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_BeforePU"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FourthJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_PU_NoLeptonSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FourthJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_BeforeBTag"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FourthJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FourthJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_AllCuts"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FourthJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_BTagSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FourthJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_BeforePU"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FourthJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_PU_NoLeptonSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FourthJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_BeforeBTag"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FourthJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FourthJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_AllCuts"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FourthJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FourthJet_BTagSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
 
-    MSPlot["JetPt_FifthJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_BeforePU"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FifthJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_PU_NoLeptonSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FifthJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_BeforeBTag"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FifthJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FifthJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_AllCuts"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
-    MSPlot["JetPt_FifthJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_BTagSF"+leptFlav, 120, 0, 350,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FifthJet_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_BeforePU"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FifthJet_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_PU_NoLeptonSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FifthJet_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_BeforeBTag"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FifthJet"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FifthJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_AllCuts"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
+    MSPlot["JetPt_FifthJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetPt_FifthJet_BTagSF"+leptFlav, 85, 20, 270,"Jet p_{T} (GeV)");
 
     MSPlot["JetMass_LeadingJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetMass_LeadingJet_AllCuts"+leptFlav, 75, 0, 50,"Jet p_{T} (GeV)");
     MSPlot["JetEta_LeadingJet"+leptFlav] = new MultiSamplePlot(datasets, "JetEta_LeadingJet"+leptFlav, 50, -2.6, 2.6,"Jet #eta");
     MSPlot["JetEta_LeadingJet_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "JetEta_LeadingJet_BTagSF"+leptFlav, 50, -2.6, 2.6,"Jet #eta");
     MSPlot["JetEta_LeadingJet_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "JetEta_LeadingJet_AllCuts"+leptFlav, 50, -2.6, 2.6,"Jet #eta");
 
-    MSPlot["nPV_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "nPV_BeforePU"+leptFlav, 50, 0, 50,"Number of primary vertices");
-    MSPlot["nPV_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "nPV_PU_NoLeptonSF"+leptFlav, 50, 0, 50,"Number of primary vertices");
-    MSPlot["nPV_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "nPV_BeforeBTag"+leptFlav, 50, 0, 50,"Number of primary vertices");
-    MSPlot["nPV"+leptFlav] = new MultiSamplePlot(datasets, "nPV"+leptFlav, 50, 0, 50,"Number of primary vertices");
-    MSPlot["nPV_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "nPV_BTagSF"+leptFlav, 50, 0, 50,"Number of primary vertices");
-    MSPlot["nPV_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "nPV_AllCuts"+leptFlav, 50, 0, 50,"Number of primary vertices");
+    MSPlot["nPV_BeforePU"+leptFlav] = new MultiSamplePlot(datasets, "nPV_BeforePU"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
+    MSPlot["nPV_PU_NoLeptonSF"+leptFlav] = new MultiSamplePlot(datasets, "nPV_PU_NoLeptonSF"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
+    MSPlot["nPV_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "nPV_BeforeBTag"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
+    MSPlot["nPV"+leptFlav] = new MultiSamplePlot(datasets, "nPV"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
+    MSPlot["nPV_BTagSF"+leptFlav] = new MultiSamplePlot(datasets, "nPV_BTagSF"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
+    MSPlot["nPV_AllCuts"+leptFlav] = new MultiSamplePlot(datasets, "nPV_AllCuts"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
+    MSPlot["nPV_AllCuts_noPU"+leptFlav] = new MultiSamplePlot(datasets, "nPV_AllCuts_noPU"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
+    MSPlot["nPV_AllCuts_noLumi"+leptFlav] = new MultiSamplePlot(datasets, "nPV_AllCuts_noLumi"+leptFlav, 36, 0.5, 35.5,"Number of primary vertices");
 
     MSPlot["CSVDistr_BeforeBTag"+leptFlav] = new MultiSamplePlot(datasets, "CSVDistribution_BeforeBTag"+leptFlav, 100, -1, 2, "CSV discriminant");
     MSPlot["CSVDistr_BJets"+leptFlav] = new MultiSamplePlot(datasets, "CSVDistr_BJets"+leptFlav,50,-1,2,"CSV discriminant");
@@ -428,8 +443,8 @@ int main (int argc, char *argv[])
   LumiReWeighting LumiWeights;
   LumiReWeighting LumiWeightsUp;
   LumiReWeighting LumiWeightsDown;
-  LumiWeights = LumiReWeighting("PersonalClasses/Calibrations/PUReweighting/pileup_MC_Summer12_S10.root", "PersonalClasses/Calibrations/PUReweighting/pileup_2012Data53X_UpToRun208686_Mu/nominal.root", "pileup", "pileup");
-  LumiWeightsUp = LumiReWeighting("PersonalClasses/Calibrations/PUReweighting/pileup_MC_Summer12_S10.root", "PersonalClasses/Calibrations/PUReweighting/pileup_2012Data53X_UpToRun208686_Mu/sys_up.root", "pileup", "pileup");
+  LumiWeights = LumiReWeighting("PersonalClasses/Calibrations/PUReweighting/pileup_MC_Summer12_S10.root", "PersonalClasses/Calibrations/PUReweighting/pileup_2012Data53X_UpToRun208686_Mu/nominal.root", "pileup","pileup");
+  LumiWeightsUp = LumiReWeighting("PersonalClasses/Calibrations/PUReweighting/pileup_MC_Summer12_S10.root", "PersonalClasses/Calibrations/PUReweighting/pileup_2012Data53X_UpToRun208686_Mu/sys_up.root","pileup","pileup");
   LumiWeightsDown = LumiReWeighting("PersonalClasses/Calibrations/PUReweighting/pileup_MC_Summer12_S10.root", "PersonalClasses/Calibrations/PUReweighting/pileup_2012Data53X_UpToRun208686_Mu/sys_down.root", "pileup", "pileup");
   cout << " - LumiReWeighting instantiated ... " << endl;
   
@@ -487,7 +502,7 @@ int main (int argc, char *argv[])
     if(verbosity > 0) std::cout << "\n   *** Looking at dataset "<< dsName << " (" << iDataSet+1 << "/" << inputFiles.size() << ") with " << nrEvts << " events (total = " << inLightTree->GetEntries() << ") !" << std::endl;
 
     //Set some booleans in order to know whether the considered sample is Data or TTbarSemiLept!
-    bool isData = false, isTTbarSemiLept;
+    bool isData = false, isTTbarSemiLept = false;
     if( dsName.find("Data") == 0 || dsName.find("data") == 0 || dsName.find("DATA") == 0 )
       isData = true;
     if( dsName.find("TTbarJets_SemiLept") == 0 )
@@ -512,6 +527,8 @@ int main (int argc, char *argv[])
     histo1D["partonFlav_BJets_"+dsName] = new TH1F(("partonFlav_BJets_"+dsName).c_str(),("parton flavour for b-jets ("+dsTitle+")").c_str(),101,-0.5,100.5);
     histo1D["partonFlav_LightJets_"+dsName] = new TH1F(("partonFlav_LightJets_"+dsName).c_str(),("parton flavour for light jets ("+dsTitle+")").c_str(),101,-0.5,100.5);
     
+    histo1D["nPartons_PartFlav5_"+dsName] = new TH1F(("nPartons_PartFlav5_"+dsName).c_str(), ("Number of partons with parton-flavour 5 ("+dsTitle+")").c_str(),6, -0.5, 5.5);
+    
     histo2D["MlbMqqbChiSq_vs_nPv_"+dsName] = new TH2F(("MlbMqqbChiSq_vs_nPv_"+dsName).c_str(), ("Mlb-Mqqb #chi^{2} versus nr of primary vertices for "+dsTitle).c_str(), 40, 0, 40, 50,0, 10); 
     histo2D["HadrTopMass_vs_nPv_"+dsName] = new TH2F(("HadrTopMass_vs_nPv_"+dsName).c_str(), ("Hadronic top mass versus nr of primary vertices for "+dsTitle).c_str(), 40, 0, 40, 175, 30, 320);
     histo2D["HadrWMass_vs_nPv_"+dsName] = new TH2F(("HadrWMass_vs_nPv_"+dsName).c_str(), ("Hadronic w-boson mass versus nr of primary vertices for "+dsTitle).c_str(), 40, 0, 40, 120, 15, 175);
@@ -522,14 +539,26 @@ int main (int argc, char *argv[])
     histo2D["HadrTopMass_vs_JetPt_"+dsName] = new TH2F(("HadrTopMass_vs_JetPt_"+dsName).c_str(), ("Hadronic top mass versus jet pT for "+dsTitle).c_str(), 150, 0, 350, 175, 30, 320);
     histo2D["HadrWMass_vs_JetPt_"+dsName] = new TH2F(("HadrWMass_vs_JetPt_"+dsName).c_str(), ("Hadronic w-boson mass versus jet pT for "+dsTitle).c_str(), 150, 0, 350, 120, 15, 175);
     
-    histo2D["MlbMqqbChiSq_vs_HadrTopMass_"+dsName] = new TH2F(("MlbMqqbChiSq_vs_HadrTopMass_"+dsName).c_str(), ("Mlb-Mqqb #chi^{2} versus hadronic top mass for "+dsTitle).c_str(), 175, 30, 320, 50, 0, 10);
-    histo2D["MlbMqqbChiSq_vs_HadrWMass_"+dsName] = new TH2F(("MlbMqqbChiSq_vs_HadrWMass_"+dsName).c_str(), ("Mlb-Mqqb #chi^{2} versus hadronic w-boson mass for "+dsTitle).c_str(), 120, 15, 175, 50, 0, 10);
-    histo2D["HadrTopMass_vs_HadrWMass_"+dsName] = new TH2F(("HadrTopMass_vs_HadrWMass_"+dsName).c_str(), ("Hadronic top mass versus hadronic w-boson mass for "+dsTitle).c_str(), 120, 15, 175, 175, 30, 320);
+    histo2D["MlbMqqbChiSq_vs_HadrTopMass_"+dsName] = new TH2F(("MlbMqqbChiSq_vs_HadrTopMass_"+dsName).c_str(), ("Mlb-Mqqb #chi^{2} versus hadronic top mass for "+dsTitle).c_str(), 100, 150, 200, 50, 0, 10);
+    histo2D["MlbMqqbChiSq_vs_HadrWMass_"+dsName] = new TH2F(("MlbMqqbChiSq_vs_HadrWMass_"+dsName).c_str(), ("Mlb-Mqqb #chi^{2} versus hadronic w-boson mass for "+dsTitle).c_str(), 120, 40, 140, 50, 0, 10);
+    histo2D["HadrTopMass_vs_HadrWMass_"+dsName] = new TH2F(("HadrTopMass_vs_HadrWMass_"+dsName).c_str(),("Hadronic top mass versus hadronic w-boson mass for "+dsTitle).c_str(), 120, 15, 175, 175, 30, 320);
 
     //Only want these to be filled for TTbarJets_SemiMu!  (what about FullLept and FullHadr ??)
     int BothB = 0;
     double tagEffPartFlavB = 0, tagEffPartFlavNotB = 0, tagEffPartFlavC = 0, tagEffPartFlavL = 0;
     int nrPartFlavBJets = 0, nrPartFlavNotBJets = 0, nrPartFlavCJets = 0, nrPartFlavLJets = 0;
+    int lightIsMatched = 0, evtHasThreeLights = 0;
+    int firstIsMatched = 0;
+    int firstLightIsFirst = 0, firstLightIsSecond = 0, firstLightIsElse = 0;
+    int lightIsFirst = 0, lightIsSecond = 0, lightIsThird = 0;
+    int firstLightMatchedThreeExist = 0, firstLightIsThird = 0;
+    int firstJetChosen = 0, secondJetChosen = 0, thirdJetChosen = 0;
+    int firstJetChosenAndCorrect = 0, secondJetChosenAndCorrect = 0, thirdJetChosenAndCorrect = 0;
+
+    int chiSqLowerThan5 = 0, chiSqLowerThan10 = 0, chiSqLowerThan50 = 0;
+    int chiSqLowerThan5Correct = 0, chiSqLowerThan10Correct = 0, chiSqLowerThan50Correct = 0;
+    double SFcount = 0.;
+
     if(isTTbarSemiLept){
       histo1D["PartFlavBJets_BTag"+dsName] = new TH1F(("PartFlavourBJets_BTag"+dsName).c_str(), ("Parton flavour of b-jets for "+dsTitle+" events after 2T CSV tags").c_str(), 10, -0.5, 9.5);
       histo1D["PartFlavBJets_BTag"+dsName]->GetXaxis()->SetBinLabel(1,"Both b");
@@ -584,6 +613,11 @@ int main (int argc, char *argv[])
       histo1D["HadrMW_CorrTT_"+dsName]     = new TH1F(("HadrMW_CorrTT_"+dsName).c_str(),    ("Hadronic m_{W} for the actual "+dsTitle+" events").c_str(), 200,  0, 250);
       histo2D["MW_vs_MTop_CorrTT_"+dsName] = new TH2F(("MW_vs_MTop_CorrTT_"+dsName).c_str(),("Hadronic m_{W} versus m_{t} for the actual "+dsTitle+" jet combinations").c_str(),200,50,350,200,0,250);
 
+      histo1D["LightJetIndex_Correct"] = new TH1F("LightJetIndex_Correct","Light jet index of the correct light jets", 10, -0.5, 10.5);
+      histo1D["LightJetIndex_Wrong"] = new TH1F("LightJetIndex_Wrong",    "Light jet index of the wrong light jets",   10, -0.5, 10.5);
+      histo1D["ChosenJetCombi"] = new TH1F("ChosenJetCombi","Number of times the different jet-combinations are chosen", 3, -0.5, 2.5);
+      histo1D["CorrectJetCombi"] = new TH1F("CorrectJetCombi","Number of times the different jet-combinations are correct", 3, -0.5, 2.5);
+
       histo1D["CorrectLightJetIndex"] = new TH1F("CorrectLightJetIndex","Correct jet index of the light jets", 10, -0.5, 9.5);
       histo1D["ChosenLightJetIndex"]  = new TH1F("ChosenLightJetIndex", "Chosen jet index of the light jets",  10, -0.5, 9.5);
       histo1D["LightJetsCorrComb"]    = new TH1F("LightJetsCorrComb",   "Correct jet combination for the light jets", 6, -0.5, 5.5);
@@ -593,7 +627,7 @@ int main (int argc, char *argv[])
       histo1D["LightJetsCorrComb"]->GetXaxis()->SetBinLabel(4,"Only 0 correct");
       histo1D["LightJetsCorrComb"]->GetXaxis()->SetBinLabel(5,"Only 1 correct");
       histo1D["LightJetsCorrComb"]->GetXaxis()->SetBinLabel(6,"Only 2 correct");
-      histo1D["ThirdJetInfo"] = new TH1F("ThirdJetInfo", "Events with more then two light jets",4, -0.5, 3.5);
+      histo1D["ThirdJetInfo"] = new TH1F("ThirdJetInfo", "Events with more than two light jets",4, -0.5, 3.5);
       histo1D["ThirdJetInfo"]->GetXaxis()->SetBinLabel(1,"All events");
       histo1D["ThirdJetInfo"]->GetXaxis()->SetBinLabel(2,"Light jet not in leading 2");
       histo1D["ThirdJetInfo"]->GetXaxis()->SetBinLabel(3,"Light jet is 3th one");
@@ -635,8 +669,8 @@ int main (int argc, char *argv[])
     lhcoOutput.Initialize("Reco", onlyMuonChannel, dsName);
 
     ofstream EvtNrMatching;
-    if(bTagChoiceMade && getLHCOOutput){
-      EvtNrMatching.open(("MadWeightInput/AnalyzerOutput/MWEventNrMatching_"+dsName+".txt").c_str());
+    if(bTagChoiceMade && (getLHCOOutput || getEvtNrInfo)){
+      EvtNrMatching.open(("MadWeightInput/AnalyzerOutput/MWEventNrMatching_"+dsName+"_"+systematic+".txt").c_str());
       EvtNrMatching << "  Event Nr     Extra cuts     Decay channel      MW Number     TTbar splitting file      MW Nr (split)    MC scale factor " << endl;
       EvtNrMatching << "   * Lumi = " << Luminosity << endl;
       EvtNrMatching << "   * NormFactor = " << datasets[iDataSet]->NormFactor() << endl;
@@ -755,20 +789,6 @@ int main (int argc, char *argv[])
       for(int ibTag = 0; ibTag < NrBTags; ibTag++){
         vector<int> selJetCombi = bTagStudy.getIndices(ibTag);
 
-        //--- Check whether the event is correctly reconstructed  ---// 
-        //---  (jetCombi is initialized to 9999 for all dataSets) ---//
-        int CWUIndex = 999;
-        if(corrJetCombi[0] != 9999 && corrJetCombi[1] != 9999 && corrJetCombi[2] != 9999 && corrJetCombi[3] != 9999){
-          if( selJetCombi[0] == corrJetCombi[0] && selJetCombi[1] == corrJetCombi[1]  &&
-             (selJetCombi[2] == corrJetCombi[2] || selJetCombi[2] == corrJetCombi[3]) &&
-             (selJetCombi[3] == corrJetCombi[2] || selJetCombi[3] == corrJetCombi[3]) )
-            CWUIndex = 0;
-          else
-            CWUIndex = 1; 
-        }
-        else
-          CWUIndex = 2;
-
         for(int iJet = 0; iJet < selJets.size(); iJet++)
           MSPlot["CSVDistr_BeforeBTag"+leptChannel]->Fill(bTagCSV[iJet], datasets[iDataSet], true, Luminosity*scaleFactor);
 
@@ -832,6 +852,20 @@ int main (int argc, char *argv[])
         int Light1Index = bTagStudy.getLight1Index(ibTag);
         int Light2Index = bTagStudy.getLight2Index(ibTag);
 
+        //--- Check whether the event is correctly reconstructed  ---// 
+        //---  (jetCombi is initialized to 9999 for all dataSets) ---//
+        int CWUIndex = 999;
+        if(corrJetCombi[0] != 9999 && corrJetCombi[1] != 9999 && corrJetCombi[2] != 9999 && corrJetCombi[3] != 9999){
+          if( selJetCombi[0] == corrJetCombi[0] && selJetCombi[1] == corrJetCombi[1]  &&
+             (selJetCombi[2] == corrJetCombi[2] || selJetCombi[2] == corrJetCombi[3]) &&
+             (selJetCombi[3] == corrJetCombi[2] || selJetCombi[3] == corrJetCombi[3]) )
+            CWUIndex = 0;
+          else
+            CWUIndex = 1; 
+        }
+        else
+          CWUIndex = 2;
+
         //How often is the third light jet one of the correct ones ...
         if(isTTbarSemiLept){
           histo1D["CorrectLightJetIndex"]->Fill(corrJetCombi[2]);
@@ -846,6 +880,57 @@ int main (int argc, char *argv[])
           else if(lightJet[0] == corrJetCombi[2] || lightJet[0] == corrJetCombi[3]) histo1D["LightJetsCorrComb"]->Fill(3);
           else if(lightJet[1] == corrJetCombi[2] || lightJet[1] == corrJetCombi[3]) histo1D["LightJetsCorrComb"]->Fill(4);
           else if(lightJet.size() > 2 && (lightJet[2] == corrJetCombi[2] || lightJet[2] == corrJetCombi[3]) ) histo1D["LightJetsCorrComb"]->Fill(5);
+
+          //Get some percentages to understand the 3rd light jet improvement
+          if( corrJetCombi[2] != 9999 && corrJetCombi[3] != 9999){  //Look only at events with matched light jets
+
+            if( (Light1Index == lightJet[0] && Light2Index == lightJet[1]) || (Light1Index == lightJet[1] && Light2Index == lightJet[0]) ) histo1D["ChosenJetCombi"]->Fill(0);
+            if( (Light1Index == lightJet[1] && Light2Index == lightJet[2]) || (Light1Index == lightJet[2] && Light2Index == lightJet[1]) ) histo1D["ChosenJetCombi"]->Fill(1);
+            if( (Light1Index == lightJet[0] && Light2Index == lightJet[2]) || (Light1Index == lightJet[2] && Light2Index == lightJet[0]) ) histo1D["ChosenJetCombi"]->Fill(2);
+
+            if( (corrJetCombi[2] == lightJet[0] && corrJetCombi[3] == lightJet[1]) || (corrJetCombi[2] == lightJet[1] && corrJetCombi[3] == lightJet[0]) ) histo1D["CorrectJetCombi"]->Fill(0);
+            if( (corrJetCombi[2] == lightJet[1] && corrJetCombi[3] == lightJet[2]) || (corrJetCombi[2] == lightJet[2] && corrJetCombi[3] == lightJet[1]) ) histo1D["CorrectJetCombi"]->Fill(1);
+            if( (corrJetCombi[2] == lightJet[0] && corrJetCombi[3] == lightJet[2]) || (corrJetCombi[2] == lightJet[2] && corrJetCombi[3] == lightJet[0]) ) histo1D["CorrectJetCombi"]->Fill(2);
+
+            if(lightJet.size() > 2 && ( lightJet[0] == Light1Index || lightJet[0] == Light2Index)){
+              firstJetChosen++;
+              if(lightJet[0] == corrJetCombi[2] || lightJet[0] == corrJetCombi[3]) firstJetChosenAndCorrect++;
+            }
+            if(lightJet.size() > 2 && ( lightJet[1] == Light1Index || lightJet[1] == Light2Index)){
+              secondJetChosen++;
+              if(lightJet[1] == corrJetCombi[2] || lightJet[1] == corrJetCombi[3]) secondJetChosenAndCorrect++;
+            }
+            if(lightJet.size() > 2 && (lightJet[2] == Light1Index || lightJet[2] == Light2Index)){
+              thirdJetChosen++;
+              if(lightJet[2] == corrJetCombi[2] || lightJet[2] == corrJetCombi[3]) thirdJetChosenAndCorrect++;
+            }
+            
+            for(int iLight = 0; iLight < lightJet.size(); iLight++){
+              if(lightJet[iLight] == corrJetCombi[2] || lightJet[iLight] == corrJetCombi[3] ) histo1D["LightJetIndex_Correct"]->Fill(iLight);
+              else                                                                            histo1D["LightJetIndex_Wrong"]->Fill(iLight);
+            }
+    
+            lightIsMatched++;
+            if(corrJetCombi[2] == lightJet[0] || corrJetCombi[3] == lightJet[0]) lightIsFirst++;        //How often is the light jet the leading jet
+            if(corrJetCombi[2] == lightJet[1] || corrJetCombi[3] == lightJet[1]) lightIsSecond++;       //How often is the light jet the second jet
+            if(lightJet.size() > 2){
+              evtHasThreeLights++;
+              if(corrJetCombi[2] == lightJet[2] || corrJetCombi[3] == lightJet[2]) lightIsThird++;      //How often is the light the third jet
+            }
+          }
+          if( corrJetCombi[2] != 9999){
+            firstIsMatched++;
+            if(corrJetCombi[2] == lightJet[0])      firstLightIsFirst++;
+            else if(corrJetCombi[2] == lightJet[1]) firstLightIsSecond++;
+            else{
+              firstLightIsElse++;
+              if(lightJet.size() > 2){
+                firstLightMatchedThreeExist++;
+                if(corrJetCombi[2] == lightJet[2]) firstLightIsThird++;
+              }
+            }
+            
+          }
 
           if(lightJet.size() > 2){
             histo1D["ThirdJetInfo"]->Fill(0);
@@ -962,6 +1047,12 @@ int main (int argc, char *argv[])
         }
         histo1D["BTagWeight_"+dsName]->Fill(BTagWeight);
 
+        int nrPartFlavBs = 0;
+        for(int i = 0; i < selJets.size(); i++){
+          if(partFlavAbs[i] == 5) nrPartFlavBs++;
+        }
+        histo1D["nPartons_PartFlav5_"+dsName]->Fill(nrPartFlavBs);
+
         if(isTTbarSemiLept && bTagPlotsMade){
           if      (partFlavAbs[BLeptIndex] == 5 && partFlavAbs[BHadrIndex] == 5){                                                                     histo1D["PartFlavBJets_BTag"+dsName]->Fill(0); BothB++;}
           else if((partFlavAbs[BLeptIndex] == 5 && partFlavAbs[BHadrIndex] == 1) || (partFlavAbs[BLeptIndex] == 1 && partFlavAbs[BHadrIndex] == 5))   histo1D["PartFlavBJets_BTag"+dsName]->Fill(1);
@@ -999,6 +1090,7 @@ int main (int argc, char *argv[])
             if(partFlavAbs[iJet] == 21)                          histo2D["PartFlavGluon_BTagEffvsPt"]->Fill(selJets[iJet].Pt(), bTagTool->getTagEff(selJets[iJet].Pt(), selJets[iJet].Eta(), partFlavour[iJet]) );
             if(partFlavAbs[iJet] != 0 && partFlavAbs[iJet] < 4 ) histo2D["PartFlavLight_BTagEffvsPt"]->Fill(selJets[iJet].Pt(), bTagTool->getTagEff(selJets[iJet].Pt(), selJets[iJet].Eta(), partFlavour[iJet]) );
             if(partFlavAbs[iJet] == 0)                           histo2D["PartFlavUndef_BTagEffvsPt"]->Fill(selJets[iJet].Pt(), bTagTool->getTagEff(selJets[iJet].Pt(), selJets[iJet].Eta(), partFlavour[iJet]) );
+
           }
 
           //Check how much the non-selected events contribute to the weight
@@ -1110,6 +1202,23 @@ int main (int argc, char *argv[])
         MSPlot["nBTaggedJets_"+ bTitle[ibTag]+"_AfterBTag"+leptChannel]->Fill( bTagStudy.getNrBTaggedJets(ibTag), datasets[iDataSet], true, Luminosity*scaleFactor);
         MSPlot["nLightJets_"+   bTitle[ibTag]+"_AfterBTag"+leptChannel]->Fill( bTagStudy.getNrLightJets(ibTag),   datasets[iDataSet], true, Luminosity*scaleFactor);      
 
+        //Check the reconstruction fraction for different chi-sq values
+        if(isTTbarSemiLept && corrJetCombi[2] != 9999 && corrJetCombi[3] != 9999){
+          if(bTagStudy.getMlbMqqbChiSq(ibTag) < 5){ 
+            chiSqLowerThan5++;
+            if( (Light1Index == corrJetCombi[2] && Light2Index == corrJetCombi[3]) || (Light1Index == corrJetCombi[3] && Light2Index == corrJetCombi[2]) ) chiSqLowerThan5Correct++;
+
+          }
+          if(bTagStudy.getMlbMqqbChiSq(ibTag) < 10){
+            chiSqLowerThan10++;
+            if( (Light1Index == corrJetCombi[2] && Light2Index == corrJetCombi[3]) || (Light1Index == corrJetCombi[3] && Light2Index == corrJetCombi[2]) ) chiSqLowerThan10Correct++;
+          }
+          else{
+            chiSqLowerThan50++;
+            if( (Light1Index == corrJetCombi[2] && Light2Index == corrJetCombi[3]) || (Light1Index == corrJetCombi[3] && Light2Index == corrJetCombi[2]) ) chiSqLowerThan50Correct++;
+          }
+        }
+
         bool CutsSurvived = extraEvtSelCuts.KeepEvent(selLepton, selJets, selJetCombi, bTagStudy.getMlbMqqbChiSq(ibTag), CWUIndex, decayCh);
         MSPlot["MlbMqqbChiSq"+leptChannel]->Fill( bTagStudy.getMlbMqqbChiSq(ibTag), datasets[iDataSet], true, Luminosity*scaleFactor);
         if(bTagStudy.getMlbMqqbChiSq(ibTag) < 10) MSPlot["MlbMqqbChiSq_OnlyChiSq"+leptChannel]->Fill( bTagStudy.getMlbMqqbChiSq(ibTag), datasets[iDataSet], true, Luminosity*scaleFactor);
@@ -1146,13 +1255,18 @@ int main (int argc, char *argv[])
           MSPlot["nLightJets_AllCuts"+leptChannel]->Fill(bTagStudy.getNrLightJets(ibTag), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["nBJets_AllCuts"+leptChannel]->Fill(bTagStudy.getNrBTaggedJets(ibTag), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["nPV_AllCuts"+leptChannel]->Fill( nPrimVertices, datasets[iDataSet], true, Luminosity*scaleFactor);
+          MSPlot["nPV_AllCuts_noPU"+leptChannel]->Fill( nPrimVertices, datasets[iDataSet], true, Luminosity*scaleFactor/lumiWeight);
+          if(!isData)MSPlot["nPV_AllCuts_noLumi"+leptChannel]->Fill( nPrimVertices, datasets[iDataSet], true, scaleFactor/(datasets[iDataSet]->NormFactor()));
+          SFcount += scaleFactor;
           MSPlot["JetPt_LeadingJet_AllCuts"+leptChannel]->Fill( selJets[0].Pt(), datasets[iDataSet], true, Luminosity*scaleFactor);
+          MSPlot["JetPt_LeadingJet_AllCuts_noBTagSF"+leptChannel]->Fill( selJets[0].Pt(), datasets[iDataSet], true, Luminosity*scaleFactor/BTagWeight);
           MSPlot["JetPt_SecondJet_AllCuts"+leptChannel]->Fill( selJets[1].Pt(), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["JetPt_ThirdJet_AllCuts"+leptChannel]->Fill( selJets[2].Pt(), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["JetPt_FourthJet_AllCuts"+leptChannel]->Fill( selJets[3].Pt(), datasets[iDataSet], true, Luminosity*scaleFactor);
           if(selJets.size() > 4) MSPlot["JetPt_FifthJet_AllCuts"+leptChannel]->Fill( selJets[4].Pt(), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["JetMass_LeadingJet_AllCuts"+leptChannel]->Fill( selJets[0].M(), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["LeptonPt_AllCuts"+leptChannel]->Fill( selLepton.Pt(), datasets[iDataSet], true, Luminosity*scaleFactor);
+          MSPlot["LeptonPt_AllCuts_noMuSF"+leptChannel]->Fill( selLepton.Pt(), datasets[iDataSet], true, Luminosity*scaleFactor/leptonSF);
           MSPlot["LeptonMass_AllCuts"+leptChannel]->Fill( selLepton.M(), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["JetEta_LeadingJet_AllCuts"+leptChannel]->Fill( selJets[0].Eta(), datasets[iDataSet], true, Luminosity*scaleFactor);
           MSPlot["LeptonEta_AllCuts"+leptChannel]->Fill( selLepton.Eta(), datasets[iDataSet], true, Luminosity*scaleFactor);
@@ -1210,7 +1324,7 @@ int main (int argc, char *argv[])
         }
  
         //Write out the LHCO output!
-        if( getLHCOOutput && bTagChoiceMade){
+        if( (getLHCOOutput || getEvtNrInfo) && bTagChoiceMade){
 
           //Keep track of the original event number and the madweight numbers:
           EvtNrMatching << "\n    " << iEvt;
@@ -1228,7 +1342,7 @@ int main (int argc, char *argv[])
           if(CutsSurvived && genCosTheta != 2.0 && decayCh == 1) histo1D["CosTheta_Gen_SelEvts_"+dsName+"_el"]->Fill(genCosTheta);
           if(CutsSurvived && genCosTheta != 2.0) histo1D["CosTheta_Gen_SelEvts_"+dsName]->Fill(genCosTheta);
         }
-        else if(getLHCOOutput && !bTagChoiceMade){
+        else if((getLHCOOutput || getEvtNrInfo) && !bTagChoiceMade){
           cout << " ERROR : Not possible to write the lhco file when all b-tag options are still being considered!!  ==> Setting boolean to FALSE !" << endl;
           getLHCOOutput = false;
         }
@@ -1278,10 +1392,38 @@ int main (int argc, char *argv[])
     }
 
     //Some output on the b-tag efficiencies
-    if(isTTbarSemiLept) std::cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour b is : " << (double)(tagEffPartFlavB/nrPartFlavBJets) << " ("<< tagEffPartFlavB << "/" << nrPartFlavBJets << ")" << std::endl;
-    if(isTTbarSemiLept) std::cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour udscg is : " << (double)(tagEffPartFlavNotB/nrPartFlavNotBJets) << " ("<< tagEffPartFlavNotB << "/" << nrPartFlavNotBJets << ")" << std::endl;
-    if(isTTbarSemiLept) std::cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour c is : " << (double)(tagEffPartFlavC/nrPartFlavCJets) << " ("<< tagEffPartFlavC << "/" << nrPartFlavCJets << ")" << std::endl;
-    if(isTTbarSemiLept) std::cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour udsg is : " << (double)(tagEffPartFlavL/nrPartFlavLJets) << " ("<< tagEffPartFlavL << "/" << nrPartFlavLJets << ")" << std::endl;
+    if(isTTbarSemiLept){
+      cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour b is : " << (double)(tagEffPartFlavB/nrPartFlavBJets) << " ("<< tagEffPartFlavB << "/" << nrPartFlavBJets << ")" << endl;
+      cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour udscg is : " << (double)(tagEffPartFlavNotB/nrPartFlavNotBJets) << " ("<< tagEffPartFlavNotB << "/" << nrPartFlavNotBJets << ")" << endl;
+      cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour c is : " << (double)(tagEffPartFlavC/nrPartFlavCJets) << " ("<< tagEffPartFlavC << "/" << nrPartFlavCJets << ")" << endl;
+      cout << " Mean value obtained for the b-tag efficiency for jets with parton flavour udsg is : " << (double)(tagEffPartFlavL/nrPartFlavLJets) << " ("<< tagEffPartFlavL << "/" << nrPartFlavLJets << ")" << endl;
+
+      cout << "\n ******* Some information about the light jet assignment ******* " << endl;
+      cout << "   * Number of events with the light jets matched : " << lightIsMatched << endl;
+      cout << "    - How often is the light jet the leading jet : " << lightIsFirst << endl;
+      cout << "    - How often is the light jet the second jet : " << lightIsSecond << endl;
+      cout << "   * How often are more than 2 light jets present in the event: " << evtHasThreeLights << endl;
+      cout << "    - How often is the light jet the third jet : " << lightIsThird << endl;
+  
+      cout << "\n ******* First light jet separate ******* " << endl;
+      cout << "   * Number of events with first light jet matched : " << firstIsMatched << endl;
+      cout << "     - How often is the first light jet the leading one : " << firstLightIsFirst << endl;
+      cout << "     - How often is the first light jet the second  one : " << firstLightIsSecond << endl;
+      cout << "     - How often is the first light jet another one     : " << firstLightIsElse << endl;
+      cout << "      * Number of events with a third light jet : " << firstLightMatchedThreeExist << endl;
+      cout << "        - How often is this third light jet the correct one : " << firstLightIsThird << endl;
+
+      cout << "\n ******** Some percentages ******** " << endl;
+      cout << "   * How often is when the first jet is chosen this also correct  : " << (float)(firstJetChosenAndCorrect)/(float)(firstJetChosen) << endl;
+      cout << "   * How often is when the second jet is chosen this also correct : " << (float)(secondJetChosenAndCorrect)/(float)secondJetChosen << endl;
+      cout << "   * How often is when the third jet is chosen this also correct  : " << (float)(thirdJetChosenAndCorrect)/(float)thirdJetChosen << endl;
+
+      cout << "\n ******** Reconstruction efficiency for different chi-sq bins ********** " << endl;
+      cout << "   * Fraction of correct light jets for chisq < 5  : " << (float)(chiSqLowerThan5Correct)/(float)(chiSqLowerThan5) << " (Nr events is " << chiSqLowerThan5 << ") " << endl;
+      cout << "   * Fraction of correct light jets for chisq < 10 : " << (float)(chiSqLowerThan10Correct)/(float)(chiSqLowerThan10) << " (Nr events is " << chiSqLowerThan10 << ") " << endl;
+      cout << "   * Fraction of correct light jets for chisq < 50 : " << (float)(chiSqLowerThan50Correct)/(float)(chiSqLowerThan50) << " (Nr events is " << chiSqLowerThan50 << ") " << endl;
+    }
+    cout << "    --> Overall event count using the SF (no lumi) is : " << SFcount << endl;
 
     //--- Get output from bTagStudy class ---//
     if(isTTbarSemiLept) bTagStudy.ReturnBTagTable();
@@ -1294,7 +1436,7 @@ int main (int argc, char *argv[])
     extraEvtSelCuts.StoreCutInfluence(outputFile);
 
     //---- Close the EventNrMatching output file for the considered dataset  ----//
-    if(bTagChoiceMade && getLHCOOutput) EvtNrMatching.close();
+    if(bTagChoiceMade && (getLHCOOutput || getEvtNrInfo)) EvtNrMatching.close();
 
     //---- Store the dataset specific 1D and 2D histograms ----//
     if(histo1D.size() > 0){
@@ -1349,7 +1491,7 @@ int main (int argc, char *argv[])
     inputFile->Close();
     delete inputFile;
 
-    if(isTTbarSemiLept) std::cout << " Number of events with both b-jets actually parton flavour = b is : " << BothB << std::endl;
+    if(isTTbarSemiLept) std::cout << "\n Number of events with both b-jets actually parton flavour = b is : " << BothB << std::endl;
   }//End of loop on datasets
 
   //Store the b-tag histograms:
@@ -1362,7 +1504,7 @@ int main (int argc, char *argv[])
   outputFile -> cd();
   mkdir((pathPNG+"/MSPlots").c_str(),0777);
 
-  if(verbosity > 0) std::cout << "\n - Making the plots in the LightAnomCoupAnalyzer file " << std::endl;
+  if(verbosity > 0) std::cout << "\n - Making the plots in the LightAnomCoupAnalyzer file: " << outputFile->GetName() << std::endl;
   if(MSPlot.size() > 0 && !onlyTTbar){
     TDirectory* msdir = outputFile->mkdir("MSPlots");
     msdir->cd(); 
