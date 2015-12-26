@@ -126,7 +126,7 @@ void calculateFit(double LogLikelihood[], string EvtNumber, int evtCounter, bool
   delete gr_LnLik;
 }
 
-vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, bool getIndivSampleMin, std::string systematic, std::string pseudoTitle = ""){
+vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], double FitMin, double FitMax, bool getIndivSampleMin, std::string systematic, std::string files, std::string pseudoTitle = ""){
 
   TH1D* h_MinComp = 0;
   if(pseudoTitle == "") h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
@@ -156,7 +156,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       }
     }
 
-    double SampleEntries[100];
+    double SampleEntries[15];
     double ySM_sample = 0, yNeg_sample = 0, yPos_sample = 0;
     for(int i = 0; i < LnLikArray[iFile][0].size(); i++){
       SampleEntries[i] = summedSampleEntries[i];
@@ -219,18 +219,21 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     }
   }
   
-  double Entries[100];
+  double Entries[15];
+  double MinEntries = summedEntries[0]; for(int i = 0; i < LnLikArray[0][0].size(); i++){ if(MinEntries > summedEntries[i]) MinEntries = summedEntries[i]; }
   double ySM = 0, yNeg = 0, yPos = 0;
-  for(int i = 0; i < LnLikArray[0][0].size(); i++){
-    Entries[i] = summedEntries[i];
-    if(Var[i] == -0.05) yNeg = summedEntries[i];
-    if(Var[i] == 0.0)   ySM  = summedEntries[i];
-    if(Var[i] == 0.05)  yPos = summedEntries[i];
+  for(int iEnt = 0; iEnt < LnLikArray[0][0].size(); iEnt++){
+    Entries[iEnt] = 2*(summedEntries[iEnt] - MinEntries);
+    if(Var[iEnt] == -0.05) yNeg = Entries[iEnt];
+    if(Var[iEnt] == 0.0)   ySM  = Entries[iEnt];
+    if(Var[iEnt] == 0.05)  yPos = Entries[iEnt];
   }
   TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
   gr_totalSum->SetMarkerStyle(22);
+  gr_totalSum->SetMarkerSize(1.3);
+  gr_totalSum->SetMinimum(-10);
   gr_totalSum->GetXaxis()->SetTitle("g_{R} coefficient");
-  gr_totalSum->GetYaxis()->SetTitle("-ln(L_{MEM}) output");
+  gr_totalSum->GetYaxis()->SetTitle("#Delta #chi^{2}_{MEM} value");
   gr_totalSum->GetYaxis()->SetTitleOffset(1.5);
 
   TDirectory* grdir = outFile->GetDirectory("graphs");   //Check whether directory already exists ..
@@ -241,7 +244,8 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   TF1* polFit_totalSum = new TF1(("polFit_SummedTotalGraph"+pseudoTitle).c_str(),"pol2",FitMin, FitMax);
   gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
   double MinimumComb = polFit_totalSum->GetMinimumX();
-  double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
+  //double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
+  double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+1.0, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+1.0, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
 
   //Using the three points around zero as parabola!
   TF1* pol_totalSum = new TF1(("pol_SummedTotalGraph_"+pseudoTitle).c_str(),"pol2", FitMin, FitMax);
@@ -255,6 +259,13 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   if(pseudoTitle == ""){
     std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " \\pm " << ErrorComb << endl;
     std::cout << " * Minimum using the parabola gives: " << MinParabola3_Comb << " \\pm " << ErrParabola3_Comb << std::endl;
+
+    TCanvas *canv_totalSum = new TCanvas("canv_FittedSummedGraph","canv_FittedSummedGraph");
+    canv_totalSum->cd();
+    gr_totalSum->SetTitle("");
+    gr_totalSum->Draw("AP");
+    canv_totalSum->Write();
+    canv_totalSum->SaveAs(("Events_"+systematic+"/MinimumDistribution_"+files+".pdf").c_str());
 
     gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
     gr_totalSum->SetTitle("Graph containing the summed events for all samples");
@@ -273,7 +284,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
 
     canv_pol_totalSum->Write();
     gr_totalSum->SetTitle("");   //Set this when saving the histo!
-    canv_pol_totalSum->SaveAs(("Events_"+systematic+"/MinimumExtractionMethod_"+pseudoTitle+".pdf").c_str());
+    canv_pol_totalSum->SaveAs(("Events_"+systematic+"/MinimumExtractionMethod_"+files+""+pseudoTitle+".pdf").c_str());
     delete leg;
 
     //Add the combined minimum and write out this minimum comparison histogram:
@@ -330,13 +341,15 @@ int main(int argc, char *argv[]){
     else if(string(argv[3]) == "DataLumi") Luminosity = 19646.8;
     else                                   Luminosity = atof(argv[3]);
   }
-  std::cout << " - Applied luminisoty is : " << Luminosity << std::endl;
+  std::cout << " - Applied luminosity is : " << Luminosity << std::endl;
 
   vector<string> inputFiles;
+  std::string whichFiles = "";
   int subSamples[5] = {0, 0, 0, 0, 0};    //Store the number of subSamples which have to be combined in the StackPlot (0 = TT, 1 = ST, 2 = W, 3 =  Z, 4 = Data)
   std::string sampleTitle[5] = {"t#bar{t}", "Single top", "W#rightarrowl#nu", "Z/#gamma*#rightarrowl^{+}l^{-}","Data"};
   int fillColor[5] = {kRed+1, kMagenta, kGreen-3, kAzure+2, 1};
   if( argc >= 5){
+    whichFiles = string(argv[4]);
     if(argc >= 6 && string(argv[4]) == "file"){                 //Possible input for 3rd argument: Data, DataMC, MC, systMC, Signal, file
       for(int iFile = 5; iFile < argc; iFile++)
         inputFiles.push_back(string(argv[iFile]).c_str());
@@ -376,7 +389,7 @@ int main(int argc, char *argv[]){
   if(subSamples[4] != 0) std::cout << "  ==> Also stored " << subSamples[4] << " data samples! " << std::endl;
 
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile(("Events_"+systDir+"/OutFile_LikelihoodCut"+sLikCut+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_"+systDir+"/OutFile_LikelihoodCut"+sLikCut+"_"+whichFiles+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
@@ -636,7 +649,7 @@ int main(int argc, char *argv[]){
  
   //Get the minimum!!
   bool getMinForIndivSamples = true;
-  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples, systDir);
+  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples, systDir, whichFiles);
 
   //Now do the pseudo-samples stuff!
   if(doPseudoSamples){
@@ -675,7 +688,7 @@ int main(int argc, char *argv[]){
         histo1D_PS["nrEntries_PS_"+sampleName[iSample]]->Fill(pseudoDataLnLik[iSample].size());
         histo1D_PS["nrEntriesSF_PS_"+sampleName[iSample]]->Fill(weightSum);
       }
-      vector<double> result = getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, systDir, "_PseudoSample");
+      vector<double> result = getMinimum(pseudoDataLnLik, scaleFactorPD, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, false, systDir, whichFiles, "_PseudoSample");
       histo1D_PS["Minimum_PS"]->Fill(result[0]);
       histo1D_PS["MinError_PS"]->Fill(result[1]);
       histo1D_PS["Pull"]->Fill( (result[0] - gRMeanPS)/result[1]);
