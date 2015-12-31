@@ -36,9 +36,14 @@ if "Matching" in str(sys.argv[1]) or "Scaling" in str(sys.argv[1]):
   syst = str(sys.argv[1])
   systString = "_"+syst
 elif "Tag" in str(sys.argv[1]):
-  sampleNames.pop(8), sampleNames.pop(7), sampleNames.pop(6), sampleNames.pop(5), sampleNames.pop(0)
+  sampleNames.pop(0)
   os.chdir('Events_BTagSF')
   syst = str(sys.argv[1])
+  systString = "_Nominal_"+syst
+elif "Lumi" in str(sys.argv[1]):
+  sampleNames.pop(0)
+  syst = str(sys.argv[1])
+  os.chdir('Events_PileUp')
   systString = "_Nominal_"+syst
 else:
   os.chdir(sys.argv[1])
@@ -133,7 +138,7 @@ for mcDir in os.listdir("."):
             (str(whichDir) != "-1" and str(whichDir) in mcDir and not '.' in mcDir):
 
         print "Looking at directory : ", mcDir
-        if str(mcDir) == "TTbarJets" and str(CWUChoice) == "-1" and not (str(syst).startswith("Matching") or str(syst).startswith("Scaling") or str(syst).startswith("bTag")):
+        if str(mcDir) == "TTbarJets" and str(CWUChoice) == "-1" and not (str(syst).startswith("Matching") or str(syst).startswith("Scaling")):
             combinedSemiMuWeights = open(mcDir+'/weights_CheckedEvts_CombinedSemiLeptEvts_SFAdded.out', 'w')
     
         for MCsubdir in os.listdir(mcDir):
@@ -181,7 +186,7 @@ for mcDir in os.listdir("."):
                                         arrayIndex = int(i)
 
                                 newWeightsTT.write(consSamples[arrayIndex] + ' ' + NormFactor[arrayIndex] + '\n')
-                                if not normFactorAdded and str(CWUChoice) == "-1" and not (str(syst).startswith("_Matching") or str(syst).startswith("_Scaling") or str(syst).startswith("bTag")):
+                                if not normFactorAdded and str(CWUChoice) == "-1" and not (str(syst).startswith("_Matching") or str(syst).startswith("_Scaling")):
                                     combinedSemiMuWeights.write('TTbarJets_SemiLept '+ NormFactor[arrayIndex] + '\n')
                                     normFactorAdded = True
 
@@ -191,7 +196,7 @@ for mcDir in os.listdir("."):
                                     if str(word[0]) != "#":
                                         newWeightsTT.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+word[4]+' ' +
                                                            EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
-                                        if str(CWUChoice) == "-1" and not (str(syst).startswith("_Matching") or str(syst).startswith("_Scaling") or str(syst).startswith("bTag")):
+                                        if str(CWUChoice) == "-1" and not (str(syst).startswith("_Matching") or str(syst).startswith("_Scaling")):
                                             combinedSemiMuWeights.write(word[0]+' '+word[1]+' '+word[2]+' '+word[3]+' '+
                                                                         word[4] + ' ' + EvtNrMatchingArray[arrayIndex][int(word[0])-1]+'\n')
                                     #elif str(word[0]) == "#":
@@ -199,5 +204,5 @@ for mcDir in os.listdir("."):
                                 origWeightsTT.close()
                                 newWeightsTT.close()
 
-        if str(mcDir) == "TTbarJets" and str(CWUChoice) == "-1" and not (str(syst).startswith("Matching") or str(syst).startswith("Scaling") or str(syst).startswith("bTag")):
+        if str(mcDir) == "TTbarJets" and str(CWUChoice) == "-1" and not (str(syst).startswith("Matching") or str(syst).startswith("Scaling")):
             combinedSemiMuWeights.close()

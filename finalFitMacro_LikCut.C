@@ -23,6 +23,7 @@
 #include "TLegend.h"
 #include "THStack.h"
 #include "TLine.h"
+#include "TStyle.h"
 
 using namespace std;
 
@@ -67,6 +68,7 @@ TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< 
 
   vector<double> summedEntries; summedEntries.clear();
   vector<double> minimum, error; minimum.clear(); error.clear();
+  vector<double> minimum_3P, error_3P; minimum_3P.clear(); error_3P.clear();
   int nrSamples = 0;
   for(int iCut = 0; iCut < 10; iCut++){
 
@@ -102,6 +104,7 @@ TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< 
       Entries[i] = summedEntries[i];
     }
 
+    //Minimum obtained using the standard fitting approach
     TGraph* gr_Sum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
     TF1* polFit_Sum = new TF1("polFit_SummedGraph","pol2",FitMin, FitMax);
     gr_Sum->Fit(polFit_Sum,"Q","",polFit_Sum->GetXmin(), polFit_Sum->GetXmax());
@@ -112,15 +115,31 @@ TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< 
 
     minimum.push_back(Minimum);
     error.push_back(Error);
+
+    //Minimum obtained using the fit on the narrow range!
+    TGraph* gr_Sum_3P = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+    gr_Sum_3P->SetName(("IndivFit_3P_"+NumberToString(LikCutOpt[iCut])).c_str());
+    TF1* polFit_Sum_3P = new TF1("polFit_SummedGraph_3Points","pol2",FitMin, FitMax);
+    gr_Sum_3P->Fit(polFit_Sum_3P,"Q","",-0.05, 0.05);
+    outFile->cd();
+    gr_Sum_3P->Write();
+    double Minimum_3P = polFit_Sum_3P->GetMinimumX();
+    double Error_3P = (polFit_Sum_3P->GetX(polFit_Sum_3P->GetMinimum()+0.5, polFit_Sum_3P->GetMinimumX(),0.2) - polFit_Sum_3P->GetX(polFit_Sum_3P->GetMinimum()+0.5,-0.2, polFit_Sum_3P->GetMinimumX()))/2.0;
+    delete gr_Sum_3P;
+    delete polFit_Sum_3P;
+
+    minimum_3P.push_back(Minimum_3P);
+    error_3P.push_back(Error_3P);
   }
 
   std::cout << "\n Considered a total of : " << nrSamples << " samples" << std::endl;
 
   //Now create the TGraphErrors for all the samples and cuts!
-  double Min[50], Err[50];
+  double Min[20], Err[20];
+  double Min_3P[20], Err_3P[20];
   for(int i = 0; i < minimum.size(); i++){
-    Min[i] = minimum[i];
-    Err[i] = error[i];  
+    Min[i] = minimum[i]; Err[i] = error[i];  
+    Min_3P[i] = minimum_3P[i]; Err_3P[i] = error_3P[i];  
   }
   
   outFile->cd();
@@ -131,9 +150,8 @@ TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< 
   gr_MinComp->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value");    gr_MinComp->GetYaxis()->SetTitle("Obtained minimum for gR");
   gr_MinComp->Write();
   //leg->AddEntry(gr_MinComp,(name[iFile]+" events").c_str(),"p");
-  
    
-  TCanvas* canv = new TCanvas(("canv_"+MCorData).c_str(),("canv_"+MCorData).c_str());
+  TCanvas* canv = new TCanvas(("canv_"+MCorData).c_str(),("canv_"+MCorData).c_str()); 
   canv->cd();    gr_MinComp->Draw("AP");    canv->Write();
   
   //Add a fit to decide on the optimal cut-value!
@@ -145,6 +163,13 @@ TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< 
   std::cout << " Optimal cut position is : " << minLikCut->GetX(0, likFitMin, likFitMax) << std::endl;
   gr_MinComp->SetName(("LikCutFit_"+MCorData).c_str());
   gr_MinComp->Write();
+  
+  //Calculate optimal cut-value using alternative fit:
+  TGraphErrors* gr_MinComp_3P = new TGraphErrors(NrCuts, LikCutOpt, Min_3P, 0, Err_3P);
+  TF1* minLikCut_3P = new TF1("minLikCut_pol_3P","pol3");
+  gr_MinComp_3P->Fit(minLikCut_3P,"Q","",likFitMin,likFitMax);
+  gr_MinComp_3P->Write();
+  std::cout << " Optimal cut position is (alternative fit) : " << minLikCut_3P->GetX(0, likFitMin, likFitMax) << std::endl;
 
   return gr_MinComp;
 }
@@ -154,6 +179,8 @@ TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< 
 //------------------------------------------------------------------//
 int main(int argc, char *argv[]){
   clock_t start = clock();
+
+  gStyle->SetOptStat(0);
 
   //Input variables will be:
   // 1) MG or Reco
@@ -231,6 +258,7 @@ int main(int argc, char *argv[]){
 
   //** Loop over the different input files and read out the necessary info **//
   double Luminosity = 19646.8;
+  TH1D* h_SMLikValue_Sum = new TH1D("SMLikelihoodValue_Sum","Distribution of likelihood value at gR = 0.0 (all samples)",85,40,85);
   for(int iWeightFile = 0; iWeightFile < inputFiles.size(); iWeightFile++){
 
     //Make sure that for each dataset the vector storing the individual histograms is empty
@@ -263,6 +291,7 @@ int main(int argc, char *argv[]){
 
       if( iss >> evt >> config >> tf >> weight >> weightUnc){
         if(MGorRECO == "RECO"){ iss >> MCScaleFactor;}
+        else Luminosity = 1;
 
         if(config == 1 && (consEvts+1) % 5000 == 0) std::cout << " Looking at event : " << consEvts+1 << flush<<"\r";
         stringstream ssEvt; ssEvt << evt; string sEvt = ssEvt.str();
@@ -298,6 +327,7 @@ int main(int argc, char *argv[]){
 
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
+          h_SMLikValue_Sum->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
           LnLikCut.push_back(LnLik[SMConfig]);
           consEvts++;   //Count the number of full events!
 
@@ -333,6 +363,14 @@ int main(int argc, char *argv[]){
 
   }//End of looping over the different weight files
   
+  TCanvas* canv = new TCanvas("SMLikCanvas","SMLikCanvas");
+  canv->cd();
+  h_SMLikValue_Sum->SetTitle("");
+  h_SMLikValue_Sum->GetXaxis()->SetTitle("-ln(L_{MEM}) value evaluated at g_{R} = 0"); h_SMLikValue_Sum->GetXaxis()->SetTitleOffset(1.2);
+  h_SMLikValue_Sum->GetYaxis()->SetTitle("# normalised events");                       h_SMLikValue_Sum->GetYaxis()->SetTitleOffset(1.15);
+  h_SMLikValue_Sum->DrawNormalized();
+  canv->SaveAs(("SMLikelihoodValue_"+MGorRECO+".pdf").c_str());
+  
   //Store all information into a ROOT file:
   if(string(argv[3]) != "file") consSamples = string(argv[3]);
   TFile* outputFile = new TFile(("Events_Nom/OutFile_LikelihoodCutComparison_"+consSamples+".root").c_str(),"RECREATE");   //So what if also Data is added?
@@ -350,6 +388,13 @@ int main(int argc, char *argv[]){
     line->Draw("same");
     MC->Draw("P");
     Data->Draw("P");
+  
+    TLegend *leg = new TLegend(0.35, 0.75, 0.53, 0.9);
+    leg->SetFillColor(0);
+    leg->AddEntry(Data,"Data","l");
+    leg->AddEntry(MC,"Simulation","l");
+    leg->Draw();
+
     canv_MSPlot->Write();
     canv_MSPlot->SaveAs("Events_Nom/MinComp_MSPlot_StraightLineAtZero.pdf");
   }

@@ -22,6 +22,7 @@
 #include <map>
 #include "THStack.h"
 #include "TLegend.h"
+#include "TStyle.h"
 
 using namespace std;
 
@@ -168,8 +169,8 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     if(getIndivSampleMin && pseudoTitle == ""){
       TGraph* gr_sampleSum = new TGraph(LnLikArray[iFile][0].size(), Var, SampleEntries);
       gr_sampleSum->SetMarkerStyle(22);
-      gr_sampleSum->GetXaxis()->SetTitle("g_{R} coefficient");
-      gr_sampleSum->GetYaxis()->SetTitle("-ln(L_{MEM}) output");
+      gr_sampleSum->GetXaxis()->SetTitle("g_{R} coefficient");   gr_sampleSum->GetXaxis()->SetTitleOffset(1.1);
+      gr_sampleSum->GetYaxis()->SetTitle("-ln(L_{MEM}) output"); gr_sampleSum->GetYaxis()->SetTitleOffset(1.3);
       gr_sampleSum->GetYaxis()->SetTitleOffset(1.3);
 
       //Use a fit through the entire TGraph to get the minimum
@@ -187,18 +188,29 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       pol_sampleSum->SetLineColor(3);
       double MinParabola3 = pol_sampleSum->GetMinimumX();
       double ErrParabola3 = (pol_sampleSum->GetX(pol_sampleSum->GetMinimum()+0.5, pol_sampleSum->GetMinimumX(),0.2) - pol_sampleSum->GetX(pol_sampleSum->GetMinimum()+0.5, -0.2, pol_sampleSum->GetMinimumX()))/2.0;
-      std::cout << "    --> Minimum using the parabola gives: " << MinParabola3 << " \\pm " << ErrParabola3 << std::endl;
+      //std::cout << "    --> Minimum using the parabola gives: " << MinParabola3 << " \\pm " << ErrParabola3 << std::endl;
       TCanvas *canv_pol_sampleSum = new TCanvas(("pol_sumSample_"+name[iFile]).c_str(),("pol_sumSample_"+name[iFile]).c_str()); canv_pol_sampleSum->cd();
       gr_sampleSum->Draw("AP");
       pol_sampleSum->Draw("same");
+      
+      //Using all points of range!
+      TF1* polFit_sampleSum_FullRange = new TF1(("pol_SummedSampleGraph_"+name[iFile]).c_str(),"pol2", -0.2, 0.2);
+      gr_sampleSum->Fit(polFit_sampleSum_FullRange,"Q","",polFit_sampleSum_FullRange->GetXmin(), polFit_sampleSum_FullRange->GetXmax());
+      double MinParabolaAll = polFit_sampleSum_FullRange->GetMinimumX();
+      double ErrParabolaAll = (polFit_sampleSum_FullRange->GetX(polFit_sampleSum_FullRange->GetMinimum()+0.5, polFit_sampleSum_FullRange->GetMinimumX(),0.2) - polFit_sampleSum_FullRange->GetX(polFit_sampleSum_FullRange->GetMinimum()+0.5, -0.2, polFit_sampleSum_FullRange->GetMinimumX()))/2.0;
+      //std::cout << "    --> Minimum using the parabola on the full range gives: " << MinParabolaAll << " \\pm " << ErrParabolaAll << std::endl;
+      TCanvas *canv_polFit_sampleSum_FullRange = new TCanvas(("polFit_sumSample_FullRange_"+name[iFile]).c_str(),("polFit_sumSample_FullRange_"+name[iFile]).c_str()); canv_polFit_sampleSum_FullRange->cd();
+      gr_sampleSum->Draw("AP");
+      polFit_sampleSum_FullRange->Draw("same");
       
       //Add a legend for this fit vs parabola comparison!
       TLegend* leg = new TLegend(0.35,0.7,0.65,0.9);
       leg->SetFillColor(0);
       leg->SetHeader((name[iFile]).c_str());
       leg->AddEntry(gr_sampleSum,"Output from the MEM","p");
-      leg->AddEntry(polFit_sampleSum,"Polynomial fit through all points","l");
+      leg->AddEntry(polFit_sampleSum,"Polynomial fit through reduced range","l");
       leg->AddEntry(pol_sampleSum,"Parabola through three inner points","l");
+      leg->AddEntry(polFit_sampleSum_FullRange,"Parabola through full range","l");
       leg->Draw();
 
       h_MinComp->SetBinContent(iFile+1, Minimum);
@@ -213,6 +225,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       gr_sampleSum->Write();
       
       canv_pol_sampleSum->Write();
+      canv_polFit_sampleSum_FullRange->Write();
       //gr_sampleSum->SetTitle("");   //Set this when saving the histo!
       //canv_pol_sampleSum->SaveAs(("Events_"+systematic+"/MinimumExtractionMethod_"+name[iFile]+".pdf").c_str());
       delete leg;
@@ -240,32 +253,50 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   if(!grdir) grdir = outFile->mkdir("graphs");          // .. and otherwise create it!
   grdir->cd();
 
-  //Fit through the entire TGraph!
+  //Fit through the reduced range!
   TF1* polFit_totalSum = new TF1(("polFit_SummedTotalGraph"+pseudoTitle).c_str(),"pol2",FitMin, FitMax);
   gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
   double MinimumComb = polFit_totalSum->GetMinimumX();
   //double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
   double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+1.0, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+1.0, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
 
-  //Using the three points around zero as parabola!
-  TF1* pol_totalSum = new TF1(("pol_SummedTotalGraph_"+pseudoTitle).c_str(),"pol2", FitMin, FitMax);
-  pol_totalSum->SetParameter(0, ySM );
-  pol_totalSum->SetParameter(1, (yPos-yNeg)/(2.0*0.05) );
-  pol_totalSum->SetParameter(2, (((yPos+yNeg)/2.0)-ySM)*(1/(0.05*0.05)) );
-  pol_totalSum->SetLineColor(3);
-  double MinParabola3_Comb = pol_totalSum->GetMinimumX();
-  double ErrParabola3_Comb = (pol_totalSum->GetX(pol_totalSum->GetMinimum()+0.5, pol_totalSum->GetMinimumX(),0.2) - pol_totalSum->GetX(pol_totalSum->GetMinimum()+0.5, -0.2, pol_totalSum->GetMinimumX()))/2.0;
+  //Limit the range one more!
+  TGraph* gr_totalSum_Down = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+  TF1* polFit_totalSum_Down = new TF1(("polFit_SummedTotalGraph_DownSyst_"+pseudoTitle).c_str(),"pol2", -0.10, 0.10);
+  gr_totalSum_Down->Fit(polFit_totalSum_Down,"Q","",polFit_totalSum_Down->GetXmin(), polFit_totalSum_Down->GetXmax());
+  polFit_totalSum_Down->SetLineColor(3);
+  double MinComb_Down = polFit_totalSum_Down->GetMinimumX();
+  double ErrComb_Down = (polFit_totalSum_Down->GetX(polFit_totalSum_Down->GetMinimum()+0.5, polFit_totalSum_Down->GetMinimumX(),0.2) - polFit_totalSum_Down->GetX(polFit_totalSum_Down->GetMinimum()+0.5, -0.2, polFit_totalSum_Down->GetMinimumX()))/2.0;
+
+  //Limit the range to the three inner points
+  TGraph* gr_totalSum_Inner = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+  TF1* polFit_totalSum_Inner = new TF1(("polFit_SummedTotalGraph_Inner_"+pseudoTitle).c_str(),"pol2", FitMin, FitMax);
+  gr_totalSum_Inner->Fit(polFit_totalSum_Inner,"Q","", -0.05, 0.05);
+  polFit_totalSum_Inner->SetLineColor(7);
+  polFit_totalSum_Inner->SetLineStyle(10);
+  double MinComb_Inner = polFit_totalSum_Inner->GetMinimumX();
+  double ErrComb_Inner = (polFit_totalSum_Inner->GetX(polFit_totalSum_Inner->GetMinimum()+0.5, polFit_totalSum_Inner->GetMinimumX(),0.2) - polFit_totalSum_Inner->GetX(polFit_totalSum_Inner->GetMinimum()+0.5, -0.2, polFit_totalSum_Inner->GetMinimumX()))/2.0;
+
+  //Increase the considered range!
+  TGraph* gr_totalSum_Up = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+  TF1* polFit_totalSum_Up = new TF1(("polFit_SummedTotalGraph_UpSyst_"+pseudoTitle).c_str(),"pol2", -0.2, 0.2);
+  gr_totalSum_Up->Fit(polFit_totalSum_Up,"Q","",polFit_totalSum_Up->GetXmin(), polFit_totalSum_Up->GetXmax());
+  polFit_totalSum_Up->SetLineColor(6);
+  double MinComb_Up = polFit_totalSum_Up->GetMinimumX();
+  double ErrComb_Up = (polFit_totalSum_Up->GetX(polFit_totalSum_Up->GetMinimum()+0.5, polFit_totalSum_Up->GetMinimumX(),0.2) - polFit_totalSum_Up->GetX(polFit_totalSum_Up->GetMinimum()+0.5, -0.2, polFit_totalSum_Up->GetMinimumX()))/2.0;
 
   if(pseudoTitle == ""){
     std::cout << " * Minimum for " << polFit_totalSum->GetName() << " is : \n            " << MinimumComb << " \\pm " << ErrorComb << endl;
-    std::cout << " * Minimum using the parabola gives: " << MinParabola3_Comb << " \\pm " << ErrParabola3_Comb << std::endl;
+    std::cout << " * Minimum for syst-down (smaller range): " << MinComb_Down << " \\pm " << ErrComb_Down << std::endl;
+    std::cout << " * Minimum for syst-up (broader range): " << MinComb_Up << " \\pm " << ErrComb_Up << std::endl;
+    std::cout << " * Minimum using only the three inner points : " << MinComb_Inner << " \\pm " << ErrComb_Inner << std::endl;
 
     TCanvas *canv_totalSum = new TCanvas("canv_FittedSummedGraph","canv_FittedSummedGraph");
     canv_totalSum->cd();
     gr_totalSum->SetTitle("");
     gr_totalSum->Draw("AP");
     canv_totalSum->Write();
-    canv_totalSum->SaveAs(("Events_"+systematic+"/MinimumDistribution_"+files+".pdf").c_str());
+    //canv_totalSum->SaveAs(("Events_"+systematic+"/MinimumDistribution_"+files+".pdf").c_str());
 
     gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
     gr_totalSum->SetTitle("Graph containing the summed events for all samples");
@@ -273,13 +304,17 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   
     TCanvas *canv_pol_totalSum = new TCanvas(("pol_sumTotal_"+pseudoTitle).c_str(),("pol_sumTotal_"+pseudoTitle).c_str()); canv_pol_totalSum->cd();
     gr_totalSum->Draw("AP");
-    pol_totalSum->Draw("same");
-    //Add a legend for this fit vs parabola comparison!
+    //polFit_totalSum_Down->Draw("same");
+    //polFit_totalSum_Up->Draw("same");
+    polFit_totalSum_Inner->Draw("same");
+
     TLegend* leg = new TLegend(0.35,0.7,0.65,0.9);
     leg->SetFillColor(0);
-    leg->AddEntry(gr_totalSum,"Output from the MEM","p");
-    leg->AddEntry(polFit_totalSum,"Polynomial fit through all points","l");
-    leg->AddEntry(pol_totalSum,"Parabola through three inner points","l");
+    leg->AddEntry(gr_totalSum,"Output from the Matrix Eement method","p");
+    leg->AddEntry(polFit_totalSum,"Polynomial fit through normal range","l");
+    //leg->AddEntry(polFit_totalSum_Down,"Polynomial fit through smaller range","l");
+    //leg->AddEntry(polFit_totalSum_Up,"Polynomial fit through broader range","l");
+    leg->AddEntry(polFit_totalSum_Inner,"Polynomial fit through three inner points","l");
     leg->Draw();
 
     canv_pol_totalSum->Write();
@@ -311,6 +346,8 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
 int main(int argc, char *argv[]){
   clock_t start = clock();
 
+  gStyle->SetOptStat(0);
+
   //Input variables will be:
   // 1) Likelihood cut value!
   // 2) Which systematic (is also the directory where info will be stored)
@@ -323,16 +360,15 @@ int main(int argc, char *argv[]){
     else                          LikCut = atof(argv[1]);
   }
   std::cout << " - Applied likelihood cut value is : " << LikCut << std::endl;
-  //int iLikCut = atoi(argv[1]);
-  //std::string sLikCut = NumberToString(iLikCut);
-  std::string sLikCut = string(argv[1]);
+  std::string sLikCut = string(NumberToString(LikCut));
 
   std::string syst = "Nom";    //Possible input: Nom, JESMinus, JESPlus, JERMinus, JERPlus, ...
   if(argc >= 3)
     syst = string(argv[2]);
   std::string systDir = syst;
-  if(syst.find("Tag") >= 0 && syst.find("Tag") < syst.size()) systDir = "BTagSF";
-  if( (syst.find("Matching") >= 0 && syst.find("Maching") < syst.size()) || (syst.find("Scaling") >= 0 && syst.find("Scaling") < syst.size()) ) systDir = "MatchingAndScaling";
+  if( syst.find("Tag") >= 0 && syst.find("Tag") < syst.size() ) systDir = "BTagSF";
+  if( (syst.find("Matching") >= 0 && syst.find("Matching") < syst.size()) || (syst.find("Scaling") >= 0 && syst.find("Scaling") < syst.size()) ) systDir = "MatchingAndScaling";
+  if( syst.find("Lumi") >= 0 && syst.find("Lumi") < syst.size() ) systDir = "PileUp";
 
   //Also give the luminosity from the command line (easy to change between ttbar (semi-lept) and data lumi!
   double Luminosity = 19646.8;
@@ -354,24 +390,30 @@ int main(int argc, char *argv[]){
       for(int iFile = 5; iFile < argc; iFile++)
         inputFiles.push_back(string(argv[iFile]).c_str());
     }
-    if(string(argv[4]) == "DataMC" || string(argv[4]) == "Data") 
-      inputFiles.push_back("Events_Data/Data_SemiMu_RgR_AllEvents_LatestEvtSel_Nov24/weights_SFAdded.out");
-    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC"){
-      inputFiles.push_back("Events_"+systDir+"/ZJets/"+syst+"_ZJets_4jets/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+systDir+"/WJets/"+syst+"_WJets_4jets/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tChannel_t/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tChannel_tbar/weights_CheckedEvts_SFAdded.out");
+    if(systDir != "MatchingAndScaling"){
+      if(string(argv[4]) == "DataMC" || string(argv[4]) == "Data") 
+        inputFiles.push_back("Events_Data/Data_SemiMu_RgR_AllEvents_LatestEvtSel_Nov24/weights_SFAdded.out");
+      if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC"){
+        inputFiles.push_back("Events_"+systDir+"/ZJets/"+syst+"_ZJets_4jets/weights_CheckedEvts_SFAdded.out");
+        inputFiles.push_back("Events_"+systDir+"/WJets/"+syst+"_WJets_4jets/weights_CheckedEvts_SFAdded.out");
+        inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tChannel_t/weights_CheckedEvts_SFAdded.out");
+        inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tChannel_tbar/weights_CheckedEvts_SFAdded.out");
+      }
+      if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC"){
+        inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tWChannel_t/weights_CheckedEvts_SFAdded.out");
+        inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tWChannel_tbar/weights_CheckedEvts_SFAdded.out");
+      }
+      if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC" || string(argv[4]) == "AllTT")
+        inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_FullLept/weights_CheckedEvts_SFAdded.out");
+      if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC"|| string(argv[4]) == "AllTT" || string(argv[4]) == "Signal" ){
+        inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_CorrectEvts/weights_CheckedEvts_SFAdded.out");
+        inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_UnmatchedEvts/weights_CheckedEvts_SFAdded.out");
+        inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_WrongEvts/weights_CheckedEvts_SFAdded.out");
+      }
     }
-    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC"){
-      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tWChannel_t/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+systDir+"/SingleTop/"+syst+"_SingleTop_tWChannel_tbar/weights_CheckedEvts_SFAdded.out");
-    }
-    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC" || string(argv[4]) == "AllTT")
-      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_FullLept/weights_CheckedEvts_SFAdded.out");
-    if(string(argv[4]) == "DataMC" || string(argv[4]) == "MC" || string(argv[4]) == "systMC"|| string(argv[4]) == "AllTT" || string(argv[4]) == "Signal" ){
-      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_CorrectEvts/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_UnmatchedEvts/weights_CheckedEvts_SFAdded.out");
-      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_WrongEvts/weights_CheckedEvts_SFAdded.out");
+    else{
+      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets/weights_CheckedEvts_SFAdded.out");
+      std::cout << " --> Will consider all TT events (semiLept, fullLept & fullHadr) since this is the only sample which exists!!" << std::endl;
     }
   }
 
@@ -389,7 +431,7 @@ int main(int argc, char *argv[]){
   if(subSamples[4] != 0) std::cout << "  ==> Also stored " << subSamples[4] << " data samples! " << std::endl;
 
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile(("Events_"+systDir+"/OutFile_LikelihoodCut"+sLikCut+"_"+whichFiles+".root").c_str(),"RECREATE");   //So what if also Data is added?
+  TFile* outputFile = new TFile(("Events_"+systDir+"/OutFile_"+syst+"_LikelihoodCut"+sLikCut+"_"+whichFiles+".root").c_str(),"RECREATE");   //So what if also Data is added?
   outputFile->cd();
 
   //Decide whether the pseudo-samples should be processed!
@@ -425,6 +467,9 @@ int main(int argc, char *argv[]){
   std::string PosSamples[5] = {"TTbarJets","SingleTop","WJets","ZJets","Data"};
   for(int iWeightFile = 0; iWeightFile < inputFiles.size(); iWeightFile++){
 
+    //Initialise histos
+    bool fileInitialised = false;
+
     //Make sure that for each dataset the vector storing the individual histograms is empty
     vector< vector<double> > indivSampleLnLik; indivSampleLnLik.clear();
     vector<double> sampleSF; sampleSF.clear();
@@ -454,6 +499,7 @@ int main(int argc, char *argv[]){
     double halfBinWidth = (Var[NrConfigs-1]- Var[0])/((double) NrBins*2.0);
     double xLow = Var[0] - halfBinWidth, xHigh = Var[NrConfigs-1] + halfBinWidth; 
     histo1D["SMLikValue"] = new TH1D("SMLikelihoodValue","Distribution of likelihood value at gR = 0.0",85,40,85);
+    histo1D["OuterLikValue"] = new TH1D("OuterLikelihoodValue","Distribution of likelihood value at gR = 0.1",85,40,85);
     histo1D["SMLikValue_AfterCut"] = new TH1D("SMLikelihoodValue_AfterCut","Distribution of likelihood value at gR = 0.0 (after cut of ..)",85,40,85);
     histo1D["MCScaleFactor"] = new TH1D("MCScaleFactor","Scale factor for MC sample", 100,0,2);
     histo1D["Luminosity"] = new TH1D("Luminosity","Luminosity used", 100,15000,23000);
@@ -485,8 +531,9 @@ int main(int argc, char *argv[]){
           SMConfig = 99; xOuterL = 99; xOuterR = 99;
 	  ScdDer = 0; xOuterLFine = 99; xOuterRFine = 99;
 
-          if(consEvts == 0){
+          if(consEvts == 0 && fileInitialised == false){
             //Keep track of the number of considerd samples of the same type!
+            fileInitialised = true;
             for(int iOpt = 0; iOpt < 5; iOpt++){
               if(inputFiles[iWeightFile].find(PosSamples[iOpt]) != 0 && inputFiles[iWeightFile].find(PosSamples[iOpt]) < inputFiles[iWeightFile].size()) consSample[iOpt]++;
               if(consSample[iOpt] == 1)
@@ -529,6 +576,7 @@ int main(int argc, char *argv[]){
 
           //Plot the SM likelihood value:
           histo1D["SMLikValue"]->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
+          histo1D["OuterLikValue"]->Fill(LnLik[xOuterR], MCScaleFactor*Luminosity*NormFactor);
           h_SMLikValue_Sum->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
           histo1D["MCScaleFactor"]->Fill(MCScaleFactor);
           histo1D["Luminosity"]->Fill(Luminosity);
@@ -546,7 +594,7 @@ int main(int argc, char *argv[]){
           //Need to make sure event is rejected for all normalisations otherwise counter is wrong, therefore nrNorms-1 is uses which corresponds to acceptance norm!
           //  --> But then last bin is not yet filled for all norms (so using average will be difficult ...)
           //if(LnLik[SMConfig] > LikCut || MaxLik - MinLik < 1.0){if(LikCut == 120) std::cout << " *****\n ERROR: Should not reject any event when cut-value = 120 !!! \n *****\n --> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue;}
-          if(LnLik[SMConfig] > LikCut){if(LikCut == 120) std::cout << " *****\n ERROR: Should not reject any event when cut-value = 120 !!! \n *****\n --> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue;}
+          if(LnLik[SMConfig] > LikCut){if(consEvts == 0) std::cout << " Rejecting the first element ! " << std::endl; if(LikCut == 120) std::cout << " *****\n ERROR: Should not reject any event when cut-value = 120 !!! \n *****\n --> Value is : " << LnLik[SMConfig] << "\n " << std::endl; continue;}
           consEvts++;   //Count the number of full events!
 
           vector<double> indivEvtLnLik;
@@ -633,6 +681,13 @@ int main(int argc, char *argv[]){
  
   outputFile->cd();
   h_SMLikValue_Sum->Write();
+  TCanvas* canv = new TCanvas("SMLikCanvas","SMLikCanvas");
+  canv->cd();
+  h_SMLikValue_Sum->SetTitle("");
+  h_SMLikValue_Sum->GetXaxis()->SetTitle("-ln(L_{MEM}) value evaluated at g_{R} = 0");
+  h_SMLikValue_Sum->GetYaxis()->SetTitle("# events");
+  h_SMLikValue_Sum->Draw();
+  canv->SaveAs(("Events_"+systDir+"/SMLikelihoodValue.pdf").c_str());
 
   if(subSamples[0]+subSamples[1]+subSamples[2]+subSamples[3] > 1){
     TCanvas* canv_Stack = new TCanvas("CanvasStack","CanvasStack");
