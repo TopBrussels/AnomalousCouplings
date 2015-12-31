@@ -172,7 +172,7 @@ int main(int argc, char *argv[]){
 
   TGraph *gr_StraightLine = new TGraph(NrSamples, VarGraph, VarGraph);
   gr_StraightLine->SetLineStyle(2); gr_StraightLine->SetLineColor(13);  
-  gr_StraightLine->GetXaxis()->SetTitle("g_{R} coefficient");
+  gr_StraightLine->GetXaxis()->SetTitle("Input value of the g_{R} coefficient");
   gr_StraightLine->GetYaxis()->SetTitle("Measured g_{R} coefficient");
 
   //Fit the calibration curves with a straight line (slope should be as close as possible to 1)
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]){
   TCanvas* canv_FitResult = new TCanvas("LinearityTest_FitResult","LinearityTest_FitResult");
   canv_FitResult->cd();
   gr_FitResult->Fit(polFit_Line,"Q","",-0.16, 0.16);
-  gr_StraightLine->SetTitle("Linearity test using the 2nd order polynomial fit through all points");
+  gr_StraightLine->SetTitle("");
   gr_StraightLine->Draw("AC");
   gr_FitResult->Draw("P");
   canv_FitResult->SaveAs("Events_CalibCurve/LinearityTest_FitResult.pdf");
