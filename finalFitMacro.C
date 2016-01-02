@@ -296,7 +296,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     gr_totalSum->SetTitle("");
     gr_totalSum->Draw("AP");
     canv_totalSum->Write();
-    //canv_totalSum->SaveAs(("Events_"+systematic+"/MinimumDistribution_"+files+".pdf").c_str());
+    canv_totalSum->SaveAs(("Events_"+systematic+"/MinimumDistribution_"+files+".pdf").c_str());
 
     gr_totalSum->SetName(("FittedGraph_AllSamples"+pseudoTitle).c_str());
     gr_totalSum->SetTitle("Graph containing the summed events for all samples");
@@ -347,6 +347,7 @@ int main(int argc, char *argv[]){
   clock_t start = clock();
 
   gStyle->SetOptStat(0);
+  //gStyle->SetOptFit(0101);
 
   //Input variables will be:
   // 1) Likelihood cut value!
@@ -440,9 +441,8 @@ int main(int argc, char *argv[]){
   //Considered values and corresponding XS-values
   const int NrConfigs = 9; 
   std::stringstream ssNrConfigs; ssNrConfigs << NrConfigs; std::string sNrConfigs = ssNrConfigs.str();
-  double Var[NrConfigs]     = {-0.2,     -0.15,   -0.1,      -0.05,   0.0,      0.05,    0.1,     0.15,    0.2    };
-  double MGXSCut[NrConfigs] = {0.450287, 0.540131, 0.648626, 0.77937, 0.935959, 1.12199, 1.34106, 1.59677, 1.8927};  //Updated with fine-tuning cuts!
-  //double MGXSCut[NrConfigs] = {0.947244, 1.13624,  1.36448,  1.63952, 1.96892,  2.36027, 2.82111, 3.35903, 3.98157};
+  double Var[NrConfigs]     = {0.2,      0.15,     0.1,      0.05,    0.0,      -0.05,   -0.1,    -0.15,   -0.2  };  //Update 02/01/2016: Minus-sign wrong in FeynRules model, so have to invert all gRs!!
+  double MGXSCut[NrConfigs] = {0.450287, 0.540131, 0.648626, 0.77937, 0.935959, 1.12199, 1.34106, 1.59677, 1.8927};
 
   double FitMin = -0.15, FitMax = 0.15;
   double LnLik[NrConfigs] = {0.0};
@@ -656,11 +656,12 @@ int main(int argc, char *argv[]){
               h_SMLikValue_SampleSum[iOpt]->SetLineColor(fillColor[iOpt]);
               hs->Add(h_SMLikValue_SampleSum[iOpt]);
             }
-            else if(sampleTitle[iOpt] == "Data" && string(argv[3]) == "DataMC"){
+            else if(sampleTitle[iOpt] == "Data" && string(argv[4]) == "DataMC"){
               h_SMLikValue_SampleSum[iOpt]->Add(histo1D["SMLikValue"]);
               leg->AddEntry(h_SMLikValue_SampleSum[iOpt],(" "+sampleTitle[iOpt]+" ").c_str(),"LEP");
               h_SMLikValue_SampleSum[iOpt]->SetMarkerColor(fillColor[iOpt]);
               h_SMLikValue_SampleSum[iOpt]->SetMarkerStyle(20);                 //As is the case in MultiSamplePlots!
+              h_SMLikValue_SampleSum[iOpt]->SetMarkerSize(0.5);
             }
             consSample[iOpt] = 0;
           }
@@ -696,10 +697,11 @@ int main(int argc, char *argv[]){
     hs->SetTitle("");
     hs->GetXaxis()->SetTitle("Matrix Element method -ln(L) value evaluated at SM configuration"); hs->GetXaxis()->SetTitleOffset(1.2);
     hs->GetYaxis()->SetTitle("# events");                                                         hs->GetYaxis()->SetTitleOffset(1.2);
-    if(string(argv[3]) == "DataMC") h_SMLikValue_SampleSum[4]->Draw("samepe");
+    if(string(argv[4]) == "DataMC") h_SMLikValue_SampleSum[4]->Draw("samepe");
     leg->Draw();
     leg->SetFillColor(0);
     canv_Stack->Write();
+    if(string(argv[4]) == "DataMC") canv_Stack->SaveAs("Events_Nom/MSPlot_SMLikelihoodValue.pdf");
   }
  
   //Get the minimum!!
@@ -717,9 +719,18 @@ int main(int argc, char *argv[]){
       histo1D_PS["nrEntriesSF_PS_"+sampleName[i]] = new TH1D(("nrEntriesSF_PS_"+sampleName[i]).c_str(),("Weighted number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
     }
     histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",50,-0.06, 0.06);
+    histo1D_PS["Minimum_PS"]->GetXaxis()->SetTitle("Minimum of g_{R} coefficient");
+    histo1D_PS["Minimum_PS"]->GetYaxis()->SetTitle("# pseudo-experiments");
+    histo1D_PS["Minimum_PS"]->SetTitle("");
     histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",50,0.005, 0.015);
+    histo1D_PS["MinError_PS"]->GetXaxis()->SetTitle("Uncertainty of g_{R} coefficient");
+    histo1D_PS["MinError_PS"]->GetYaxis()->SetTitle("# pseudo-experiments");
+    histo1D_PS["MinError_PS"]->SetTitle("");
     histo1D_PS["Pull"] = new TH1D("Pull","Pull distribution obtained from the pseudo-experiments",35,-4,4.5);
-    double gRMeanPS = -0.00182966; // -0.000969311; // 0.00229755; //-0.00153229; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
+    histo1D_PS["Pull"]->GetXaxis()->SetTitle("Pull of g_{R} coefficient");
+    histo1D_PS["Pull"]->GetYaxis()->SetTitle("# pseudo-experiments");
+    histo1D_PS["Pull"]->SetTitle("");
+    double gRMeanPS = 0.00182966; // -0.000969311; // 0.00229755; //-0.00153229; //-0.00263296; //-0.000137548; //0.00894882; //0.0326056;
     std::cout << "  --> Mean used for pull calculation is : " << gRMeanPS << std::endl;
 
     for(int iPseudo = 0; iPseudo < nrRandomSamples; iPseudo++){

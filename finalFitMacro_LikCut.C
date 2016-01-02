@@ -221,11 +221,10 @@ int main(int argc, char *argv[]){
   std::string consSamples;
   //Considered values and corresponding XS-values
   const int NrConfigsReco = 9;
-  double VarReco[NrConfigsReco]     = {-0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2    };
-  double MGXSCutReco[NrConfigsReco] = {0.450287, 0.540131, 0.648626, 0.77937, 0.935959, 1.12199, 1.34106, 1.59677, 1.8927};  //Updated with fine-tuning cuts!
-  //double MGXSCutReco[NrConfigsReco] = {0.947244, 1.13624,  1.36448,  1.63952, 1.96892,  2.36027, 2.82111, 3.35903, 3.98157};
+  double VarReco[NrConfigsReco]     = {0.2,      0.15,     0.1,      0.05,    0.0,      -0.05,   -0.1,    -0.15,   -0.2  }; //Update 02/01/2016: Minus-sign wrong in FR model, so have to invert all gRs!!
+  double MGXSCutReco[NrConfigsReco] = {0.450287, 0.540131, 0.648626, 0.77937, 0.935959, 1.12199, 1.34106, 1.59677, 1.8927};
   const int NrConfigsGen = 13;
-  double VarGen[NrConfigsGen]     = {-0.4,    -0.3,    -0.2,     -0.15,   -0.1,    -0.05,   0.0,     0.05,    0.1,     0.15,    0.2,    0.3,      0.4     };
+  double VarGen[NrConfigsGen]     = {0.4,     0.3,     0.2,      0.15,     0.1,    0.05,    0.0,     -0.05,  -0.1,    -0.15,   -0.2,    -0.3,     -0.4    }; //Same here!
   double MGXSCutGen[NrConfigsGen] = {0.93159, 1.27966, 1.825208, 2.194079, 2.6393, 3.17698, 3.80921, 4.5645, 5.45665, 6.47791, 7.66805, 10.63243, 14.46786};
   
   //Now set the correct ones (Gen or Reco)
@@ -389,7 +388,7 @@ int main(int argc, char *argv[]){
     MC->Draw("P");
     Data->Draw("P");
   
-    TLegend *leg = new TLegend(0.35, 0.75, 0.53, 0.9);
+    TLegend *leg = new TLegend(0.55, 0.75, 0.73, 0.9);
     leg->SetFillColor(0);
     leg->AddEntry(Data,"Data","l");
     leg->AddEntry(MC,"Simulation","l");
