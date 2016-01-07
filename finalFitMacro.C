@@ -135,6 +135,8 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   if(pseudoTitle != "") Lumi = 1;  //Do not scale to data-lumi since you treat this sample as it was data!
   if(pseudoTitle == "") std::cout << "\n\n ** Calculating minimum for " << LnLikArray.size() << " samples ** " << std::endl;
   vector<double> summedEntries; summedEntries.clear();
+  double DataEntries[15]; 
+  double MCEntries[15] = {0};
   for(int iFile = 0; iFile < LnLikArray.size(); iFile++){
     if(pseudoTitle == "") std::cout << "  - Considering : " << name[iFile] << " with " << LnLikArray[iFile].size() << " stored events " << std::endl;
 
@@ -164,6 +166,8 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
       if(Var[i] == -0.05) yNeg_sample = summedSampleEntries[i];
       if(Var[i] == 0.0)   ySM_sample  = summedSampleEntries[i];
       if(Var[i] == 0.05)  yPos_sample = summedSampleEntries[i];
+      if(name[iFile] == "Data"){DataEntries[i] = summedSampleEntries[i];}
+      else MCEntries[i] += summedSampleEntries[i];
     }
 
     if(getIndivSampleMin && pseudoTitle == ""){
@@ -234,13 +238,50 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   
   double Entries[15];
   double MinEntries = summedEntries[0]; for(int i = 0; i < LnLikArray[0][0].size(); i++){ if(MinEntries > summedEntries[i]) MinEntries = summedEntries[i]; }
+  double MinDataEntries = DataEntries[0]; for(int i = 0; i < LnLikArray[0][0].size(); i++){ if(MinDataEntries > DataEntries[i]) MinDataEntries = DataEntries[i]; }
+  double DataChiSqEntries[15];
+  double MinMCEntries = MCEntries[0]; for(int i = 0; i < LnLikArray[0][0].size(); i++){ if(MinMCEntries > MCEntries[i]) MinMCEntries = MCEntries[i]; }
+  double MCChiSqEntries[15];
   double ySM = 0, yNeg = 0, yPos = 0;
   for(int iEnt = 0; iEnt < LnLikArray[0][0].size(); iEnt++){
     Entries[iEnt] = 2*(summedEntries[iEnt] - MinEntries);
+    DataChiSqEntries[iEnt] = 2*(DataEntries[iEnt] - MinDataEntries);
+    MCChiSqEntries[iEnt] = 2*(MCEntries[iEnt] - MinMCEntries);
     if(Var[iEnt] == -0.05) yNeg = Entries[iEnt];
     if(Var[iEnt] == 0.0)   ySM  = Entries[iEnt];
-    if(Var[iEnt] == 0.05)  yPos = Entries[iEnt];
+    if(Var[iEnt] == 0.05)  yPos = Entries[iEnt];    
   }
+
+  TGraph* gr_Data = new TGraph(LnLikArray[0][0].size(), Var, DataChiSqEntries);
+  gr_Data->SetTitle("");
+  gr_Data->SetMarkerStyle(22);
+  gr_Data->SetMarkerSize(1.3);
+  gr_Data->SetMinimum(-10);
+  gr_Data->SetLineColor(1);
+  gr_Data->SetLineWidth(2);
+  gr_Data->GetXaxis()->SetTitle("g_{R} coefficient");
+  gr_Data->GetYaxis()->SetTitle("#Delta #chi^{2}_{MEM} value");
+  gr_Data->GetYaxis()->SetTitleOffset(1.5);
+
+  TGraph* gr_MC = new TGraph(LnLikArray[0][0].size(), Var, MCChiSqEntries);
+  gr_MC->SetMarkerStyle(23);
+  gr_MC->SetMarkerSize(1.3);
+  gr_MC->SetMarkerColor(8);
+  gr_MC->SetLineColor(8);
+  gr_MC->SetLineWidth(2);
+
+  TLegend* legMSChiSq = new TLegend(0.4, 0.7, 0.6, 0.9);
+  legMSChiSq->SetFillColor(0);
+  legMSChiSq->AddEntry(gr_Data,"Data","lp");
+  legMSChiSq->AddEntry(gr_MC,"Simulation","lp");
+
+  TCanvas* MSPlotChiSq = new TCanvas("MSPlotChiSq","MSPlotChiSq");
+  MSPlotChiSq->cd();
+  gr_Data->Draw("APC");
+  gr_MC->Draw("PC");
+  legMSChiSq->Draw();
+  MSPlotChiSq->SaveAs("MSPlotChiSq.pdf");
+
   TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
   gr_totalSum->SetMarkerStyle(22);
   gr_totalSum->SetMarkerSize(1.3);
@@ -262,16 +303,27 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
 
   //Limit the range one more!
   TGraph* gr_totalSum_Down = new TGraph(LnLikArray[0][0].size(), Var, Entries);
-  TF1* polFit_totalSum_Down = new TF1(("polFit_SummedTotalGraph_DownSyst_"+pseudoTitle).c_str(),"pol2", -0.10, 0.10);
+  TF1* polFit_totalSum_Down = new TF1(("polFit_SummedTotalGraph_DownSyst_"+pseudoTitle).c_str(),"pol2", -0.11, 0.11);
   gr_totalSum_Down->Fit(polFit_totalSum_Down,"Q","",polFit_totalSum_Down->GetXmin(), polFit_totalSum_Down->GetXmax());
   polFit_totalSum_Down->SetLineColor(3);
   double MinComb_Down = polFit_totalSum_Down->GetMinimumX();
   double ErrComb_Down = (polFit_totalSum_Down->GetX(polFit_totalSum_Down->GetMinimum()+0.5, polFit_totalSum_Down->GetMinimumX(),0.2) - polFit_totalSum_Down->GetX(polFit_totalSum_Down->GetMinimum()+0.5, -0.2, polFit_totalSum_Down->GetMinimumX()))/2.0;
 
+  //Special range that works for scaling:
+  TGraph* gr_totalSum_Scale = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+  TF1* polFit_totalSum_Scale = new TF1(("polFit_SummedTotalGraph_ScaleSyst_"+pseudoTitle).c_str(),"pol2", -0.06, 0.16);
+  gr_totalSum_Scale->Fit(polFit_totalSum_Scale,"Q","",polFit_totalSum_Scale->GetXmin(), polFit_totalSum_Scale->GetXmax());
+  polFit_totalSum_Scale->SetLineColor(4);
+  double MinComb_Scale = polFit_totalSum_Scale->GetMinimumX();
+  double ErrComb_Scale = (polFit_totalSum_Scale->GetX(polFit_totalSum_Scale->GetMinimum()+0.5, polFit_totalSum_Scale->GetMinimumX(),0.2) - polFit_totalSum_Scale->GetX(polFit_totalSum_Scale->GetMinimum()+0.5, -0.2, polFit_totalSum_Scale->GetMinimumX()))/2.0;
+
   //Limit the range to the three inner points
   TGraph* gr_totalSum_Inner = new TGraph(LnLikArray[0][0].size(), Var, Entries);
   TF1* polFit_totalSum_Inner = new TF1(("polFit_SummedTotalGraph_Inner_"+pseudoTitle).c_str(),"pol2", FitMin, FitMax);
-  gr_totalSum_Inner->Fit(polFit_totalSum_Inner,"Q","", -0.05, 0.05);
+  polFit_totalSum_Inner->SetParameter(0, ySM );
+  polFit_totalSum_Inner->SetParameter(1, (yPos-yNeg)/(2.0*0.05) );
+  polFit_totalSum_Inner->SetParameter(2, (((yPos+yNeg)/2.0)-ySM)*(1/(0.05*0.05)) );  
+  //gr_totalSum_Inner->Fit(polFit_totalSum_Inner,"Q","", -0.06, 0.06);
   polFit_totalSum_Inner->SetLineColor(7);
   polFit_totalSum_Inner->SetLineStyle(10);
   double MinComb_Inner = polFit_totalSum_Inner->GetMinimumX();
@@ -279,7 +331,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
 
   //Increase the considered range!
   TGraph* gr_totalSum_Up = new TGraph(LnLikArray[0][0].size(), Var, Entries);
-  TF1* polFit_totalSum_Up = new TF1(("polFit_SummedTotalGraph_UpSyst_"+pseudoTitle).c_str(),"pol2", -0.2, 0.2);
+  TF1* polFit_totalSum_Up = new TF1(("polFit_SummedTotalGraph_UpSyst_"+pseudoTitle).c_str(),"pol2", -0.21, 0.21);
   gr_totalSum_Up->Fit(polFit_totalSum_Up,"Q","",polFit_totalSum_Up->GetXmin(), polFit_totalSum_Up->GetXmax());
   polFit_totalSum_Up->SetLineColor(6);
   double MinComb_Up = polFit_totalSum_Up->GetMinimumX();
@@ -290,6 +342,7 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
     std::cout << " * Minimum for syst-down (smaller range): " << MinComb_Down << " \\pm " << ErrComb_Down << std::endl;
     std::cout << " * Minimum for syst-up (broader range): " << MinComb_Up << " \\pm " << ErrComb_Up << std::endl;
     std::cout << " * Minimum using only the three inner points : " << MinComb_Inner << " \\pm " << ErrComb_Inner << std::endl;
+    std::cout << " * Minimum using special range of scale-syst : " << MinComb_Scale << " \\pm " << ErrComb_Scale << std::endl;
 
     TCanvas *canv_totalSum = new TCanvas("canv_FittedSummedGraph","canv_FittedSummedGraph");
     canv_totalSum->cd();
@@ -304,16 +357,18 @@ vector<double> getMinimum(vector< vector< vector<double> > > LnLikArray, vector<
   
     TCanvas *canv_pol_totalSum = new TCanvas(("pol_sumTotal_"+pseudoTitle).c_str(),("pol_sumTotal_"+pseudoTitle).c_str()); canv_pol_totalSum->cd();
     gr_totalSum->Draw("AP");
-    //polFit_totalSum_Down->Draw("same");
-    //polFit_totalSum_Up->Draw("same");
+    polFit_totalSum_Down->Draw("same");
+    polFit_totalSum_Up->Draw("same");
     polFit_totalSum_Inner->Draw("same");
+    polFit_totalSum_Scale->Draw("same");
 
     TLegend* leg = new TLegend(0.35,0.7,0.65,0.9);
     leg->SetFillColor(0);
     leg->AddEntry(gr_totalSum,"Output from the Matrix Eement method","p");
     leg->AddEntry(polFit_totalSum,"Polynomial fit through normal range","l");
-    //leg->AddEntry(polFit_totalSum_Down,"Polynomial fit through smaller range","l");
-    //leg->AddEntry(polFit_totalSum_Up,"Polynomial fit through broader range","l");
+    leg->AddEntry(polFit_totalSum_Down,"Polynomial fit through smaller range","l");
+    leg->AddEntry(polFit_totalSum_Up,"Polynomial fit through broader range","l");
+    leg->AddEntry(polFit_totalSum_Scale,"Polynomial fit for scale-syst","l");
     leg->AddEntry(polFit_totalSum_Inner,"Polynomial fit through three inner points","l");
     leg->Draw();
 
@@ -376,6 +431,7 @@ int main(int argc, char *argv[]){
   if(argc >= 4){
     if(string(argv[3]) == "MCLumi")        Luminosity = 226504.2973;
     else if(string(argv[3]) == "DataLumi") Luminosity = 19646.8;
+    else if(string(argv[3]) == "SystLumi") Luminosity = 22167.3202;
     else                                   Luminosity = atof(argv[3]);
   }
   std::cout << " - Applied luminosity is : " << Luminosity << std::endl;
@@ -412,10 +468,10 @@ int main(int argc, char *argv[]){
         inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets_SemiLept_WrongEvts/weights_CheckedEvts_SFAdded.out");
       }
     }
-    else{
-      inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets/weights_CheckedEvts_SFAdded.out");
-      std::cout << " --> Will consider all TT events (semiLept, fullLept & fullHadr) since this is the only sample which exists!!" << std::endl;
-    }
+    //else{
+    //  inputFiles.push_back("Events_"+systDir+"/TTbarJets/"+syst+"_TTbarJets/weights_CheckedEvts_SFAdded.out");
+    //  std::cout << " --> Will consider all TT events (semiLept, fullLept & fullHadr) since this is the only sample which exists!!" << std::endl;
+    //}
   }
 
   //Now loop over all the stored inputFiles and extract information (sampleName)
@@ -440,11 +496,33 @@ int main(int argc, char *argv[]){
 
   //Considered values and corresponding XS-values
   const int NrConfigs = 9; 
-  std::stringstream ssNrConfigs; ssNrConfigs << NrConfigs; std::string sNrConfigs = ssNrConfigs.str();
-  double Var[NrConfigs]     = {0.2,      0.15,     0.1,      0.05,    0.0,      -0.05,   -0.1,    -0.15,   -0.2  };  //Update 02/01/2016: Minus-sign wrong in FeynRules model, so have to invert all gRs!!
+  double Var[NrConfigs]     = {0.2,      0.15,     0.1,      0.05,    0.0,      -0.05,   -0.1,    -0.15,   -0.2  };  //Update 02/01/2016: Minus-sign wrong in FR model, so have to invert all gRs!!
   double MGXSCut[NrConfigs] = {0.450287, 0.540131, 0.648626, 0.77937, 0.935959, 1.12199, 1.34106, 1.59677, 1.8927};
+  //const int NrConfScale = 7; 
+  //double VarScale[NrConfScale]     = {0.075,    0.05,    0.025,    0.0,      -0.025,  -0.05,   -0.075 };  //Update 02/01/2016: Minus-sign wrong in FR model, so have to invert all gRs!!
+  //double MGXSCutScale[NrConfScale] = {0.710992, 0.77937, 0.854209, 0.935959, 1.02507, 1.12199, 1.22717};
 
+  //int NrConfigs = 0;
+  //double Var[9] = {0}, MGXSCut[9] = {0};
   double FitMin = -0.15, FitMax = 0.15;
+  /*if( syst.find("Scaling") >= 0 && syst.find("Scaling") < syst.size() ){
+    NrConfigs = NrConfScale;
+    FitMin = -0.08;
+    FitMax = 0.08;
+    for(int ii = 0; ii < NrConfigs; ii++){
+      Var[ii] = VarScale[ii];
+      MGXSCut[ii] = MGXSCutScale[ii];
+    }
+  } */ 
+  //else{
+  //  NrConfigs = NrConfNormal;
+  //  for(int ii = 0; ii < NrConfigs; ii++){
+  //    Var[ii] = VarNormal[ii];
+  //    MGXSCut[ii] = MGXSCutNormal[ii];
+  //  }
+  //}
+  std::stringstream ssNrConfigs; ssNrConfigs << NrConfigs; std::string sNrConfigs = ssNrConfigs.str();
+
   double LnLik[NrConfigs] = {0.0};
 
   //vector< vector<TH1D> > indivLnLik;
@@ -460,7 +538,11 @@ int main(int argc, char *argv[]){
 
   //** Loop over the different input files and read out the necessary info **//
   TH1D* h_SMLikValue_Sum = new TH1D("SMLikelihoodValue_Sum","Distribution of likelihood value at gR = 0.0 (all samples)",85,40,85);
-  TH1D* h_SMLikValue_SampleSum[5] = {0}; 
+  TH1D* h_SMLikValue_SampleSum[5] = {0};
+  TH1D* h_SMLikValue_Sample[12] = {0};
+  TCanvas* canv_SMLik_Norm = new TCanvas("canv_SMLik_Norm","canv_SMLik_Norm");
+  TLegend* leg_SMLik_Norm = new TLegend(0.5, 0.7, 0.9, 0.9);
+  leg_SMLik_Norm->SetFillColor(0);
   THStack* hs = new THStack("hs","Stacked SMLikelihoodValue");
   TLegend* leg = new TLegend(0.6, 0.6, 0.9, 0.9);
   int consSample[5] = {0, 0, 0, 0, 0};
@@ -507,10 +589,14 @@ int main(int argc, char *argv[]){
 
     histo2D["SMLik_vs_LeftDeltaLnLik"]  = new TH2D("SMLik_vs_LeftDeltaLnLik", "Scatter-plot of -ln(L) value at gR = 0 versus the difference of the -ln(L) at gR = 0 and gR = -0.2",200,48,85,100,-2,2);
     histo2D["SMLik_vs_RightDeltaLnLik"] = new TH2D("SMLik_vs_RightDeltaLnLik","Scatter-plot of -ln(L) value at gR = 0 versus the difference of the -ln(L) at gR = 0 and gR = 0.2", 200,48,85,100,-2,2);
-    histo2D["SMLik_vs_MaxDelta"] = new TH2D("SMLik_vs_MaxDelta","Scatter-plot of -ln(L) value at gR = 0 versus the maximum difference in -ln(L) value", 200,48,85,150,-0.5,5);
+    histo2D["SMLik_vs_MaxDelta"] = new TH2D("SMLik_vs_MaxDelta","Scatter-plot of -ln(L) value at gR = 0 versus the maximum difference in -ln(L) value", 150,48,75,72,-0.05,3.5);
+    histo2D["SMLik_vs_MaxDelta"]->GetXaxis()->SetTitle("-ln(L_{MEM}) value evaluated at g_{R} = 0.0");
+    histo2D["SMLik_vs_MaxDelta"]->GetYaxis()->SetTitle("Maximal variation of -ln(L) values");
     histo2D["SMLik_vs_MaxDeltaRel"] = new TH2D("SMLik_vs_MaxDeltaRel","Scatter-plot of -ln(L) value at gR = 0 versus the relative maximum difference in -ln(L) value", 200,48,85,150,-0.01,0.2);
     histo2D["SMLik_vs_ScdDerWide"] = new TH2D("SMLik_vs_ScdDerWide","Scatter-plot of -ln(L) value at gR = 0 versus the second derivative between (-0.2, 0.2)", 200,48,85,150,-25,25);
-    histo2D["SMLik_vs_ScdDerFine"] = new TH2D("SMLik_vs_ScdDerFine","Scatter-plot of -ln(L) value at gR = 0 versus the second derivative between (-0.1, 0.1)", 200,48,85,150,-25,25);
+    histo2D["SMLik_vs_ScdDerFine"] = new TH2D("SMLik_vs_ScdDerFine","Scatter-plot of -ln(L) value at gR = 0 versus the second derivative between (-0.1, 0.1)", 150,48,75,150,-50,50);
+    histo2D["SMLik_vs_ScdDerFine"]->GetXaxis()->SetTitle("-ln(L_{MEM}) value evaluated at g_{R} = 0.0");
+    histo2D["SMLik_vs_ScdDerFine"]->GetYaxis()->SetTitle("Second derivative of -ln(L) evaluated at g_{R} = 0.0");
     histo2D["RightDelta_vs_MaxDelta"] = new TH2D("RightDelta_vs_MaxDelta","Scatter-plot of difference between right leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
     histo2D["LeftDelta_vs_MaxDelta"] = new TH2D("LeftDelta_vs_MaxDelta","Scatter-plot of difference between left leg of -ln(L) distribution and maximum difference", 200,-2,2,150,-0.5,5);
     histo2D["SMLik_vs_MinCoef"] = new TH2D("SMLik_vs_MinCoef","Scatter-plot of -ln(L) value at gR = 0 versus the minimum x-position of the -ln(L) distribution for this event",200,48,85,150,-0.25,0.25);
@@ -539,6 +625,11 @@ int main(int argc, char *argv[]){
               if(consSample[iOpt] == 1)
                 h_SMLikValue_SampleSum[iOpt] = new TH1D(("SumLikValue_Sum"+PosSamples[iOpt]).c_str(),("Sum of likelihood values (for "+PosSamples[iOpt]+")").c_str(), 85, 40, 85);
             }
+            //h_SMLikValue_Sample[iWeightFile] = new TH1D(("SMLikValue_Sample_"+sampleName[iWeightFile]).c_str(), "",85, 40, 85);
+            //h_SMLikValue_Sample[iWeightFile]->GetXaxis()->SetTitle("-ln(L_{MEM}) value evaluated at g_{R} = 0");
+            //h_SMLikValue_Sample[iWeightFile]->GetYaxis()->SetTitle("Normalised nr. of events");
+            //h_SMLikValue_Sample[iWeightFile]->SetLineColor(3-iWeightFile);
+            //h_SMLikValue_Sample[iWeightFile]->SetLineWidth(2);
 
             //Loop over all histo1Ds and add the sampleName!
             if(histo1D.size() > 0){
@@ -576,6 +667,7 @@ int main(int argc, char *argv[]){
 
           //Plot the SM likelihood value:
           histo1D["SMLikValue"]->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
+          //h_SMLikValue_Sample[iWeightFile]->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
           histo1D["OuterLikValue"]->Fill(LnLik[xOuterR], MCScaleFactor*Luminosity*NormFactor);
           h_SMLikValue_Sum->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
           histo1D["MCScaleFactor"]->Fill(MCScaleFactor);
@@ -586,7 +678,7 @@ int main(int argc, char *argv[]){
           histo2D["SMLik_vs_MaxDelta"]->Fill(LnLik[SMConfig], MaxLik - MinLik);
           histo2D["SMLik_vs_MaxDeltaRel"]->Fill(LnLik[SMConfig], (MaxLik - MinLik)/LnLik[SMConfig]);
           histo2D["SMLik_vs_ScdDerWide"]->Fill(LnLik[SMConfig], (LnLik[xOuterL] + LnLik[xOuterR] - 2*LnLik[SMConfig])/(0.2*0.2));
-          histo2D["SMLik_vs_ScdDerFine"]->Fill(LnLik[SMConfig], (LnLik[xOuterLFine] + LnLik[xOuterRFine] - 2*LnLik[SMConfig])/(0.2*0.2));
+          histo2D["SMLik_vs_ScdDerFine"]->Fill(LnLik[SMConfig], (LnLik[xOuterLFine] + LnLik[xOuterRFine] - 2*LnLik[SMConfig])/(0.1*0.1));
           histo2D["SMLik_vs_MinCoef"]->Fill(LnLik[SMConfig], MingR);
           histo2D["RightDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterR], MaxLik - MinLik);
           histo2D["LeftDelta_vs_MaxDelta"]->Fill(LnLik[SMConfig] - LnLik[xOuterL], MaxLik - MinLik);
@@ -669,6 +761,14 @@ int main(int argc, char *argv[]){
       }
     }
 
+    //canv_SMLik_Norm->cd();
+    //if(iWeightFile == 0) h_SMLikValue_Sample[iWeightFile]->DrawNormalized();
+    //else                 h_SMLikValue_Sample[iWeightFile]->DrawNormalized("same");
+    //if(iWeightFile == 0) leg_SMLik_Norm->AddEntry(h_SMLikValue_Sample[iWeightFile],"t#bar{t}, correct event topology","l");
+    //if(iWeightFile == 1){ leg_SMLik_Norm->AddEntry(h_SMLikValue_Sample[iWeightFile],"t#bar{t}, wrong event topology","l"); leg_SMLik_Norm->Draw(); }
+    //leg_SMLik_Norm->AddEntry(h_SMLikValue_Sample[iWeightFile],sampleName[iWeightFile].c_str(),"l");
+    //if(iWeightFile == inputFiles.size()-1) canv_SMLik_Norm->SaveAs("SMLik_Norm.pdf");
+
     if(histo2D.size() > 0){
       TDirectory* th2dir = outputFile->GetDirectory(("2D_histo_"+sampleName[iWeightFile]).c_str());
       if(!th2dir) th2dir = outputFile->mkdir(("2D_histo_"+sampleName[iWeightFile]).c_str());
@@ -677,6 +777,18 @@ int main(int argc, char *argv[]){
         TH2D *temp = it->second;
         temp->Write();
       }
+
+      //TCanvas* canv_ScdDer = new TCanvas("Canv_ScdDer","Canv_ScdDer");
+      //canv_ScdDer->cd();
+      //histo2D["SMLik_vs_ScdDerFine"]->SetTitle("");
+      //histo2D["SMLik_vs_ScdDerFine"]->Draw("colz");
+      //canv_ScdDer->SaveAs("SMLik_vs_ScdDerFine.pdf");
+
+      //TCanvas* canv_MaxDel = new TCanvas("Canv_MaxDelta","Canv_MaxDelta");
+      //canv_MaxDel->cd();
+      //histo2D["SMLik_vs_MaxDelta"]->SetTitle("");
+      //histo2D["SMLik_vs_MaxDelta"]->Draw("colz");
+      //canv_MaxDel->SaveAs("SMLik_vs_MaxDelta.pdf");
     }
   }//End of looping over the different weight files
  
@@ -704,6 +816,8 @@ int main(int argc, char *argv[]){
     if(string(argv[4]) == "DataMC") canv_Stack->SaveAs("Events_Nom/MSPlot_SMLikelihoodValue.pdf");
   }
  
+  
+
   //Get the minimum!!
   bool getMinForIndivSamples = true;
   getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, FitMin, FitMax, getMinForIndivSamples, systDir, whichFiles);
@@ -719,7 +833,7 @@ int main(int argc, char *argv[]){
       histo1D_PS["nrEntriesSF_PS_"+sampleName[i]] = new TH1D(("nrEntriesSF_PS_"+sampleName[i]).c_str(),("Weighted number of entries in the pseudo-sample for "+sampleName[i]).c_str(),500, 0, 20000);
     }
     histo1D_PS["Minimum_PS"] = new TH1D("Minimum_PS","Distribution of the minimum obtained from the pseudo-experiments",50,-0.06, 0.06);
-    histo1D_PS["Minimum_PS"]->GetXaxis()->SetTitle("Minimum of g_{R} coefficient");
+    histo1D_PS["Minimum_PS"]->GetXaxis()->SetTitle("Measured g_{R} coefficient");
     histo1D_PS["Minimum_PS"]->GetYaxis()->SetTitle("# pseudo-experiments");
     histo1D_PS["Minimum_PS"]->SetTitle("");
     histo1D_PS["MinError_PS"] = new TH1D("MinError_PS","Distribution of the uncertainty on the minimum obtained from the pseudo-experiments",50,0.005, 0.015);

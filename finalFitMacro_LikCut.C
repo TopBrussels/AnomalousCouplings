@@ -147,7 +147,7 @@ TGraphErrors* getMinimum(vector< vector< vector<double> > > LnLikArray, vector< 
   gr_MinComp->SetName(("MinComp_"+MCorData).c_str()); gr_MinComp->SetTitle(("Minimum comparison for all samples ("+MCorData+")").c_str());
   if(MCorData == "Data"){    gr_MinComp->SetLineColor(1); gr_MinComp->SetMarkerStyle(20); gr_MinComp->SetMarkerColor(1); }
   else if(MCorData == "MC"){ gr_MinComp->SetLineColor(4); gr_MinComp->SetMarkerStyle(22); gr_MinComp->SetMarkerColor(4); }
-  gr_MinComp->GetXaxis()->SetTitle("MadWeight -ln(L) cut-value");    gr_MinComp->GetYaxis()->SetTitle("Obtained minimum for gR");
+  gr_MinComp->GetXaxis()->SetTitle("-ln(L) at g_{R} = 0 cut-value");    gr_MinComp->GetYaxis()->SetTitle("Value of the Matrix Element estimator #hat{g_{R}}");
   gr_MinComp->Write();
   //leg->AddEntry(gr_MinComp,(name[iFile]+" events").c_str(),"p");
    

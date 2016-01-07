@@ -32,7 +32,7 @@ string NumberToString ( T Number ){
     return ss.str();
 }
 
-void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[]){
+void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<double> > SF, vector<std::string> name, vector<double> norm, double Lumi, TFile* outFile, double Var[], std::string dir){
 
   TH1D* h_MinComp = 0;
   h_MinComp = new TH1D("MinimumComparison","Comparison of obtained minimum for the different considered samples",LnLikArray.size()+1, -0.5, LnLikArray.size()+0.5);
@@ -72,11 +72,24 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
   for(int iEnt = 0; iEnt < LnLikArray[0][0].size(); iEnt++){
     Entries[iEnt] = 2*(summedEntries[iEnt] - MinEntries);
   }
+  TGraph* gr_totalSum_NoFit = new TGraph(LnLikArray[0][0].size(), Var, Entries);
+  gr_totalSum_NoFit->SetMarkerStyle(22);
+  gr_totalSum_NoFit->SetMarkerSize(1.3);
+  gr_totalSum_NoFit->SetMinimum(-10);
+  gr_totalSum_NoFit->GetXaxis()->SetTitle("top-quark mass");
+  gr_totalSum_NoFit->GetYaxis()->SetTitle("#Delta #chi^{2}_{MEM} value"); gr_totalSum_NoFit->GetYaxis()->SetTitleOffset(1.5);
+  gr_totalSum_NoFit->SetTitle("");
+
+  TCanvas* canv_totalSum_NoFit = new TCanvas("canv_totalSum_NoFit","canv_totalSum_NoFit");
+  canv_totalSum_NoFit->cd();
+  gr_totalSum_NoFit->Draw("AP");
+  canv_totalSum_NoFit->SaveAs((dir+"/OverallLikelihoodCurve_NoFit_"+dir+".pdf").c_str());
+
   TGraph* gr_totalSum = new TGraph(LnLikArray[0][0].size(), Var, Entries);
   gr_totalSum->SetMarkerStyle(22);
   gr_totalSum->SetMarkerSize(1.3);
   gr_totalSum->SetMinimum(-10);
-  gr_totalSum->GetXaxis()->SetTitle("m_{top} value");
+  gr_totalSum->GetXaxis()->SetTitle("top-quark mass (GeV)");
   gr_totalSum->GetYaxis()->SetTitle("#Delta #chi^{2}_{MEM} value");
   gr_totalSum->GetYaxis()->SetTitleOffset(1.5);
 
@@ -85,7 +98,7 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
   grdir->cd();
 
   //Fit through the reduced range!
-  TF1* polFit_totalSum = new TF1("polFit_SummedTotalGraph","pol2",170, 175);
+  TF1* polFit_totalSum = new TF1("polFit_SummedTotalGraph","pol2",171, 175);
   gr_totalSum->Fit(polFit_totalSum,"Q","",polFit_totalSum->GetXmin(), polFit_totalSum->GetXmax());
   double MinimumComb = polFit_totalSum->GetMinimumX();
   //double ErrorComb = (polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, polFit_totalSum->GetMinimumX(),0.2) - polFit_totalSum->GetX(polFit_totalSum->GetMinimum()+0.5, -0.2, polFit_totalSum->GetMinimumX()))/2.0;
@@ -98,6 +111,7 @@ void getMinimum(vector< vector< vector<double> > > LnLikArray, vector< vector<do
   gr_totalSum->SetTitle("");
   gr_totalSum->Draw("AP");
   canv_totalSum->Write();
+  canv_totalSum->SaveAs((dir+"/OverallLikelihoodCurve_"+dir+".pdf").c_str());
 
   gr_totalSum->SetName("FittedGraph_AllSamples");
   gr_totalSum->SetTitle("Graph containing the summed events for all samples");
@@ -139,13 +153,13 @@ int main(int argc, char *argv[]){
     whichDir = string(argv[3]);
   vector<string> inputFiles;
   if(whichDir.find("TTSemiLept") < whichDir.size())
-    inputFiles.push_back((whichDir+"weights_CheckedEvts_SFAdded.out").c_str());
+    inputFiles.push_back((whichDir+"/weights_CheckedEvts_SFAdded.out").c_str());
   else
-    inputFiles.push_back((whichDir+"weights_CheckedEvts.out").c_str());
+    inputFiles.push_back((whichDir+"/weights_CheckedEvts.out").c_str());
   //inputFiles.push_back("weights_CheckedEvts.out");
 
   //Store all information into a ROOT file:
-  TFile* outputFile = new TFile((whichDir+"OutFile_TopMassExample.root").c_str(),"RECREATE");
+  TFile* outputFile = new TFile((whichDir+"/OutFile_TopMassExample.root").c_str(),"RECREATE");
   outputFile->cd();
 
   //Considered values and corresponding XS-values
@@ -275,6 +289,27 @@ int main(int argc, char *argv[]){
           sampleSF.push_back(MCScaleFactor);
 
           histo1D["SMLikValue_AfterCut"]->Fill(LnLik[SMConfig], MCScaleFactor*Luminosity*NormFactor);
+          
+          //Save the first six LnLik curves
+          if(consEvts % 25 == 0 && consEvts <= 4000){
+            double lnLikArr[NrConfigs] = {0};
+            for(int i = 0; i < NrConfigs; i++)
+              lnLikArr[i] = LnLik[i];
+
+            TGraph* gr_lnLik = new TGraph(NrConfigs, Var, lnLikArr);
+            gr_lnLik->SetMarkerStyle(22);
+            gr_lnLik->SetTitle("");
+            gr_lnLik->GetXaxis()->SetTitle("top-quark mass (GeV)");
+            gr_lnLik->GetYaxis()->SetTitle("-ln(L) value");
+
+            //TF1* fit = new TF1("IndivFit","pol2",170,175);
+            //gr_lnLik->Fit(fit,"Q","",170,175);
+            
+            TCanvas* canv = new TCanvas(("canv_"+NumberToString(consEvts)).c_str(),("canv_"+NumberToString(consEvts)).c_str());
+            canv->cd();
+            gr_lnLik->Draw("AP");
+            canv->SaveAs((whichDir+"/IndivLikelihoods/EventLikelihood_"+whichDir+"_"+NumberToString(consEvts)+".pdf").c_str());
+          }
 
         }
       }
@@ -322,7 +357,7 @@ int main(int argc, char *argv[]){
  
   outputFile->cd();
   //Get the minimum!!
-  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var);
+  getMinimum(indivLnLik, scaleFactor, sampleName, normFactor, Luminosity, outputFile, Var, whichDir);
 
   outputFile->Close();
   cout << "\n It took us " << ((double)clock() - start) / CLOCKS_PER_SEC << "s to run the program \n" << endl;
